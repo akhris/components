@@ -47,7 +47,6 @@ fun ExpandableSidePanel(route: String = "", onNavigateTo: ((route: String) -> Un
             )
         },
         content = {
-
             NavItem.items.forEach { item ->
                 NavigationRailItem(
                     alwaysShowLabel = panelWidth == SidePanelSettings.widthExpanded,

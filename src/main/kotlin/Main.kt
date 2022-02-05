@@ -1,5 +1,6 @@
 // Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.Button
@@ -10,9 +11,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import di.di
+import navigation.Screen
+import org.kodein.di.compose.withDI
 import ui.nav_panel.ExpandableSidePanel
+import ui.screens.NavHost
+import ui.theme.AppSettings
 
 @Composable
 @Preview
@@ -29,20 +36,27 @@ fun App() {
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        mainWindow()
-    }
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = AppSettings.appTitle,
+        icon = painterResource("vector/grid_view_black_24dp.svg"),
+        content = {
+            mainWindow()
+        }
+    )
 }
 
 @Composable
-private fun mainWindow() {
+private fun mainWindow() = withDI(di) {
+    var route by remember { mutableStateOf<String?>(Screen.homeScreen.route) }
+
     Row {
-        ExpandableSidePanel()
-        Icon(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            imageVector = Icons.Rounded.AccountBox,
-            contentDescription = ""
-        )
+        ExpandableSidePanel(route ?: "", onNavigateTo = {
+            route = it
+        })
+        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            NavHost(route = route)
+        }
     }
 }
 
