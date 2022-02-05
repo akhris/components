@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import ui.nav_panel.ExpandableSidePanel
 
 @Composable
 @Preview
@@ -36,8 +37,8 @@ fun main() = application {
 @Composable
 private fun mainWindow() {
     Row {
-
-    Icon(
+        ExpandableSidePanel()
+        Icon(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             imageVector = Icons.Rounded.AccountBox,
             contentDescription = ""

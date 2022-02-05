@@ -1,31 +1,73 @@
 package ui.nav_panel
 
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material.Button
-import androidx.compose.material.NavigationRail
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
+import navigation.NavItem
+import ui.theme.SidePanelSettings
+
 
 @Composable
-fun SidePanel() {
-    NavigationRail(modifier = Modifier.fillMaxHeight().defaultMinSize(minWidth = 200.dp)) {
-        Button(onClick = {
-            //navigate to...
+fun ExpandableSidePanel(route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val panelWidth by animateDpAsState(
+        when (isExpanded) {
+            true -> SidePanelSettings.widthExpanded
+            false -> SidePanelSettings.widthCollapsed
+        }
+    )
+
+    var selectedRoute by remember(route) { mutableStateOf(route) }
+
+    NavigationRail(
+        modifier = Modifier.width(panelWidth),
+        header = {
+            IconButton(modifier = Modifier.align(Alignment.Start), onClick = {
+                isExpanded = !isExpanded
+            },
+                content = {
+                    Icon(
+                        imageVector = when (isExpanded) {
+                            true -> Icons.Rounded.KeyboardArrowLeft
+                            false -> Icons.Rounded.KeyboardArrowRight
+                        },
+                        contentDescription = "expand or collapse icon"
+                    )
+                }
+            )
         },
-            content = { Text("Resistors") }
-        )
-        Button(onClick = {
-            //navigate to...
-        },
-            content = { Text("Capacitors") }
-        )
-        Button(onClick = {
-            //navigate to...
-        },
-            content = { Text("ICs") }
-        )
-    }
+        content = {
+
+            NavItem.items.forEach { item ->
+                NavigationRailItem(
+                    alwaysShowLabel = panelWidth == SidePanelSettings.widthExpanded,
+                    selected = selectedRoute == item.route,
+                    icon = {
+                        Icon(
+                            painter = painterResource(item.pathToIcon),
+                            contentDescription = "navigation item",
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                    },
+                    label = {
+                        Text(item.title)
+                    },
+                    onClick = {
+                        selectedRoute = item.route
+                        onNavigateTo?.invoke(item.route)
+                    }
+                )
+            }
+        }
+    )
 }
