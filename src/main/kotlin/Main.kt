@@ -1,18 +1,15 @@
 // Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 
@@ -39,24 +36,8 @@ fun main() = application {
 @Composable
 private fun mainWindow() {
     Row {
-        NavigationRail(modifier = Modifier.fillMaxHeight().defaultMinSize(minWidth = 200.dp)) {
-            Button(onClick = {
-                //navigate to...
-            },
-                content = { Text("Resistors") }
-            )
-            Button(onClick = {
-                //navigate to...
-            },
-                content = { Text("Capacitors") }
-            )
-            Button(onClick = {
-                //navigate to...
-            },
-                content = { Text("ICs") }
-            )
-        }
-        Icon(
+
+    Icon(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             imageVector = Icons.Rounded.AccountBox,
             contentDescription = ""
