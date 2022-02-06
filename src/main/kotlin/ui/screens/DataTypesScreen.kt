@@ -33,7 +33,7 @@ fun TypesScreenContent() {
             onObjectTypeSelected = { currentSelection = it })
 
         ObjectsTypeDetail(
-            modifier = Modifier.weight(10f),
+            modifier = Modifier.fillMaxWidth(0.8f).weight(10f),
             typeOfObjects = currentSelection
         )
     }
@@ -108,7 +108,6 @@ private fun ObjectsTypeDetail(modifier: Modifier = Modifier, typeOfObjects: Type
                 TypeOfObjects.Units -> UnitsScreen()
             }
         }
-        println("scroll in progress: ${scrollState.isScrollInProgress}")
 
         FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).alpha(
             if (scrollState.isScrollInProgress) 0.25f else 1f
