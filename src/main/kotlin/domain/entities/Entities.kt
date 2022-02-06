@@ -25,17 +25,21 @@ data class ObjectType(
 data class Parameter(
     override val id: String,
     val name: String,
-    val description: String
+    val description: String = "",
+    val unit: Unit
 ) : IEntity<String>
 
 data class Value(
     override val id: String,
     val parameter: Parameter,
-    val value: String,
-    val unit: Unit
+    val value: String
 ) : IEntity<String>
 
+/**
+ * e.g. m, cm, km
+ */
 data class Unit(
     override val id: String,
-    val unit: String
+    val unit: String,
+    val factor: Float = 1f
 ) : IEntity<String>
