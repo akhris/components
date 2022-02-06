@@ -9,5 +9,11 @@ object AppSettings {
 
 object SidePanelSettings {
     val widthExpanded = 240.dp
-    val widthCollapsed = 64.dp
+    val widthCollapsed = 72.dp
+}
+
+object ContentSettings {
+    val contentHorizontalPadding = 16.dp
+    val contentCardWidth = 360.dp
+    val contentCardHeight = 360.dp
 }

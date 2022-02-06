@@ -1,7 +1,5 @@
 package ui.screens
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import navigation.Screen
 
@@ -17,6 +15,9 @@ fun NavHost(route: String? = null) {
         Screen.Income.route -> {
             Screen.Income
         }
+        Screen.Types.route -> {
+            Screen.Types
+        }
         else -> {
             null
         }
@@ -28,5 +29,16 @@ fun NavHost(route: String? = null) {
 
 @Composable
 private fun NavigateToScreen(screen: Screen) {
-    Text(text = screen.route, style = MaterialTheme.typography.h2)
+    when (screen) {
+        Screen.Database -> {}
+        Screen.Income -> {}
+        Screen.Outcome -> {}
+        Screen.Projects -> {}
+        Screen.Types -> {
+            DataTypesScreen()
+        }
+        Screen.Warehouse -> {
+
+        }
+    }
 }

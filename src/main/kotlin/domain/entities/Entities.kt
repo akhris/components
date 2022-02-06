@@ -26,13 +26,14 @@ data class Parameter(
     override val id: String,
     val name: String,
     val description: String = "",
-    val unit: Unit
+    val unit: Unit? = null
 ) : IEntity<String>
 
 data class Value(
     override val id: String,
     val parameter: Parameter,
-    val value: String
+    val value: String,
+    val factor: Float = 1f
 ) : IEntity<String>
 
 /**
@@ -41,5 +42,5 @@ data class Value(
 data class Unit(
     override val id: String,
     val unit: String,
-    val factor: Float = 1f
+    val isMultipliable: Boolean = false
 ) : IEntity<String>
