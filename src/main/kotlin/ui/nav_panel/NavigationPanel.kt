@@ -16,7 +16,7 @@ import ui.theme.SidePanelSettings
 
 
 @Composable
-fun ExpandableSidePanel(route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
+fun SidePanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -31,23 +31,25 @@ fun ExpandableSidePanel(route: String = "", onNavigateTo: ((route: String) -> Un
 
     NavigationRail(
         modifier = Modifier.width(panelWidth),
-        header = {
-            IconButton(modifier = Modifier.align(Alignment.Start), onClick = {
-                isExpanded = !isExpanded
-            },
-                content = {
-                    Icon(
-                        imageVector = when (isExpanded) {
-                            true -> Icons.Rounded.KeyboardArrowLeft
-                            false -> Icons.Rounded.KeyboardArrowRight
-                        },
-                        contentDescription = "expand or collapse icon"
-                    )
-                }
-            )
-        },
+        header = if (isExpandable) {
+            {
+                IconButton(modifier = Modifier.align(Alignment.End), onClick = {
+                    isExpanded = !isExpanded
+                },
+                    content = {
+                        Icon(
+                            imageVector = when (isExpanded) {
+                                true -> Icons.Rounded.KeyboardArrowLeft
+                                false -> Icons.Rounded.KeyboardArrowRight
+                            },
+                            contentDescription = "expand or collapse icon"
+                        )
+                    }
+                )
+            }
+        } else null,
         content = {
-            NavItem.items.forEach { item ->
+            NavItem.getItems().forEach { item ->
                 NavigationRailItem(
                     alwaysShowLabel = panelWidth == SidePanelSettings.widthExpanded,
                     selected = selectedRoute == item.route,

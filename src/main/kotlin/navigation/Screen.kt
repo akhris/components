@@ -22,6 +22,7 @@ sealed class Screen(val route: String) {
     object Outcome : Screen("screen_outcome")
     object Projects : Screen("screen_projects")
 
+    object Settings : Screen("screen_settings")
     companion object {
         val homeScreen = Screen.Database
     }
@@ -41,8 +42,9 @@ sealed class NavItem(val pathToIcon: String, val title: String, val route: Strin
 
     object Projects : NavItem(pathToIcon = "vector/list_alt_black_24dp.svg", title = "projects", Screen.Projects.route)
 
+    object Settings : NavItem(pathToIcon = "vector/settings_black_24dp.svg", title = "settings", Screen.Settings.route)
 
     companion object {
-        val items = listOf<NavItem>(Database, CurrentState, Types, Income, Outcome, Projects)
+        fun getItems() = listOf<NavItem>(Database, CurrentState, Types, Income, Outcome, Projects, Settings)
     }
 }

@@ -6,7 +6,11 @@ import domain.application.*
 import domain.repository.IItemsRepository
 import domain.repository.ITypesRepository
 import kotlinx.coroutines.Dispatchers
-import org.kodein.di.*
+import kotlinx.coroutines.MainScope
+import org.kodein.di.DI
+import org.kodein.di.bindMultiton
+import org.kodein.di.bindSingleton
+import ui.settings.AppSettingsRepository
 
 val di = DI {
     bindSingleton<IItemsRepository> { ItemsTestRepository() }
@@ -22,4 +26,6 @@ val di = DI {
     bindMultiton { repo: ITypesRepository -> RemoveObjectType(repo, ioDispatcher = Dispatchers.IO) }
     bindMultiton { repo: ITypesRepository -> InsertObjectType(repo, ioDispatcher = Dispatchers.IO) }
     bindMultiton { repo: ITypesRepository -> GetObjectTypes(repo, ioDispatcher = Dispatchers.IO) }
+
+    bindSingleton { AppSettingsRepository(MainScope()) }
 }

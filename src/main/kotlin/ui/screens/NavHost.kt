@@ -18,6 +18,9 @@ fun NavHost(route: String? = null) {
         Screen.Types.route -> {
             Screen.Types
         }
+        Screen.Settings.route -> {
+            Screen.Settings
+        }
         else -> {
             null
         }
@@ -39,6 +42,9 @@ private fun NavigateToScreen(screen: Screen) {
         }
         Screen.Warehouse -> {
 
+        }
+        Screen.Settings -> {
+            SettingsScreen()
         }
     }
 }

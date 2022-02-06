@@ -1,14 +1,20 @@
 package ui.screens
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.Text
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import ui.composable.ScrollableBox
 
 @Composable
 fun DataTypesScreen() {
@@ -23,7 +29,7 @@ fun TypesScreenContent() {
     Row {
         ObjectTypeSelector(
             modifier = Modifier.weight(3f),
-            selected = currentSelection,
+            selectedObject = currentSelection,
             onObjectTypeSelected = { currentSelection = it })
 
         ObjectsTypeDetail(
@@ -38,22 +44,50 @@ fun TypesScreenContent() {
 @Composable
 private fun ObjectTypeSelector(
     modifier: Modifier = Modifier,
-    selected: TypeOfObjects,
+    selectedObject: TypeOfObjects,
     onObjectTypeSelected: (type: TypeOfObjects) -> Unit
 ) {
-    println("ObjectTypeSelector: selected=$selected, typesList=${TypeOfObjects.typesList}")
-    Column(modifier = modifier.fillMaxHeight()) {
+    println("selectedObject: $selectedObject")
+    Column(modifier = modifier.fillMaxHeight().selectableGroup()) {
         listOf(
             TypeOfObjects.ObjectTypes,
             TypeOfObjects.ObjectParameters,
             TypeOfObjects.Units
         ).forEachIndexed { index, typeOfObjects ->
+
+
+            val isSelected = remember(selectedObject, typeOfObjects) {
+                typeOfObjects == selectedObject
+            }
+
+            val background = when (isSelected) {
+                true -> MaterialTheme.colors.primary
+                false -> MaterialTheme.colors.surface
+            }
+
+
             ListItem(
-                modifier = Modifier.fillMaxWidth().selectable(
-                    selected = selected == typeOfObjects,
-                    onClick = { onObjectTypeSelected(typeOfObjects) }),
-                text = { Text(text = typeOfObjects.name) },
-                secondaryText = { Text(text = typeOfObjects.description) })
+                modifier = Modifier.fillMaxWidth()
+
+                    .selectable(
+                        selected = selectedObject == typeOfObjects,
+                        onClick = { onObjectTypeSelected(typeOfObjects) },
+                        role = Role.RadioButton
+                    )
+                    .background(color = background)
+                    .padding(8.dp),
+                text = {
+                    Text(
+                        text = typeOfObjects.name,
+                        color = MaterialTheme.colors.contentColorFor(background)
+                    )
+                },
+                secondaryText = {
+                    Text(
+                        text = typeOfObjects.description,
+                        color = MaterialTheme.colors.contentColorFor(background).copy(alpha = 0.7f)
+                    )
+                })
             if (index != TypeOfObjects.typesList.lastIndex) {
                 Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
             }
@@ -64,12 +98,25 @@ private fun ObjectTypeSelector(
 @Composable
 private fun ObjectsTypeDetail(modifier: Modifier = Modifier, typeOfObjects: TypeOfObjects) {
 
-    Column(modifier = modifier.fillMaxHeight()) {
-        when (typeOfObjects) {
-            TypeOfObjects.ObjectTypes -> ObjectTypesScreen()
-            TypeOfObjects.ObjectParameters -> ObjectParametersScreen()
-            TypeOfObjects.Units -> UnitsScreen()
+    Box(modifier = modifier) {
+        val scrollState = remember(typeOfObjects) { ScrollState(initial = 0) }
+
+        ScrollableBox(modifier = modifier.fillMaxHeight(), scrollState = scrollState) {
+            when (typeOfObjects) {
+                TypeOfObjects.ObjectTypes -> ObjectTypesScreen()
+                TypeOfObjects.ObjectParameters -> ObjectParametersScreen()
+                TypeOfObjects.Units -> UnitsScreen()
+            }
         }
+        println("scroll in progress: ${scrollState.isScrollInProgress}")
+
+        FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).alpha(
+            if (scrollState.isScrollInProgress) 0.25f else 1f
+        ), onClick = {
+            //on add object type clicked
+        }, content = {
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add object type")
+        })
     }
 }
 
@@ -92,6 +139,13 @@ sealed class TypeOfObjects(val name: String, val description: String) {
     companion object {
         val typesList = listOf(ObjectParameters, ObjectTypes, Units)
     }
+
+//    override fun equals(other: Any?): Boolean {
+//        return if (other is TypeOfObjects) {
+//            other.name == name && other.description == description
+//        } else
+//            super.equals(other)
+//    }
 
 }
 
