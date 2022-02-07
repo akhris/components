@@ -12,11 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.akhris.domain.core.application.InsertEntity
 import di.di
+import domain.application.InsertObjectType
 import navigation.Screen
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import test.CapacitorTestEntities
+import test.ResistorTestEntities
 import ui.nav_panel.SidePanel
 import ui.screens.NavHost
 import ui.settings.AppSettingsRepository
@@ -55,6 +59,8 @@ private fun mainWindow() = withDI(di) {
     val di = localDI()
     val settingsRepository: AppSettingsRepository by di.instance()
 
+    PrepopulateDatabase()
+
     val isLightTheme by remember(settingsRepository) {
         settingsRepository.isLightTheme
     }.collectAsState()
@@ -69,6 +75,26 @@ private fun mainWindow() = withDI(di) {
             }
         }
     }
+}
+
+@Composable
+private fun PrepopulateDatabase() {
+    var wasInitialized by remember { mutableStateOf(false) }
+
+    val di = localDI()
+
+    val insertObjectType by di.instance<InsertObjectType>()
+
+    LaunchedEffect(wasInitialized) {
+        if (!wasInitialized) {
+            listOf(ResistorTestEntities.resistorsType, CapacitorTestEntities.capacitorsType).forEach {
+                insertObjectType(InsertEntity.Update(it))
+            }
+            wasInitialized = true
+        }
+    }
+
+
 }
 
 private fun databaseConnect() {

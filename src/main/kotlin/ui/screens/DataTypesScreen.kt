@@ -14,15 +14,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.akhris.domain.core.application.InsertEntity
+import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.IDUtils
+import domain.application.InsertObjectType
+import domain.entities.ObjectType
+import domain.entities.Parameter
+import org.kodein.di.compose.localDI
+import org.kodein.di.instance
 import ui.composable.ScrollableBox
 
 @Composable
 fun DataTypesScreen() {
-    TypesScreenContent()
+
+    val di = localDI()
+
+    val objectInsert: InsertObjectType by di.instance()
+
+    var addNewData by remember { mutableStateOf<IEntity<*>?>(null) }
+
+    TypesScreenContent(onAddNewEntity = {
+        addNewData = it
+    })
+
+    LaunchedEffect(addNewData) {
+        addNewData?.let { entity ->
+            when (entity) {
+                is ObjectType -> {
+                    objectInsert(InsertEntity.Update(entity))
+                }
+            }
+            addNewData = null
+        }
+    }
+
+
 }
 
 @Composable
-fun TypesScreenContent() {
+fun TypesScreenContent(
+    onAddNewEntity: ((IEntity<*>) -> Unit)? = null
+) {
+    var addNewEntity by remember { mutableStateOf<IEntity<*>?>(null) }
 
     var currentSelection by remember { mutableStateOf<TypeOfObjects>(TypeOfObjects.ObjectTypes) }
 
@@ -33,8 +66,26 @@ fun TypesScreenContent() {
             onObjectTypeSelected = { currentSelection = it })
 
         ObjectsTypeDetail(
-            modifier = Modifier.fillMaxWidth(0.8f).weight(10f),
-            typeOfObjects = currentSelection
+            modifier = Modifier.weight(10f),
+            typeOfObjects = currentSelection,
+            onAddNewType = {
+                addNewEntity = when (it) {
+                    TypeOfObjects.ObjectParameters -> Parameter(id = IDUtils.newID())
+                    TypeOfObjects.ObjectTypes -> ObjectType(id = IDUtils.newID())
+                    TypeOfObjects.Units -> domain.entities.Unit(id = IDUtils.newID())
+                }
+            }
+        )
+    }
+
+    addNewEntity?.let { entity: IEntity<*> ->
+        EditEntityDialog(
+            title = "Add new ${entity::class.simpleName}",
+            entity = entity,
+            onSaveClicked = { onAddNewEntity?.invoke(it) },
+            onDismiss = {
+                addNewEntity = null
+            }
         )
     }
 
@@ -47,7 +98,6 @@ private fun ObjectTypeSelector(
     selectedObject: TypeOfObjects,
     onObjectTypeSelected: (type: TypeOfObjects) -> Unit
 ) {
-    println("selectedObject: $selectedObject")
     Column(modifier = modifier.fillMaxHeight().selectableGroup()) {
         listOf(
             TypeOfObjects.ObjectTypes,
@@ -96,12 +146,16 @@ private fun ObjectTypeSelector(
 }
 
 @Composable
-private fun ObjectsTypeDetail(modifier: Modifier = Modifier, typeOfObjects: TypeOfObjects) {
+private fun ObjectsTypeDetail(
+    modifier: Modifier = Modifier,
+    typeOfObjects: TypeOfObjects,
+    onAddNewType: ((type: TypeOfObjects) -> Unit)? = null
+) {
 
     Box(modifier = modifier) {
         val scrollState = remember(typeOfObjects) { ScrollState(initial = 0) }
 
-        ScrollableBox(modifier = modifier.fillMaxHeight(), scrollState = scrollState) {
+        ScrollableBox(modifier = modifier.fillMaxHeight(), scrollState = scrollState, innerHorizontalPadding = 64.dp) {
             when (typeOfObjects) {
                 TypeOfObjects.ObjectTypes -> ObjectTypesScreen()
                 TypeOfObjects.ObjectParameters -> ObjectParametersScreen()
@@ -109,13 +163,20 @@ private fun ObjectsTypeDetail(modifier: Modifier = Modifier, typeOfObjects: Type
             }
         }
 
-        FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).alpha(
-            if (scrollState.isScrollInProgress) 0.25f else 1f
-        ), onClick = {
-            //on add object type clicked
-        }, content = {
-            Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add object type")
-        })
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(8.dp)
+                .alpha(
+                    if (scrollState.isScrollInProgress) 0.25f else 1f
+                ),
+            onClick = {
+                onAddNewType?.invoke(typeOfObjects)
+            },
+            content = {
+                Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add object type")
+            }
+        )
     }
 }
 

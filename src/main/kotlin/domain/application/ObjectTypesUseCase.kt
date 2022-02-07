@@ -5,10 +5,12 @@ import domain.entities.ObjectType
 import domain.repository.ITypesRepository
 import kotlinx.coroutines.CoroutineDispatcher
 
-typealias GetObjectType = GetEntity<String, ObjectType>
+typealias GetObjectType    = GetEntity<String, ObjectType>
 typealias InsertObjectType = InsertEntity<String, ObjectType>
 typealias RemoveObjectType = RemoveEntity<String, ObjectType>
 typealias UpdateObjectType = UpdateEntity<String, ObjectType>
+
+
 
 class GetObjectTypes(
     private val repo: ITypesRepository,

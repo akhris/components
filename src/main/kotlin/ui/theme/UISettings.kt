@@ -17,3 +17,7 @@ object ContentSettings {
     val contentCardWidth = 360.dp
     val contentCardHeight = 360.dp
 }
+
+object DialogSettings {
+    val defaultDialogWidth = 480.dp
+}

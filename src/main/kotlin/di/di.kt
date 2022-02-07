@@ -1,31 +1,52 @@
 package di
 
-import di.persistence.repository.ItemsTestRepository
-import di.persistence.repository.ObjectTypesTestRepository
+import persistence.repository.ItemsTestRepository
+import persistence.repository.ObjectTypesTestRepository
 import domain.application.*
+import domain.entities.ObjectType
+import domain.entities.fieldsmappers.FieldsMapperFactory
+import domain.entities.fieldsmappers.IFieldsMapperFactory
 import domain.repository.IItemsRepository
 import domain.repository.ITypesRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import org.kodein.di.DI
-import org.kodein.di.bindMultiton
 import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import ui.settings.AppSettingsRepository
+import viewmodels.SingleEntityViewModel
 
 val di = DI {
     bindSingleton<IItemsRepository> { ItemsTestRepository() }
-    bindMultiton { repo: IItemsRepository -> GetItem(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: IItemsRepository -> UpdateItem(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: IItemsRepository -> RemoveItem(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: IItemsRepository -> InsertItem(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: IItemsRepository -> GetItemsList(repo, ioDispatcher = Dispatchers.IO) }
+    bindSingleton { GetItem(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { UpdateItem(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { RemoveItem(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { InsertItem(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { GetItemsList(instance(), ioDispatcher = Dispatchers.IO) }
+
 
     bindSingleton<ITypesRepository> { ObjectTypesTestRepository() }
-    bindMultiton { repo: ITypesRepository -> GetObjectType(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: ITypesRepository -> UpdateObjectType(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: ITypesRepository -> RemoveObjectType(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: ITypesRepository -> InsertObjectType(repo, ioDispatcher = Dispatchers.IO) }
-    bindMultiton { repo: ITypesRepository -> GetObjectTypes(repo, ioDispatcher = Dispatchers.IO) }
+    bindSingleton { GetObjectType(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { UpdateObjectType(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { RemoveObjectType(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { InsertObjectType(instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { GetObjectTypes(instance(), ioDispatcher = Dispatchers.IO) }
 
-    bindSingleton { AppSettingsRepository(MainScope()) }
+
+    bindSingleton<CoroutineScope> { MainScope() }
+    bindSingleton { AppSettingsRepository(instance()) }
+
+    bindSingleton<IFieldsMapperFactory> { FieldsMapperFactory() }
+
+    bindSingleton<SingleEntityViewModel<String, ObjectType>> {
+        SingleEntityViewModel(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
 }

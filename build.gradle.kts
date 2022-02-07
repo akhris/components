@@ -34,6 +34,9 @@ dependencies {
 
     //dependency injection:
     implementation("org.kodein.di:kodein-di-framework-compose:7.10.0")
+
+    //reflection:
+//    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
 }
 
 tasks.withType<KotlinCompile> {

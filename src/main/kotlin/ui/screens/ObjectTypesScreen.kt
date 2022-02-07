@@ -11,27 +11,63 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
+import com.akhris.domain.core.utils.unpack
+import domain.application.GetObjectTypes
 import domain.entities.ObjectType
-import test.CapacitorTestEntities
-import test.ResistorTestEntities
+import org.kodein.di.compose.localDI
+import org.kodein.di.instance
+import viewmodels.SingleEntityViewModel
 
 @Composable
 fun ObjectTypesScreen() {
-    ObjectTypesScreenContent(listOf(ResistorTestEntities.resistorsType, CapacitorTestEntities.capacitorsType))
+
+    var showTypeEditDialog by remember { mutableStateOf<ObjectType?>(null) }
+
+    val di = localDI()
+
+    val getEntities: GetObjectTypes by di.instance()
+
+    val viewModel: SingleEntityViewModel<String, ObjectType> by di.instance()
+
+    var entities by remember { mutableStateOf(listOf<ObjectType>()) }
+
+    LaunchedEffect(getEntities) {
+        entities = getEntities(GetObjectTypes.Params.GetAll).unpack()
+    }
+
+    EntityScreenContent(entities)
+//
+//    ObjectTypesScreenContent(
+//        listOf(ResistorTestEntities.resistorsType, CapacitorTestEntities.capacitorsType),
+//        onEditType = {
+//                     showTypeEditDialog = it
+//        },
+//        onDeleteType = {})
+
+    showTypeEditDialog?.let { t ->
+
+        EditEntityDialog("edit object type: ${t.name}", t, onSaveClicked = {
+
+        }, onDismiss = { showTypeEditDialog = null })
+    }
 }
 
 @Composable
-fun ObjectTypesScreenContent(items: List<ObjectType>) {
+fun ObjectTypesScreenContent(
+    items: List<ObjectType>,
+    onEditType: (ObjectType) -> Unit,
+    onDeleteType: (ObjectType) -> Unit
+) {
     Column {
         items.forEach {
-            ObjectTypeItem(it)
+            ObjectTypeItem(it, onEditType, onDeleteType)
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ObjectTypeItem(objectType: ObjectType) {
+fun ObjectTypeItem(objectType: ObjectType, onEditType: (ObjectType) -> Unit, onDeleteType: (ObjectType) -> Unit) {
 
     var isHovered by remember { mutableStateOf(false) }
 
@@ -62,7 +98,7 @@ fun ObjectTypeItem(objectType: ObjectType) {
                 if (isHovered) {
                     Spacer(modifier = Modifier.weight(1f))
                     IconButton(onClick = {
-                        //on edit clicked
+                        onEditType(objectType)
                     }, content = {
                         Icon(
                             imageVector = Icons.Rounded.Edit,
@@ -71,7 +107,7 @@ fun ObjectTypeItem(objectType: ObjectType) {
                         )
                     })
                     IconButton(onClick = {
-                        //on delete clicked
+                        onDeleteType(objectType)
                     }, content = {
                         Icon(
                             imageVector = Icons.Rounded.Delete,

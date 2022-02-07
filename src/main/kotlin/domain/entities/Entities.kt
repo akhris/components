@@ -15,8 +15,8 @@ data class Item(
  */
 data class ObjectType(
     override val id: String,
-    val name: String,
-    val parameters: List<Parameter>
+    val name: String = "",
+    val parameters: List<Parameter> = listOf()
 ) : IEntity<String>
 
 /**
@@ -24,7 +24,7 @@ data class ObjectType(
  */
 data class Parameter(
     override val id: String,
-    val name: String,
+    val name: String = "",
     val description: String = "",
     val unit: Unit? = null
 ) : IEntity<String>
@@ -41,6 +41,6 @@ data class Value(
  */
 data class Unit(
     override val id: String,
-    val unit: String,
+    val unit: String = "",
     val isMultipliable: Boolean = false
 ) : IEntity<String>
