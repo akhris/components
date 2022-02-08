@@ -1,9 +1,6 @@
 package viewmodels
 
-import com.akhris.domain.core.application.GetEntity
-import com.akhris.domain.core.application.InsertEntity
-import com.akhris.domain.core.application.RemoveEntity
-import com.akhris.domain.core.application.UpdateEntity
+import com.akhris.domain.core.application.*
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.RepoResult
@@ -12,6 +9,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import persistence.repository.Specification
+import utils.replace
 
 /**
  * Class that operates with single entity and observe it's changes.
@@ -21,39 +20,31 @@ class MultipleEntitiesViewModel<ID, T : IEntity<ID>>(
     private val repoCallback: IRepositoryCallback<T>,
     private val coroutineScope: CoroutineScope,
     private val getEntity: GetEntity<ID, T>,
+    private val getEntities: GetEntities<ID, T>,
     private val insertEntity: InsertEntity<ID, T>,
     private val removeEntity: RemoveEntity<ID, T>,
     private val updateEntity: UpdateEntity<ID, T>
 ) {
     private val _entities: MutableStateFlow<List<T>> = MutableStateFlow(listOf())
 
-//    val type: StateFlow<ObjectType?> = _type
+    val entities: StateFlow<List<T>> = _entities
 
-    private suspend fun initEntity(id: ID) {
-//        if (_entity.value?.id != id) {
-//            val type = getEntity(GetEntity.GetByID(id)).unpack()
-//            type?.let {
-//                _entity.value = it
-//            }
-//        }
+
+    private suspend fun invalidateEntities() {
+        val entities = getEntities(GetEntities.GetBySpecification(Specification.QueryAll)).unpack()
+        _entities.value = entities
     }
 
-    fun getEntity(id: ID): StateFlow<List<T>> {
-        coroutineScope.launch {
-            initEntity(id)
-        }
-        return _entities
-    }
 
     fun insertEntity(type: T) {
         coroutineScope.launch {
-            updateEntity(UpdateEntity.Update(type))
+            insertEntity(InsertEntity.Insert(type))
         }
     }
 
     fun updateEntity(type: T) {
         coroutineScope.launch {
-            insertEntity(InsertEntity.Update(type))
+            updateEntity(UpdateEntity.Update(type))
         }
     }
 
@@ -65,19 +56,34 @@ class MultipleEntitiesViewModel<ID, T : IEntity<ID>>(
 
     init {
         coroutineScope.launch {
+            invalidateEntities()
+        }
+        coroutineScope.launch {
             repoCallback
                 .updates
                 .collect { item ->
+                    val cachedList = _entities.value
+                    val cachedItem = cachedList.find { it.id == item.item.id }
                     when (item) {
-                        is RepoResult.ItemUpdated, is RepoResult.ItemInserted -> {
-//                            if (item.item.id == _entity.value?.id) {
-//                                _entity.value = item.item
-//                            }
+                        is RepoResult.ItemUpdated -> {
+                            //update entities:
+                            if (cachedItem != null && cachedItem != item.item) {
+                                _entities.value = cachedList.replace(item.item) {
+                                    it.id == item.item.id
+                                }
+                            }
+                        }
+                        is RepoResult.ItemInserted -> {
+                            //insert item in the list (just at the end):
+                            //todo apply sorting/filtering here
+                            if (cachedItem == null) {
+                                _entities.value = cachedList.plus(item.item)
+                            }
                         }
                         is RepoResult.ItemRemoved -> {
-//                            if (item.item.id == _entity.value?.id) {
-//                                _entity.value = null
-//                            }
+                            if (cachedItem != null) {
+                                _entities.value = cachedList.minus(cachedItem)
+                            }
                         }
                     }
                 }

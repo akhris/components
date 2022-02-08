@@ -1,14 +1,20 @@
 package ui.screens
 
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import navigation.Screen
+import ui.screens.datatypes.DataTypesScreen
+import ui.screens.patterns.ScreenWithFilterSheet
 
 @Composable
 fun NavHost(route: String? = null) {
     val screen = when (route) {
-        Screen.Database.route -> {
-            Screen.Database
-        }
         Screen.Warehouse.route -> {
             Screen.Warehouse
         }
@@ -20,6 +26,9 @@ fun NavHost(route: String? = null) {
         }
         Screen.Settings.route -> {
             Screen.Settings
+        }
+        Screen.Projects.route -> {
+            Screen.Projects
         }
         else -> {
             null
@@ -33,10 +42,23 @@ fun NavHost(route: String? = null) {
 @Composable
 private fun NavigateToScreen(screen: Screen) {
     when (screen) {
-        Screen.Database -> {}
         Screen.Income -> {}
         Screen.Outcome -> {}
-        Screen.Projects -> {}
+        Screen.Projects -> {
+            ScreenWithFilterSheet(isOpened = true, content = {
+                Icon(
+                    modifier = Modifier.align(Alignment.Center),
+                    imageVector = Icons.Rounded.ThumbUp,
+                    tint = MaterialTheme.colors.onSurface,
+                    contentDescription = "projects screen content"
+                )
+            }, filterContent = {
+                Icon(
+                    imageVector = Icons.Rounded.Star,
+                    contentDescription = "projects screen content"
+                )
+            })
+        }
         Screen.Types -> {
             DataTypesScreen()
         }
@@ -46,5 +68,6 @@ private fun NavigateToScreen(screen: Screen) {
         Screen.Settings -> {
             SettingsScreen()
         }
+        Screen.Places -> {}
     }
 }

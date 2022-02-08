@@ -19,5 +19,6 @@ object ContentSettings {
 }
 
 object DialogSettings {
-    val defaultDialogWidth = 480.dp
+    val defaultWideDialogWidth = 480.dp
+    val defaultAlertDialogWidth = 280.dp
 }

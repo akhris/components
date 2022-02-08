@@ -2,11 +2,7 @@ package ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
@@ -23,6 +19,7 @@ import ui.screens.entity_renderers.*
 import ui.theme.DialogSettings
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : IEntity<*>> EditEntityDialog(
     title: String,
@@ -32,8 +29,6 @@ fun <T : IEntity<*>> EditEntityDialog(
 ) {
 
     val dialogState = rememberDialogState(size = DpSize.Unspecified)
-
-
 
     Dialog(
         state = dialogState,
@@ -63,7 +58,7 @@ fun <T : IEntity<*>> EditEntityScreenContent(initEntity: T, onSaveClicked: (T) -
 
 
 
-    Column(modifier = Modifier.padding(8.dp).width(DialogSettings.defaultDialogWidth)) {
+    Column(modifier = Modifier.padding(8.dp).width(DialogSettings.defaultWideDialogWidth)) {
         fields.forEach {
             RenderField(it, mapper, entity, onEntityChanged = { newEntity ->
                 entity = newEntity

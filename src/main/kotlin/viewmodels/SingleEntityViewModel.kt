@@ -47,13 +47,13 @@ class SingleEntityViewModel<ID, T : IEntity<ID>>(
 
     fun insertEntity(type: T) {
         coroutineScope.launch {
-            updateEntity(UpdateEntity.Update(type))
+            insertEntity(InsertEntity.Insert(type))
         }
     }
 
     fun updateEntity(type: T) {
         coroutineScope.launch {
-            insertEntity(InsertEntity.Update(type))
+            updateEntity(UpdateEntity.Update(type))
         }
     }
 

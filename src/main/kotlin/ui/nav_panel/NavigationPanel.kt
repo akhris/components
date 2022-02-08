@@ -1,22 +1,32 @@
 package ui.nav_panel
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import navigation.NavItem
+import org.kodein.di.compose.localDI
+import org.kodein.di.instance
+import strings.IStringsProvider
 import ui.theme.SidePanelSettings
 
 
 @Composable
-fun SidePanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
+fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
+
+    val di = localDI()
+
+    val stringsProvider: IStringsProvider by di.instance()
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -30,6 +40,7 @@ fun SidePanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: (
     var selectedRoute by remember(route) { mutableStateOf(route) }
 
     NavigationRail(
+        elevation = 1.dp,
         modifier = Modifier.width(panelWidth),
         header = if (isExpandable) {
             {
@@ -47,7 +58,20 @@ fun SidePanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: (
                     }
                 )
             }
-        } else null,
+        } else {
+            {
+                FloatingActionButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(8.dp),
+                    backgroundColor = MaterialTheme.colors.primarySurface,
+                    onClick = {},
+                    content = {
+                        Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add button")
+                    }
+                )
+            }
+               },
         content = {
             NavItem.getItems().forEach { item ->
                 NavigationRailItem(
@@ -61,7 +85,7 @@ fun SidePanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: (
                         )
                     },
                     label = {
-                        Text(item.title)
+                        Text(stringsProvider.getString(item.title))
                     },
                     onClick = {
                         selectedRoute = item.route

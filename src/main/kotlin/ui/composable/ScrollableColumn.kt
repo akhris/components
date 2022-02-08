@@ -16,12 +16,15 @@ fun ScrollableBox(
     modifier: Modifier = Modifier,
     innerHorizontalPadding: Dp = 0.dp,
     scrollState: ScrollState = rememberScrollState(),
+    additionalContent: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(modifier) {
         Box(modifier = Modifier.verticalScroll(scrollState).padding(horizontal = innerHorizontalPadding)) {
             content()
         }
+
+        additionalContent?.invoke(this)
 
         VerticalScrollbar(
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),

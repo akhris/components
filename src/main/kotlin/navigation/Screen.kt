@@ -1,17 +1,11 @@
 package navigation
 
+import strings.Strings
+
 /**
  * Class for navigation representing single Screen in main host placeholder
  */
 sealed class Screen(val route: String) {
-    /**
-     * Database screen.
-     * Managing database files: select file or create new.
-     * Showing selected file's properties: size, items count, e.t.c.
-     * Export/import database.
-     */
-    object Database : Screen("screen_database")
-
     /**
      * Current state of the storage
      */
@@ -21,30 +15,62 @@ sealed class Screen(val route: String) {
     object Income : Screen("screen_income")
     object Outcome : Screen("screen_outcome")
     object Projects : Screen("screen_projects")
+    object Places : Screen("screen_places")
 
     object Settings : Screen("screen_settings")
     companion object {
-        val homeScreen = Screen.Database
+        val homeScreen = Screen.Warehouse
     }
 }
 
-sealed class NavItem(val pathToIcon: String, val title: String, val route: String) {
-    object Database : NavItem(pathToIcon = "vector/source_black_24dp.svg", title = "data source", Screen.Database.route)
-    object CurrentState :
-        NavItem(pathToIcon = "vector/warehouse_black_24dp.svg", title = "warehouse", Screen.Warehouse.route)
+sealed class NavItem(val pathToIcon: String, val title: Strings, val route: String) {
 
-    object Types : NavItem(pathToIcon = "vector/category_black_24dp.svg", title = "types", Screen.Types.route)
+    object Warehouse :
+        NavItem(
+            pathToIcon = "vector/warehouse_black_24dp.svg",
+            title = Strings.navitem_warehouse_title,
+            Screen.Warehouse.route
+        )
+
+    object DataTypes : NavItem(
+        pathToIcon = "vector/category_black_24dp.svg",
+        title = Strings.navitem_datatypes_title,
+        Screen.Types.route
+    )
+
     object Income :
-        NavItem(pathToIcon = "vector/drive_file_move_black_24dp.svg", title = "income", Screen.Income.route)
+        NavItem(
+            pathToIcon = "vector/drive_file_move_black_24dp.svg",
+            title = Strings.navitem_income_title,
+            Screen.Income.route
+        )
 
     object Outcome :
-        NavItem(pathToIcon = "vector/drive_file_move_rtl_black_24dp.svg", title = "outcome", Screen.Outcome.route)
+        NavItem(
+            pathToIcon = "vector/drive_file_move_rtl_black_24dp.svg",
+            title = Strings.navitem_outcome_title,
+            Screen.Outcome.route
+        )
 
-    object Projects : NavItem(pathToIcon = "vector/list_alt_black_24dp.svg", title = "projects", Screen.Projects.route)
+    object Projects : NavItem(
+        pathToIcon = "vector/list_alt_black_24dp.svg",
+        title = Strings.navitem_projects_title,
+        Screen.Projects.route
+    )
 
-    object Settings : NavItem(pathToIcon = "vector/settings_black_24dp.svg", title = "settings", Screen.Settings.route)
+    object Settings : NavItem(
+        pathToIcon = "vector/settings_black_24dp.svg",
+        title = Strings.navitem_settings_title,
+        Screen.Settings.route
+    )
+
+    object Places : NavItem(
+        pathToIcon = "vector/inventory_2_black_24dp.svg",
+        title = Strings.navitem_places_title,
+        Screen.Places.route
+    )
 
     companion object {
-        fun getItems() = listOf<NavItem>(Database, CurrentState, Types, Income, Outcome, Projects, Settings)
+        fun getItems() = listOf<NavItem>(Warehouse, DataTypes, Income, Outcome, Places, Projects, Settings)
     }
 }
