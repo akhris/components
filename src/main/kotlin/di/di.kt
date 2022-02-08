@@ -22,6 +22,7 @@ val di = DI {
     import(itemsModule)
     import(unitsModule)
     import(parametersModule)
+    import(containersModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }

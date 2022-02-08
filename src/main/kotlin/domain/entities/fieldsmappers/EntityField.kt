@@ -15,6 +15,14 @@ sealed class EntityField(
     ) :
         EntityField(tag, name, description)
 
+    data class FloatField(
+        override val tag: String,
+        override val name: String,
+        override val description: String,
+        val value: Float
+    ) :
+        EntityField(tag, name, description)
+
     //non-changeable field like ID
     data class CaptionField(
         override val tag: String,

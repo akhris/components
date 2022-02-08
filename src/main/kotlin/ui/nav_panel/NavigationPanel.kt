@@ -15,18 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import navigation.NavItem
-import org.kodein.di.compose.localDI
-import org.kodein.di.instance
-import strings.IStringsProvider
 import ui.theme.SidePanelSettings
+import utils.getLocalizedString
 
 
 @Composable
 fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigateTo: ((route: String) -> Unit)? = null) {
-
-    val di = localDI()
-
-    val stringsProvider: IStringsProvider by di.instance()
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -85,7 +79,7 @@ fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigat
                         )
                     },
                     label = {
-                        Text(stringsProvider.getString(item.title))
+                        Text(item.title.getLocalizedString())
                     },
                     onClick = {
                         selectedRoute = item.route

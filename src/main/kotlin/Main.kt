@@ -14,17 +14,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.akhris.domain.core.application.InsertEntity
 import di.di
-import domain.application.InsertObjectType
-import domain.application.InsertParameter
-import domain.application.InsertUnit
+import domain.application.*
 import navigation.Screen
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
-import test.CapacitorTestEntities
-import test.Parameters
-import test.ResistorTestEntities
-import test.Units
+import test.*
 import ui.nav_panel.NavigationPanel
 import ui.screens.NavHost
 import ui.settings.AppSettingsRepository
@@ -95,10 +90,21 @@ private fun PrepopulateDatabase() {
     val insertObjectType by di.instance<InsertObjectType>()
     val insertParameter by di.instance<InsertParameter>()
     val insertUnit by di.instance<InsertUnit>()
+    val insertItem by di.instance<InsertItem>()
+    val insertContainer by di.instance<InsertContainer>()
 
     LaunchedEffect(wasInitialized) {
         if (!wasInitialized) {
-            listOf(ResistorTestEntities.resistorsType, CapacitorTestEntities.capacitorsType).forEach {
+            listOf(
+                Items.Resistors.resistor1,
+                Items.Resistors.resistor2,
+                Items.Capacitors.capacitor1,
+                Items.Capacitors.capacitor2
+            ).forEach {
+                insertItem(InsertEntity.Insert(it))
+            }
+
+            listOf(Types.resistorsType, Types.capacitorsType).forEach {
                 insertObjectType(InsertEntity.Insert(it))
             }
             listOf(
@@ -127,6 +133,19 @@ private fun PrepopulateDatabase() {
             ).forEach {
                 insertUnit(InsertEntity.Insert(it))
             }
+
+            listOf(
+                Containers.room407,
+                Containers.shelving1,
+                Containers.box1,
+                Containers.box2,
+                Containers.box3
+            ).forEach {
+                insertContainer(InsertEntity.Insert(it))
+            }
+
+
+
             wasInitialized = true
         }
     }

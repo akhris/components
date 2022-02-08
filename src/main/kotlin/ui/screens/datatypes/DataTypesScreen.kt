@@ -11,8 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import org.kodein.di.compose.localDI
+import strings.Strings
 import ui.composable.ScrollableBox
 import ui.screens.patterns.ScreenWithFilterSheet
+import utils.getLocalizedString
 
 @Composable
 fun DataTypesScreen() {
@@ -24,16 +27,17 @@ fun DataTypesScreen() {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TypesScreenContent() {
+    val di = localDI()
     var currentSelection by remember { mutableStateOf<TypeOfObjects>(TypeOfObjects.ObjectTypes) }
     ScreenWithFilterSheet(
         mainScreenTitle = {
             ListItem(
                 modifier = Modifier.align(Alignment.Center).padding(vertical = 16.dp),
                 text = {
-                    Text(text = currentSelection.name, style = MaterialTheme.typography.h3)
+                    Text(text = currentSelection.name.getLocalizedString(di), style = MaterialTheme.typography.h3)
                 },
                 secondaryText = {
-                    Text(text = currentSelection.description)
+                    Text(text = currentSelection.description.getLocalizedString(di))
                 }
             )
         },
@@ -62,11 +66,7 @@ private fun ObjectTypeSelector(
     onObjectTypeSelected: (type: TypeOfObjects) -> Unit
 ) {
     Column(modifier = modifier.fillMaxHeight().selectableGroup()) {
-        listOf(
-            TypeOfObjects.ObjectTypes,
-            TypeOfObjects.ObjectParameters,
-            TypeOfObjects.Units
-        ).forEachIndexed { index, typeOfObjects ->
+        TypeOfObjects.getTypesList().forEachIndexed { index, typeOfObjects ->
 
 
             val isSelected = remember(selectedObject, typeOfObjects) {
@@ -78,19 +78,21 @@ private fun ObjectTypeSelector(
                 false -> MaterialTheme.colors.surface
             }
 
-            Text(modifier = Modifier.fillMaxWidth()
+            Text(
+                modifier = Modifier.fillMaxWidth()
 
-                .selectable(
-                    selected = selectedObject == typeOfObjects,
-                    onClick = { onObjectTypeSelected(typeOfObjects) },
-                    role = Role.RadioButton
-                )
-                .background(color = background)
-                .padding(8.dp),
-                text = typeOfObjects.name,
-                color = MaterialTheme.colors.contentColorFor(background))
+                    .selectable(
+                        selected = selectedObject == typeOfObjects,
+                        onClick = { onObjectTypeSelected(typeOfObjects) },
+                        role = Role.RadioButton
+                    )
+                    .background(color = background)
+                    .padding(8.dp),
+                text = typeOfObjects.name.getLocalizedString(),
+                color = MaterialTheme.colors.contentColorFor(background)
+            )
 
-            if (index != TypeOfObjects.typesList.lastIndex) {
+            if (index != TypeOfObjects.getTypesList().lastIndex) {
                 Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
             }
         }
@@ -113,6 +115,8 @@ private fun ObjectsTypeDetail(
                 TypeOfObjects.ObjectTypes -> ObjectTypesScreen(showAddDialog)
                 TypeOfObjects.ObjectParameters -> ObjectParametersScreen(showAddDialog)
                 TypeOfObjects.Units -> UnitsScreen(showAddDialog)
+                TypeOfObjects.Items -> ItemsScreen(showAddDialog)
+                TypeOfObjects.Containers -> ContainersScreen(showAddDialog)
             }
         }
     )
@@ -131,24 +135,34 @@ private fun ObjectsTypeDetail(
 
 }
 
-sealed class TypeOfObjects(val name: String, val description: String) {
+sealed class TypeOfObjects(val name: Strings, val description: Strings) {
     object ObjectTypes : TypeOfObjects(
-        name = "object types",
-        description = "Types of objects that are stored in database (resistors, capacitors, ICs,...) and their parameters sets"
+        name = Strings.TypesOfData.types_title,
+        description = Strings.TypesOfData.types_description
     )
 
     object ObjectParameters : TypeOfObjects(
-        name = "object parameters",
-        description = "Parameters that objects can have (resistivity, maximum applied voltage, weight, size,...)"
+        name = Strings.TypesOfData.parameters_title,
+        description = Strings.TypesOfData.parameters_description
     )
 
     object Units : TypeOfObjects(
-        name = "units",
-        description = "Units that object parameters values can have (volts, amps, meters,...)"
+        name = Strings.TypesOfData.units_title,
+        description = Strings.TypesOfData.units_description
+    )
+
+    object Items : TypeOfObjects(
+        name = Strings.TypesOfData.items_title,
+        description = Strings.TypesOfData.items_description
+    )
+
+    object Containers : TypeOfObjects(
+        name = Strings.TypesOfData.containers_title,
+        description = Strings.TypesOfData.containers_description
     )
 
     companion object {
-        val typesList = listOf(ObjectParameters, ObjectTypes, Units)
+        fun getTypesList() = listOf(ObjectParameters, ObjectTypes, Units, Items, Containers)
     }
 
 //    override fun equals(other: Any?): Boolean {

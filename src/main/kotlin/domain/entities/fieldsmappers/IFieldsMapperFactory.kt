@@ -1,8 +1,7 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
-import domain.entities.ObjectType
-import domain.entities.Parameter
+import domain.entities.*
 import domain.entities.Unit
 import kotlin.reflect.KClass
 
@@ -16,6 +15,9 @@ class FieldsMapperFactory : IFieldsMapperFactory {
             Unit::class -> UnitFieldsMapper()
             Parameter::class -> ParameterFieldsMapper()
             ObjectType::class -> ObjectTypeFieldsMapper()
+            Item::class -> ItemFieldsMapper()
+            Value::class -> ValueFieldsMapper()
+            Container::class -> ContainerFieldsMapper()
             else -> throw IllegalArgumentException("$this cannot get factory for $entityClass")
         }
     }
