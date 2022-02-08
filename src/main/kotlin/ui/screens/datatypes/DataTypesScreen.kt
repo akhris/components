@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import ui.composable.ScrollableBox
 import ui.screens.patterns.ScreenWithFilterSheet
-import ui.screens.patterns.ScrollableListWithAddButton
 
 @Composable
 fun DataTypesScreen() {
@@ -90,28 +90,6 @@ private fun ObjectTypeSelector(
                 text = typeOfObjects.name,
                 color = MaterialTheme.colors.contentColorFor(background))
 
-//            ListItem(
-//                modifier = Modifier.fillMaxWidth()
-//
-//                    .selectable(
-//                        selected = selectedObject == typeOfObjects,
-//                        onClick = { onObjectTypeSelected(typeOfObjects) },
-//                        role = Role.RadioButton
-//                    )
-//                    .background(color = background)
-//                    .padding(8.dp),
-//                text = {
-//                    Text(
-//                        text = typeOfObjects.name,
-//                        color = MaterialTheme.colors.contentColorFor(background)
-//                    )
-//                },
-//                secondaryText = {
-//                    Text(
-//                        text = typeOfObjects.description,
-//                        color = MaterialTheme.colors.contentColorFor(background).copy(alpha = 0.7f)
-//                    )
-//                })
             if (index != TypeOfObjects.typesList.lastIndex) {
                 Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
             }
@@ -126,10 +104,10 @@ private fun ObjectsTypeDetail(
 ) {
 
     val showAddDialog = remember { mutableStateOf(false) }
-    ScrollableListWithAddButton(
-        modifier = modifier,
-        onAddClick = { showAddDialog.value = true },
-        scrollState = remember(typeOfObjects) { ScrollState(initial = 0) },
+
+    val scrollState = remember(typeOfObjects) { ScrollState(initial = 0) }
+    ScrollableBox(
+        modifier = modifier.fillMaxHeight(), scrollState = scrollState, innerHorizontalPadding = 64.dp,
         content = {
             when (typeOfObjects) {
                 TypeOfObjects.ObjectTypes -> ObjectTypesScreen(showAddDialog)
@@ -138,33 +116,19 @@ private fun ObjectsTypeDetail(
             }
         }
     )
-//    Box(modifier = modifier) {
-//        val scrollState = remember(typeOfObjects) { ScrollState(initial = 0) }
-//
-//        ScrollableBox(modifier = modifier.fillMaxHeight(), scrollState = scrollState, innerHorizontalPadding = 64.dp) {
+//    ScrollableListWithAddButton(
+//        modifier = modifier,
+//        onAddClick = { showAddDialog.value = true },
+//        scrollState = remember(typeOfObjects) { ScrollState(initial = 0) },
+//        content = {
 //            when (typeOfObjects) {
 //                TypeOfObjects.ObjectTypes -> ObjectTypesScreen(showAddDialog)
 //                TypeOfObjects.ObjectParameters -> ObjectParametersScreen(showAddDialog)
 //                TypeOfObjects.Units -> UnitsScreen(showAddDialog)
 //            }
 //        }
-//
-//        FloatingActionButton(
-//            modifier = Modifier
-//                .align(Alignment.BottomEnd)
-//                .padding(8.dp)
-//                .alpha(
-//                    if (scrollState.isScrollInProgress) 0.25f else 1f
-//                ),
-//            onClick = {
-//                showAddDialog.value = true
-////                onAddNewType?.invoke(typeOfObjects)
-//            },
-//            content = {
-//                Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add object type")
-//            }
-//        )
-//    }
+//    )
+
 }
 
 sealed class TypeOfObjects(val name: String, val description: String) {
