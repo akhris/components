@@ -121,7 +121,7 @@ private fun FileDialog(
     onCloseRequest: (result: String?) -> Unit
 ) = AwtWindow(
     create = {
-        object : FileDialog(parent, "Choose a file", SAVE) {
+        object : FileDialog(parent, "Choose a file", LOAD) {
 
             override fun setVisible(value: Boolean) {
                 super.setVisible(value)
