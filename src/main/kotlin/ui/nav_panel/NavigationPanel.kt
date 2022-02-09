@@ -16,7 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import navigation.NavItem
 import ui.theme.SidePanelSettings
-import utils.getLocalizedString
+import utils.toLocalizedString
 
 
 @Composable
@@ -79,7 +79,7 @@ fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigat
                         )
                     },
                     label = {
-                        Text(item.title.getLocalizedString())
+                        Text(item.title.toLocalizedString())
                     },
                     onClick = {
                         selectedRoute = item.route

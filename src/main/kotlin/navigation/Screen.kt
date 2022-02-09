@@ -71,6 +71,6 @@ sealed class NavItem(val pathToIcon: String, val title: Strings, val route: Stri
     )
 
     companion object {
-        fun getItems() = listOf<NavItem>(Warehouse, DataTypes, Income, Outcome, Places, Projects, Settings)
+        fun getItems() = listOf<NavItem>(Warehouse, Income, Outcome, DataTypes, Projects, Settings)
     }
 }

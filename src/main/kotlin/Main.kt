@@ -19,10 +19,10 @@ import navigation.Screen
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import settings.AppSettingsRepository
 import test.*
 import ui.nav_panel.NavigationPanel
 import ui.screens.NavHost
-import ui.settings.AppSettingsRepository
 import ui.theme.AppSettings
 import ui.theme.AppTheme
 
@@ -48,9 +48,9 @@ private fun mainWindow() = withDI(di) {
 
     val isLightTheme by remember(settingsRepository) {
         settingsRepository.isLightTheme
-    }.collectAsState()
+    }.collectAsState(null)
 
-    AppTheme(darkTheme = !isLightTheme) {
+    AppTheme(darkTheme = !(isLightTheme ?: true)) {
 
         val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
 

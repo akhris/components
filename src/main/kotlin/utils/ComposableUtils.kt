@@ -8,7 +8,7 @@ import strings.IStringsProvider
 import strings.Strings
 
 @Composable
-fun Strings.getLocalizedString(di: DI? = null): String {
+fun Strings.toLocalizedString(di: DI? = null): String {
     val stringsProvider by (di ?: localDI()).instance<IStringsProvider>()
     return stringsProvider.getString(this)
 }

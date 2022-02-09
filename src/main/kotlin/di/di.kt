@@ -9,7 +9,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import strings.IStringsProvider
 import strings.RUStringsProvider
-import ui.settings.AppSettingsRepository
+import settings.AppSettingsRepository
 
 val di = DI {
 

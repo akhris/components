@@ -15,7 +15,7 @@ import org.kodein.di.compose.localDI
 import strings.Strings
 import ui.composable.ScrollableBox
 import ui.screens.patterns.ScreenWithFilterSheet
-import utils.getLocalizedString
+import utils.toLocalizedString
 
 @Composable
 fun DataTypesScreen() {
@@ -34,10 +34,10 @@ fun TypesScreenContent() {
             ListItem(
                 modifier = Modifier.align(Alignment.Center).padding(vertical = 16.dp),
                 text = {
-                    Text(text = currentSelection.name.getLocalizedString(di), style = MaterialTheme.typography.h3)
+                    Text(text = currentSelection.name.toLocalizedString(di), style = MaterialTheme.typography.h3)
                 },
                 secondaryText = {
-                    Text(text = currentSelection.description.getLocalizedString(di))
+                    Text(text = currentSelection.description.toLocalizedString(di))
                 }
             )
         },
@@ -88,7 +88,7 @@ private fun ObjectTypeSelector(
                     )
                     .background(color = background)
                     .padding(8.dp),
-                text = typeOfObjects.name.getLocalizedString(),
+                text = typeOfObjects.name.toLocalizedString(),
                 color = MaterialTheme.colors.contentColorFor(background)
             )
 

@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.10"
     id("org.jetbrains.compose") version "1.0.1"
 }
 
@@ -38,6 +39,13 @@ dependencies {
 
     //reflection:
 //    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
+
+    //serialization:
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+
 }
 
 tasks.withType<KotlinCompile> {
