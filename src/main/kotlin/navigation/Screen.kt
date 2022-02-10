@@ -1,5 +1,6 @@
 package navigation
 
+
 import strings.Strings
 
 /**
@@ -9,15 +10,22 @@ sealed class Screen(val route: String) {
     /**
      * Current state of the storage
      */
+
     object Warehouse : Screen("screen_components")
 
     object Types : Screen("screen_types")
+
     object Income : Screen("screen_income")
+
     object Outcome : Screen("screen_outcome")
+
     object Projects : Screen("screen_projects")
+
     object Places : Screen("screen_places")
 
     object Settings : Screen("screen_settings")
+
+    object Empty : Screen("")
     companion object {
         val homeScreen = Screen.Warehouse
     }
@@ -72,5 +80,6 @@ sealed class NavItem(val pathToIcon: String, val title: Strings, val route: Stri
 
     companion object {
         fun getItems() = listOf<NavItem>(Warehouse, Income, Outcome, DataTypes, Projects, Settings)
+        fun getDefaultHome() = DataTypes
     }
 }

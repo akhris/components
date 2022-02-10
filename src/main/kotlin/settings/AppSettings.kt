@@ -20,6 +20,9 @@ sealed class AppSetting {
     data class StringSetting(override val key: String, val value: String) : AppSetting()
 
     @Serializable
+    data class PathSetting(override val key: String, val value: String) : AppSetting()
+
+    @Serializable
     data class BooleanSetting(override val key: String, val value: Boolean) : AppSetting()
 }
 

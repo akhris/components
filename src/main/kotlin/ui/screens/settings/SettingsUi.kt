@@ -1,4 +1,4 @@
-package ui.screens
+package ui.screens.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
-import org.kodein.di.compose.localDI
-import org.kodein.di.instance
-import settings.AppSettingsRepository
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import settings.AppSetting
 import strings.Strings
 import ui.composable.ScrollableBox
 import utils.toLocalizedString
@@ -20,18 +19,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.extension
 
 @Composable
-fun SettingsScreen() {
-    val di = localDI()
-    val settingsRepository: AppSettingsRepository by di.instance()
+fun SettingsUi(settingsComponent: ISettings) {
 
-    SettingsScreenContent(settingsRepository)
-}
-
-@Composable
-fun SettingsScreenContent(settingsRepository: AppSettingsRepository) {
-
-
-
+    val settings by settingsComponent.state.subscribeAsState()
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -46,17 +36,42 @@ fun SettingsScreenContent(settingsRepository: AppSettingsRepository) {
         }
         ScrollableBox(modifier = Modifier.weight(1f).padding(horizontal = 32.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(32.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                val isLightTheme by remember(settingsRepository) { settingsRepository.isLightTheme }.collectAsState(null)
-                val dbLocation by remember(settingsRepository) { settingsRepository.dbLocation }.collectAsState(null)
+                settings.settings.forEach {
+                    when (val s = it.setting) {
+                        is AppSetting.BooleanSetting -> {
+                            SwitchPreference(
+                                isChecked = s.value,
+                                onCheckedChange = { newValue -> settingsComponent.onSettingChanged(s.copy(value = newValue)) },
+                                title = it.name,
+                                description = it.description,
+                                iconPath = it.iconPath
+                            )
+                        }
+                        is AppSetting.FloatSetting -> {
 
+                        }
+                        is AppSetting.StringSetting -> {
 
-                DatabaseLocationPicker(dbLocation ?: "") {
-                    settingsRepository.setDBLocation(it)
+                        }
+                        is AppSetting.PathSetting -> {
+                            PathPreference(
+                                s.value,
+                                description = it.description,
+                                onPathChanged = { newPath -> settingsComponent.onSettingChanged(s.copy(value = newPath)) })
+                        }
+                    }
                 }
-
-                LightDarkThemeSelector(isLightTheme ?: true) {
-                    settingsRepository.setIsLightTheme(it)
-                }
+//                val isLightTheme by remember(settingsRepository) { settingsRepository.isLightTheme }.collectAsState(null)
+//                val dbLocation by remember(settingsRepository) { settingsRepository.dbLocation }.collectAsState(null)
+//
+//
+//                DatabaseLocationPicker(dbLocation ?: "") {
+//                    settingsRepository.setDBLocation(it)
+//                }
+//
+//                LightDarkThemeSelector(isLightTheme ?: true) {
+//                    settingsRepository.setIsLightTheme(it)
+//                }
             }
         }
     }

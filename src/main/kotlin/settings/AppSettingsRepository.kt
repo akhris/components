@@ -1,11 +1,9 @@
 package settings
 
+import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.decompose.value.Value
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import utils.FileUtils
@@ -14,8 +12,9 @@ import kotlin.io.path.*
 
 class AppSettingsRepository(private val scope: CoroutineScope) {
 
-    private val _settingsFlow = MutableStateFlow<AppSettings?>(null)
+    private val _settingsValue = MutableValue(AppSettings(listOf()))
 
+    val settingsValue: Value<AppSettings> = _settingsValue
 
     private val currentUserPath = System.getProperty("user.home")       //"/home/user"
     private val componentsSupPath = ".components_app"
@@ -26,18 +25,24 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
     private val defaultDBLocation = Path(currentUserPath, componentsSupPath, defaultComponentsDatabaseFilename)
 
 
-    val isLightTheme: Flow<Boolean?> =
-        _settingsFlow
-            .map { (it?.settings?.find { s -> s.key == key_is_light_theme } as? AppSetting.BooleanSetting)?.value }
-            .distinctUntilChanged()
+//    val isLightTheme: Flow<Boolean?> =
+//        _settingsFlow
+//            .map { (it?.settings?.find { s -> s.key == key_is_light_theme } as? AppSetting.BooleanSetting)?.value }
+//            .distinctUntilChanged()
+//
+//    val dbLocation =
+//        _settingsFlow
+//            .map {
+//                ((it?.settings?.find { s -> s.key == key_db_location } as? AppSetting.StringSetting)?.value)
+//                    ?: defaultDBLocation.toString()
+//            }
+//            .distinctUntilChanged()
 
-    val dbLocation =
-        _settingsFlow
-            .map {
-                ((it?.settings?.find { s -> s.key == key_db_location } as? AppSetting.StringSetting)?.value)
-                    ?: defaultDBLocation.toString()
-            }
-            .distinctUntilChanged()
+    fun setAppSetting(appSetting: AppSetting) {
+        scope.launch {
+            setSetting(appSetting)
+        }
+    }
 
     fun setIsLightTheme(isLight: Boolean) {
         scope.launch {
@@ -53,7 +58,7 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
 
 
     private suspend fun setSetting(appSetting: AppSetting) {
-        val currentSettings = _settingsFlow.value ?: AppSettings(listOf())
+        val currentSettings = _settingsValue.value ?: AppSettings(listOf())
         val currentSetting = currentSettings.settings.find { it.key == appSetting.key }
         val changedSettings = if (currentSetting == null) {
             //there is no such setting
@@ -80,7 +85,7 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             }
             val settings = settingsText.toAppSettings()
             settings?.let {
-                _settingsFlow.emit(it)
+                _settingsValue.value = it
             }
             println("loaded settings from file: $settings")
         } else {

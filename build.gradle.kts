@@ -46,6 +46,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
 
+    //decompose:
+    implementation("com.arkivanov.decompose:decompose:0.5.1")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.1")
+
 }
 
 tasks.withType<KotlinCompile> {
