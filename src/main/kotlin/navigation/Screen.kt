@@ -4,12 +4,10 @@ package navigation
 import strings.Strings
 
 /**
- * Class for navigation representing single Screen in main host placeholder
+ * Class for navigation representing single destination Screen that can be hosted in NavHost.
+ * Each Screen is characterized by route String.
  */
 sealed class Screen(val route: String) {
-    /**
-     * Current state of the storage
-     */
 
     object Warehouse : Screen("screen_components")
 
@@ -31,6 +29,10 @@ sealed class Screen(val route: String) {
     }
 }
 
+/**
+ * Class representing navigation items for using in navigation component (such as Navigation Rail).
+ * Each Item has title, icon and route String.
+ */
 sealed class NavItem(val pathToIcon: String, val title: Strings, val route: String) {
 
     object Warehouse :

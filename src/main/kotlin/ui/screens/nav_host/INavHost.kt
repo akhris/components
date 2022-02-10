@@ -2,22 +2,29 @@ package ui.screens.nav_host
 
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
-import navigation.Screen
 import ui.screens.settings.ISettings
 import ui.screens.types_of_data.ITypesOfData
 
+/**
+ * Interface for Navigation Host
+ */
 interface INavHost {
 
-    val state: Value<Model>
-
+    /**
+     * Navigate to destination by route.
+     */
     fun setDestination(route: String)
 
-    data class Model(val destination: Screen?)
-
+    /**
+     * Exposes Router State
+     */
     val routerState: Value<RouterState<*, Child>>
 
+    /**
+     * Child classes containing child components.
+     */
     sealed class Child {
         class Settings(val component: ISettings) : Child()
-        class TypesOfData(val component: ITypesOfData): Child()
+        class TypesOfData(val component: ITypesOfData) : Child()
     }
 }

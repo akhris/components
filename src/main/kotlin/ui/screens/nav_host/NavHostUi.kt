@@ -12,10 +12,9 @@ import ui.screens.types_of_data.TypesOfDataUi
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
 fun NavHostUi(component: INavHost) {
-    val state by component.state.subscribeAsState()
+
     val routerState by component.routerState.subscribeAsState()
 
-    println("going to show screen: ${state.destination}")
     Children(routerState = routerState, animation = crossfade()) {
         when (val child = it.instance) {
             is INavHost.Child.Settings -> SettingsUi(child.component)

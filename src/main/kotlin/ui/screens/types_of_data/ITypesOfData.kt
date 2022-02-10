@@ -5,6 +5,9 @@ import com.arkivanov.decompose.value.Value
 import ui.screens.types_of_data.data_types_list.IDataTypesList
 import ui.screens.types_of_data.types_selector.ITypesSelector
 
+/**
+ * Interface for TypesOfData component
+ */
 interface ITypesOfData {
 
 

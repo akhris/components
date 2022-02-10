@@ -4,7 +4,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.bringToFront
 import com.arkivanov.decompose.router.router
-import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
@@ -15,6 +14,9 @@ import settings.AppSettingsRepository
 import ui.screens.settings.SettingsComponent
 import ui.screens.types_of_data.TypesOfDataComponent
 
+/**
+ * Main navigation component that holds all destinations
+ */
 class NavHostComponent(
     componentContext: ComponentContext,
     private val appSettingsRepository: AppSettingsRepository,
@@ -22,6 +24,9 @@ class NavHostComponent(
 ) :
     INavHost, ComponentContext by componentContext {
 
+    /**
+     * Router instance
+     */
     private val router =
         router(
             initialConfiguration = Config(NavItem.getDefaultHome().route),
@@ -29,16 +34,22 @@ class NavHostComponent(
             childFactory = ::createChild
         )
 
+    /**
+     * Exposes Router State
+     */
     override val routerState: Value<RouterState<Config, INavHost.Child>> = router.state
 
-    private val _state = MutableValue(INavHost.Model(null))
-
-    override val state: Value<INavHost.Model> = _state
-
+    /**
+     * Navigate to destination by route.
+     */
     override fun setDestination(route: String) {
         router.bringToFront(Config(route))
     }
 
+    /**
+     * Child components factory.
+     * Creates
+     */
     private fun createChild(config: Config, componentContext: ComponentContext): INavHost.Child {
         val screen = when (config.route) {
             Screen.Warehouse.route -> null
