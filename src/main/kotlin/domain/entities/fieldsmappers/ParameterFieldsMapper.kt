@@ -6,20 +6,20 @@ import domain.entities.Unit
 class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
 
 
-    override fun getFields(entity: Parameter): Map<EntityFieldColumn, Any?> {
+    override fun getFields(entity: Parameter): Map<EntityFieldID, Any?> {
         return listOfNotNull(
-            EntityFieldColumn.NameColumn to entity.name,
-            EntityFieldColumn.DescriptionColumn to entity.description,
-            entity.unit?.let { EntityFieldColumn.UnitColumn(it.id, it.unit) to entity.unit }
+            EntityFieldID.NameID to entity.name,
+            EntityFieldID.DescriptionID to entity.description,
+            entity.unit?.let { EntityFieldID.UnitID(it.id, it.unit) to entity.unit }
         ).toMap()
     }
 
 
     override fun mapIntoEntity(entity: Parameter, field: EntityField): Parameter {
-        return when (val column = field.fieldColumn) {
-            EntityFieldColumn.NameColumn -> entity.copy(name = (field as EntityField.StringField).value)
-            EntityFieldColumn.DescriptionColumn -> entity.copy(description = (field as EntityField.StringField).value)
-            is EntityFieldColumn.UnitColumn -> {
+        return when (val column = field.fieldID) {
+            EntityFieldID.NameID -> entity.copy(name = (field as EntityField.StringField).value)
+            EntityFieldID.DescriptionID -> entity.copy(description = (field as EntityField.StringField).value)
+            is EntityFieldID.UnitID -> {
                 val unit = (field as? EntityField.EntityLink)?.entity as? Unit
                 entity.copy(unit = unit)
             }

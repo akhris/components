@@ -1,26 +1,25 @@
-package ui.screens
+package ui.screens.entity_renderers
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
-import ui.screens.entity_renderers.*
 import ui.screens.types_of_data.types_selector.ITypesSelector
 import ui.theme.ContentSettings
 import ui.theme.DialogSettings
-import utils.toLocalizedString
 
 @Composable
 fun EntityScreen() {
@@ -51,38 +50,32 @@ fun <T : IEntity<*>> EntityScreenContent(
 
     val mapper = remember(entities, factory) { entities.firstOrNull()?.let { factory.getFieldsMapper(it::class) } }
 
-    val fieldsSet = remember(mapper, entities) {
-        entities.flatMap { entity -> mapper?.getEntityColumns(entity) ?: listOf() }
-            .toSet()
-    }
 
-    LazyColumn(state = lazyColumnState) {
+    //main title
+//        entityType?.let {
+//            stickyHeader(key = "main title") {
+//                Surface(modifier = Modifier.fillMaxWidth(), elevation = headerElevation) {
+//                    ListItem(
+//                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
+//                        text = {
+//                            Text(
+//                                text = entityType.name?.toLocalizedString() ?: "",
+//                                style = MaterialTheme.typography.h3
+//                            )
+//                        },
+//                        secondaryText = {
+//                            Text(text = entityType.description?.toLocalizedString() ?: "")
+//                        }
+//                    )
+//                }
+//            }
+//        }
 
-
-        entityType?.let {
-
-            stickyHeader(key = "main title") {
-                Surface(modifier = Modifier.fillMaxWidth(), elevation = headerElevation) {
-                    ListItem(
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
-                        text = {
-                            Text(
-                                text = entityType.name?.toLocalizedString() ?: "",
-                                style = MaterialTheme.typography.h3
-                            )
-                        },
-                        secondaryText = {
-                            Text(text = entityType.description?.toLocalizedString() ?: "")
-                        }
-                    )
-                }
-            }
-
-
-        }
-
-        when (itemRepresentationType) {
-            ItemRepresentationType.Card -> {
+    //content depending on representation type:
+    when (itemRepresentationType) {
+        //cards
+        ItemRepresentationType.Card -> {
+            LazyColumn(state = lazyColumnState) {
                 items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         RenderCardEntity(
@@ -93,45 +86,48 @@ fun <T : IEntity<*>> EntityScreenContent(
                     }
                 })
             }
+        }
 
+        //table
             ItemRepresentationType.Table -> {
-
-                stickyHeader(key = "table_header") {
-                    LazyRow {
-                        itemsIndexed(fieldsSet.toList()) { index, field ->
-                            Text(
-                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
-                                text = field.name
-                            )
-                        }
-                    }
+                mapper?.let {
+                    EntityTableContent(entities = entities, fieldsMapper = it)
                 }
-
-                itemsIndexed(entities) { index, entity ->
-                    val fields = fieldsSet.mapNotNull { mapper?.getFieldByColumn(entity, fieldsSet.elementAt(index)) }
-                    LazyRow {
-                        items(fields) {
-
-                            Text(
-                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
-                                text = when (it) {
-                                    is EntityField.BooleanField -> it.value.toString()
-                                    is EntityField.CaptionField -> it.caption
-                                    is EntityField.EntityLink -> ""
-                                    is EntityField.EntityLinksList -> ""
-                                    is EntityField.FavoriteField -> it.isFavorite.toString()
-                                    is EntityField.FloatField -> it.value.toString()
-                                    is EntityField.StringField -> it.value
-                                    is EntityField.URLField -> it.url
-                                }
-                            )
-                        }
-                    }
-                }
+//                stickyHeader(key = "table_header") {
+//                    LazyRow {
+//                        itemsIndexed(fieldsSet.toList()) { index, field ->
+//                            Text(
+//                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
+//                                text = field.name
+//                            )
+//                        }
+//                    }
+//                }
+//
+//                itemsIndexed(entities) { index, entity ->
+//                    val fields = fieldsSet.mapNotNull { mapper?.getFieldByID(entity, fieldsSet.elementAt(index)) }
+//                    LazyRow {
+//                        items(fields) {
+//
+//                            Text(
+//                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
+//                                text = when (it) {
+//                                    is EntityField.BooleanField -> it.value.toString()
+//                                    is EntityField.CaptionField -> it.caption
+//                                    is EntityField.EntityLink -> ""
+//                                    is EntityField.EntityLinksList -> ""
+//                                    is EntityField.FavoriteField -> it.isFavorite.toString()
+//                                    is EntityField.FloatField -> it.value.toString()
+//                                    is EntityField.StringField -> it.value
+//                                    is EntityField.URLField -> it.url
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
 
 
             }
-        }
 
 //        entities.forEach { entity ->
 //            RenderEntity(
@@ -186,7 +182,7 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     val fields =
         remember(mapper, entity) {
 
-            mapper.getEntityColumns(entity = entity).mapNotNull { mapper.getFieldByColumn(entity, it) }
+            mapper.getEntityColumns(entity = entity).mapNotNull { mapper.getFieldByID(entity, it) }
         }
 
 

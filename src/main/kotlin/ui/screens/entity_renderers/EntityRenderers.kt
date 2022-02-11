@@ -20,7 +20,7 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
         modifier = Modifier.fillMaxWidth(),
         text = {
             Text(
-                text = field.fieldColumn.name
+                text = field.fieldID.name
             )
         }, secondaryText = {
             Text(text = field.description)
@@ -33,7 +33,7 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
 fun RenderIsFavoriteField(field: EntityField.FavoriteField, onValueChange: (Boolean) -> Unit) {
     RenderBooleanField(
         EntityField.BooleanField(
-            field.fieldColumn,
+            field.fieldID,
             field.description,
             field.isFavorite
         ),
@@ -52,7 +52,7 @@ fun RenderFloatField(field: EntityField.FloatField, onValueChange: (Float) -> Un
         isError = floatValue == null,
         modifier = Modifier.fillMaxWidth(),
         value = value,
-        label = { Text(text = field.fieldColumn.name) },
+        label = { Text(text = field.fieldID.name) },
         onValueChange = {
             value = it
             floatValue?.let { f ->
@@ -74,7 +74,7 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = field.value,
-        label = { Text(text = field.fieldColumn.name) },
+        label = { Text(text = field.fieldID.name) },
         onValueChange = onValueChange,
         trailingIcon = {
             Icon(
@@ -92,7 +92,7 @@ fun RenderURLField(field: EntityField.URLField, onValueChange: (String) -> Unit)
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = field.url,
-        label = { Text(text = field.fieldColumn.name) },
+        label = { Text(text = field.fieldID.name) },
         onValueChange = onValueChange,
         leadingIcon = {
             Icon(painter = painterResource("vector/language_black_24dp.svg"), contentDescription = "url")
@@ -113,7 +113,7 @@ fun RenderCaptionField(field: EntityField.CaptionField) {
     ListItem(
         text = { Text(text = field.caption, style = MaterialTheme.typography.caption) },
         secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldColumn.name) }
+        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 
@@ -125,7 +125,7 @@ fun RenderEntityLink(field: EntityField.EntityLink, onEntityLinkSelect: () -> Un
             modifier = Modifier.clickable {
                 onEntityLinkSelect()
             },
-            text = { Text(text = field.fieldColumn.name) },
+            text = { Text(text = field.fieldID.name) },
             secondaryText = { Text(text = field.description) },
             trailing = {
                 Icon(
@@ -142,7 +142,7 @@ fun RenderEntityLink(field: EntityField.EntityLink, onEntityLinkSelect: () -> Un
             OutlinedButton(
                 modifier = Modifier.align(Alignment.Center),
                 onClick = { onEntityLinkSelect() },
-                content = { Text("add ${field.fieldColumn.name}") })
+                content = { Text("add ${field.fieldID.name}") })
         }
     }
 }
@@ -152,7 +152,7 @@ fun RenderEntityLink(field: EntityField.EntityLink, onEntityLinkSelect: () -> Un
 fun RenderEntityLinksList(field: EntityField.EntityLinksList, onEntityLinkAdd: () -> Unit) {
     Column {
         ListItem(
-            text = { Text(text = field.fieldColumn.name) },
+            text = { Text(text = field.fieldID.name) },
             secondaryText = { Text(text = field.description) }
         )
 
@@ -164,7 +164,7 @@ fun RenderEntityLinksList(field: EntityField.EntityLinksList, onEntityLinkAdd: (
             OutlinedButton(
                 modifier = Modifier.align(Alignment.Center),
                 onClick = onEntityLinkAdd,
-                content = { Text("add ${field.fieldColumn.name}") })
+                content = { Text("add ${field.fieldID.name}") })
         }
 
     }

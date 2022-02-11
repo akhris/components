@@ -7,12 +7,12 @@ import utils.replace
 class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
 
-    override fun getFields(entity: ObjectType): Map<EntityFieldColumn, Any?> {
+    override fun getFields(entity: ObjectType): Map<EntityFieldID, Any?> {
         return listOfNotNull(
-            EntityFieldColumn.NameColumn to entity.name
+            EntityFieldID.NameID to entity.name
         ).plus(
             entity.parameters.map {
-                EntityFieldColumn.ParameterColumn(it.id, it.name) to it
+                EntityFieldID.ParameterID(it.id, it.name) to it
             }
         ).toMap()
     }
@@ -21,9 +21,9 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
 
     override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
-        return when (val column = field.fieldColumn) {
-            EntityFieldColumn.NameColumn -> entity.copy(name = (field as EntityField.StringField).value)
-            is EntityFieldColumn.ParameterColumn -> entity.copy(parameters = entity.parameters.replace(((field as EntityField.EntityLink).entity as Parameter)) {
+        return when (val column = field.fieldID) {
+            EntityFieldID.NameID -> entity.copy(name = (field as EntityField.StringField).value)
+            is EntityFieldID.ParameterID -> entity.copy(parameters = entity.parameters.replace(((field as EntityField.EntityLink).entity as Parameter)) {
                 it.id == column.paramID
             })
             else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")

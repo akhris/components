@@ -8,21 +8,21 @@ import utils.replace
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
 
-    override fun getFields(entity: Item): Map<EntityFieldColumn, Any?> {
+    override fun getFields(entity: Item): Map<EntityFieldID, Any?> {
         return listOf(
-            EntityFieldColumn.NameColumn to entity.name,
-            EntityFieldColumn.ObjectTypeColumn to entity.type
+            EntityFieldID.NameID to entity.name,
+            EntityFieldID.ObjectTypeID to entity.type
         ).plus(entity.values.map {
-            EntityFieldColumn.ValueColumn(valueID = it.id, parameterName = it.parameter.name) to it
+            EntityFieldID.ValueID(valueID = it.id, parameterName = it.parameter.name) to it
         }).toMap()
     }
 
 
     override fun mapIntoEntity(entity: Item, field: EntityField): Item {
-        return when (val column = field.fieldColumn) {
-            EntityFieldColumn.NameColumn -> entity.copy(name = (field as EntityField.StringField).value)
-            EntityFieldColumn.ObjectTypeColumn -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
-            is EntityFieldColumn.ValueColumn -> entity.copy(values = entity.values.replace((field as EntityField.EntityLink).entity as Value) {
+        return when (val column = field.fieldID) {
+            EntityFieldID.NameID -> entity.copy(name = (field as EntityField.StringField).value)
+            EntityFieldID.ObjectTypeID -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
+            is EntityFieldID.ValueID -> entity.copy(values = entity.values.replace((field as EntityField.EntityLink).entity as Value) {
                 it.id == column.valueID
             })
             else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")

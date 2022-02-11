@@ -7,86 +7,86 @@ import domain.entities.Value
 
 abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 
-    abstract fun getFields(entity: T): Map<EntityFieldColumn, Any?>
+    abstract fun getFields(entity: T): Map<EntityFieldID, Any?>
 
-    override fun getFieldByColumn(entity: T, fieldColumn: EntityFieldColumn): EntityField? {
-        val fieldValue = getFields(entity)[fieldColumn]
+    override fun getFieldByID(entity: T, fieldID: EntityFieldID): EntityField? {
+        val fieldValue = getFields(entity)[fieldID]
 //        val fieldValue = getFieldValueByColumn(entity, fieldColumn)
 
-        return when (fieldColumn) {
-            EntityFieldColumn.NameColumn -> {
+        return when (fieldID) {
+            EntityFieldID.NameID -> {
                 EntityField.StringField(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "item's name",
                     value = (fieldValue as? String) ?: ""
                 )
             }
-            EntityFieldColumn.ObjectTypeColumn -> {
+            EntityFieldID.ObjectTypeID -> {
                 EntityField.EntityLink(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "item's object type",
                     entity = (fieldValue as? IEntity<out Any>)
                 )
             }
-            is EntityFieldColumn.ValueColumn -> {
+            is EntityFieldID.ValueID -> {
                 val value = fieldValue as? Value
                 val descr = StringBuilder(value?.parameter?.name ?: "")
                 value?.parameter?.unit?.let {
                     descr.append(", ${it.unit}")
                 }
                 EntityField.EntityLink(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = descr.toString(),
                     entity = value
                 )
             }
-            is EntityFieldColumn.ParameterColumn -> {
+            is EntityFieldID.ParameterID -> {
                 val param = fieldValue as? Parameter
                 EntityField.EntityLink(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = param?.description ?: "",
                     entity = param
                 )
             }
-            EntityFieldColumn.DescriptionColumn -> EntityField.StringField(
-                fieldColumn = fieldColumn,
+            EntityFieldID.DescriptionID -> EntityField.StringField(
+                fieldID = fieldID,
                 description = "item's description",
                 value = (fieldValue as? String) ?: ""
             )
 
-            is EntityFieldColumn.UnitColumn -> {
+            is EntityFieldID.UnitID -> {
                 val unit = fieldValue as? Unit
 
                 EntityField.EntityLink(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "parameter unit",
                     entity = unit
                 )
             }
-            is EntityFieldColumn.FloatColumn -> {
+            is EntityFieldID.FloatID -> {
                 EntityField.FloatField(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "factor",
                     value = (fieldValue as? Float) ?: 1f
                 )
             }
-            is EntityFieldColumn.StringColumn -> {
+            is EntityFieldID.StringID -> {
                 EntityField.StringField(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "value",
                     value = (fieldValue as? String) ?: ""
                 )
             }
-            is EntityFieldColumn.BooleanColumn -> {
+            is EntityFieldID.BooleanID -> {
                 EntityField.BooleanField(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "boolean",
                     value = (fieldValue as? Boolean) ?: false
                 )
             }
-            is EntityFieldColumn.ContainerColumn -> {
+            is EntityFieldID.ContainerID -> {
                 EntityField.EntityLink(
-                    fieldColumn = fieldColumn,
+                    fieldID = fieldID,
                     description = "item's object type",
                     entity = (fieldValue as? IEntity<out Any>)
                 )
@@ -94,7 +94,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         }
     }
 
-    override fun getEntityColumns(entity: T): List<EntityFieldColumn> {
+    override fun getEntityColumns(entity: T): List<EntityFieldID> {
         return getFields(entity).keys.toList()
     }
 

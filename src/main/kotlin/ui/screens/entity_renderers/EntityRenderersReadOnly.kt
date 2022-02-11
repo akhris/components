@@ -17,7 +17,7 @@ fun RenderBooleanFieldReadOnly(field: EntityField.BooleanField) {
             modifier = Modifier.fillMaxWidth(),
             text = {
                 Text(
-                    text = field.fieldColumn.name
+                    text = field.fieldID.name
                 )
             }, secondaryText = {
                 Text(text = field.description)
@@ -30,7 +30,7 @@ fun RenderBooleanFieldReadOnly(field: EntityField.BooleanField) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderIsFavoriteFieldReadOnly(field: EntityField.FavoriteField) {
-    RenderBooleanFieldReadOnly(EntityField.BooleanField(field.fieldColumn, field.description, field.isFavorite))
+    RenderBooleanFieldReadOnly(EntityField.BooleanField(field.fieldID, field.description, field.isFavorite))
 }
 
 
@@ -40,7 +40,7 @@ fun RenderFloatFieldReadOnly(field: EntityField.FloatField) {
     ListItem(
         text = { Text(text = field.value.toString(), style = MaterialTheme.typography.caption) },
         secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldColumn.name) }
+        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 
@@ -51,7 +51,7 @@ fun RenderUrlFieldReadOnly(field: EntityField.URLField) {
         icon = { Icon(painter = painterResource("vector/language_black_24dp.svg"), contentDescription = "open url") },
         text = { Text(text = field.url.toString(), style = MaterialTheme.typography.caption) },
         secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldColumn.name) }
+        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 
@@ -61,7 +61,7 @@ fun RenderTextFieldReadOnly(field: EntityField.StringField) {
     ListItem(
         text = { Text(text = field.value, style = MaterialTheme.typography.caption) },
         secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldColumn.name) }
+        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 
@@ -71,7 +71,7 @@ fun RenderCaptionFieldReadOnly(field: EntityField.CaptionField) {
     ListItem(
         text = { Text(text = field.caption, style = MaterialTheme.typography.caption) },
         secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldColumn.name) }
+        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 
@@ -80,7 +80,7 @@ fun RenderCaptionFieldReadOnly(field: EntityField.CaptionField) {
 fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
     if (field.entity != null) {
         ListItem(
-            text = { Text(text = field.fieldColumn.name) },
+            text = { Text(text = field.fieldID.name) },
             secondaryText = { Text(text = field.description) }
         )
     }
@@ -91,7 +91,7 @@ fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
 fun RenderEntityLinksListReadOnly(field: EntityField.EntityLinksList) {
     Column {
         ListItem(
-            text = { Text(text = field.fieldColumn.name) },
+            text = { Text(text = field.fieldID.name) },
             secondaryText = { Text(text = field.description) }
         )
 

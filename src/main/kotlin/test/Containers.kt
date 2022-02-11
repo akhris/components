@@ -11,6 +11,6 @@ object Containers {
     val box2 =
         Container(name = "box 2", description = "medium plastic box with red cover", parentContainer = shelving1)
     val box3 =
-        Container(name = "box 3", description = "bix plastic box with blue cover", parentContainer = shelving1)
+        Container(name = "box 3", description = "big plastic box with blue cover", parentContainer = shelving1)
 
 }
