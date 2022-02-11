@@ -34,10 +34,13 @@ interface ITypesSelector {
         object Containers : Type(Strings.TypesOfData.containers_title, Strings.TypesOfData.containers_description)
 
         @Parcelize
+        object Suppliers : Type(Strings.TypesOfData.suppliers_title, Strings.TypesOfData.suppliers_description)
+
+        @Parcelize
         object None : Type(null, null)
 
         companion object {
-            fun getAllTypes() = listOf(ObjectType, Parameters, Units, Items, Containers)
+            fun getAllTypes() = listOf(ObjectType, Parameters, Units, Items, Containers, Suppliers)
             fun getDefaultHomeType(): Type = ObjectType
         }
     }

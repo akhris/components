@@ -1,7 +1,6 @@
 package di
 
 import domain.entities.fieldsmappers.FieldsMapperFactory
-import domain.entities.fieldsmappers.IFieldsMapperFactory
 import domain.entities.usecase_factories.GetListUseCaseFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +25,7 @@ val di = DI {
     import(unitsModule)
     import(parametersModule)
     import(containersModule)
+    import(suppliersModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }
@@ -37,11 +37,12 @@ val di = DI {
             instance(),
             instance(),
             instance(),
+            instance(),
             instance()
         )
     }
 
-    bindSingleton<IFieldsMapperFactory> { FieldsMapperFactory() }
+    bindSingleton { FieldsMapperFactory() }
 
 
 }

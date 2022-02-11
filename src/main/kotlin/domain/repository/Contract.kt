@@ -10,3 +10,4 @@ interface ITypesRepository : IRepository<String, ObjectType>, IRepositoryCallbac
 interface IUnitsRepository : IRepository<String, Unit>, IRepositoryCallback<Unit>
 interface IParametersRepository : IRepository<String, Parameter>, IRepositoryCallback<Parameter>
 interface IContainersRepository : IRepository<String, Container>, IRepositoryCallback<Container>
+interface ISuppliersRepository : IRepository<String, Supplier>, IRepositoryCallback<Supplier>

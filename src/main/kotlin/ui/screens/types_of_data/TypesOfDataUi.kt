@@ -1,15 +1,8 @@
 package ui.screens.types_of_data
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
@@ -19,7 +12,6 @@ import com.arkivanov.decompose.value.Value
 import ui.screens.patterns.ScreenWithFilterSheet
 import ui.screens.types_of_data.data_types_list.DataTypesListUi
 import ui.screens.types_of_data.types_selector.TypesSelectorUi
-import utils.toLocalizedString
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -29,20 +21,7 @@ fun TypesOfDataUi(component: ITypesOfData) {
 
 
     ScreenWithFilterSheet(
-        mainScreenTitle = {
-            ListItem(
-                modifier = Modifier.align(Alignment.Center).padding(vertical = 16.dp),
-                text = {
-                    Text(
-                        text = selectorState.name?.toLocalizedString() ?: "",
-                        style = MaterialTheme.typography.h3
-                    )
-                },
-                secondaryText = {
-                    Text(text = selectorState.description?.toLocalizedString() ?: "")
-                }
-            )
-        },
+        mainScreenTitle = null,
         isOpened = true,
         isModal = true,
         content = {
@@ -64,7 +43,7 @@ fun ListPane(routerState: Value<RouterState<*, ITypesOfData.ListChild>>) {
             is ITypesOfData.ListChild.List -> {
                 DataTypesListUi(component = child.component)
             }
-            ITypesOfData.ListChild.None -> {}
+//            ITypesOfData.ListChild.None -> {}
         }
     }
 }
@@ -77,9 +56,9 @@ fun FilterPane(routerState: Value<RouterState<*, ITypesOfData.FilterChild>>) {
             is ITypesOfData.FilterChild.Filter -> {
                 TypesSelectorUi(child.component)
             }
-            ITypesOfData.FilterChild.None -> {
-
-            }
+//            ITypesOfData.FilterChild.None -> {
+//
+//            }
         }
     }
 }

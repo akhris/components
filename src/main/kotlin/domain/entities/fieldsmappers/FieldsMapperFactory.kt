@@ -5,12 +5,10 @@ import domain.entities.*
 import domain.entities.Unit
 import kotlin.reflect.KClass
 
-interface IFieldsMapperFactory {
-    fun <T : IEntity<*>> getFieldsMapper(entityClass: KClass<out T>): IFieldsMapper
-}
 
-class FieldsMapperFactory : IFieldsMapperFactory {
-    override fun <T : IEntity<*>> getFieldsMapper(entityClass: KClass<out T>): IFieldsMapper {
+class FieldsMapperFactory {
+
+    fun <T : IEntity<*>> getFieldsMapper(entityClass: KClass<out T>): IFieldsMapper<T> {
         return when (entityClass) {
             Unit::class -> UnitFieldsMapper()
             Parameter::class -> ParameterFieldsMapper()
@@ -18,7 +16,9 @@ class FieldsMapperFactory : IFieldsMapperFactory {
             Item::class -> ItemFieldsMapper()
             Value::class -> ValueFieldsMapper()
             Container::class -> ContainerFieldsMapper()
+            Supplier::class -> SupplierFieldsMapper()
             else -> throw IllegalArgumentException("$this cannot get factory for $entityClass")
-        }
+        } as IFieldsMapper<T>
     }
 }
+

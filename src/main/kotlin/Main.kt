@@ -89,6 +89,7 @@ private fun PrepopulateDatabase() {
     val insertUnit by di.instance<InsertUnit>()
     val insertItem by di.instance<InsertItem>()
     val insertContainer by di.instance<InsertContainer>()
+    val insertSupplier by di.instance<InsertSupplier>()
 
     LaunchedEffect(wasInitialized) {
         if (!wasInitialized) {
@@ -141,7 +142,9 @@ private fun PrepopulateDatabase() {
                 insertContainer(InsertEntity.Insert(it))
             }
 
-
+            Suppliers.getAll().forEach {
+                insertSupplier(InsertEntity.Insert(it))
+            }
 
             wasInitialized = true
         }

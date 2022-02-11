@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import ui.theme.SidePanelSettings
+import ui.theme.NavigationPanelSettings
 import utils.toLocalizedString
 
 @Composable
@@ -28,8 +28,8 @@ fun NavigationRailUi(component: NavigationRailComponent) {
 
     val panelWidth by animateDpAsState(
         when (isExpanded) {
-            true -> SidePanelSettings.widthExpanded
-            false -> SidePanelSettings.widthCollapsed
+            true -> NavigationPanelSettings.widthExpanded
+            false -> NavigationPanelSettings.widthCollapsed
         }
     )
 
@@ -37,7 +37,7 @@ fun NavigationRailUi(component: NavigationRailComponent) {
     val selectedDestination = remember(navModel) { navModel.currentDestination }
 
     NavigationRail(
-        elevation = 1.dp,
+        elevation = NavigationPanelSettings.elevation,
         modifier = Modifier.width(panelWidth),
         header = if (isExpandable) {
             {
@@ -72,7 +72,7 @@ fun NavigationRailUi(component: NavigationRailComponent) {
         content = {
             destinations.forEach { item ->
                 NavigationRailItem(
-                    alwaysShowLabel = panelWidth == SidePanelSettings.widthExpanded,
+                    alwaysShowLabel = panelWidth == NavigationPanelSettings.widthExpanded,
                     selected = selectedDestination == item,
                     icon = {
                         Icon(

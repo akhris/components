@@ -12,7 +12,8 @@ class GetListUseCaseFactory(
     private val getParametersList: GetParametersList,
     private val getUnits: GetUnits,
     private val getObjectTypes: GetObjectTypes,
-    private val getContainersList: GetContainersList
+    private val getContainersList: GetContainersList,
+    private val getSuppliersList: GetSuppliersList
 ) :
     IGetListUseCaseFactory {
 
@@ -23,6 +24,7 @@ class GetListUseCaseFactory(
             Unit::class -> getUnits
             ObjectType::class -> getObjectTypes
             Container::class -> getContainersList
+            Supplier::class -> getSuppliersList
             else -> throw IllegalArgumentException("not found get-list-use-case for entity class: $entityClass")
         }
         return a as GetEntities<ID, out T>

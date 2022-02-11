@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import navigation.NavItem
-import ui.theme.SidePanelSettings
+import ui.theme.NavigationPanelSettings
 import utils.toLocalizedString
 
 
@@ -26,8 +26,8 @@ fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigat
 
     val panelWidth by animateDpAsState(
         when (isExpanded) {
-            true -> SidePanelSettings.widthExpanded
-            false -> SidePanelSettings.widthCollapsed
+            true -> NavigationPanelSettings.widthExpanded
+            false -> NavigationPanelSettings.widthCollapsed
         }
     )
 
@@ -69,7 +69,7 @@ fun NavigationPanel(isExpandable: Boolean = false, route: String = "", onNavigat
         content = {
             NavItem.getItems().forEach { item ->
                 NavigationRailItem(
-                    alwaysShowLabel = panelWidth == SidePanelSettings.widthExpanded,
+                    alwaysShowLabel = panelWidth == NavigationPanelSettings.widthExpanded,
                     selected = selectedRoute == item.route,
                     icon = {
                         Icon(

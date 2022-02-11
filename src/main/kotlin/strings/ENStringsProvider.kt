@@ -22,6 +22,8 @@ class ENStringsProvider : IStringsProvider {
             Strings.TypesOfData.types_description -> "Units that object parameters values can have (volts, amps, meters,...)"
             Strings.TypesOfData.units_description -> "Items that are stored (not related to quantities)"
             Strings.TypesOfData.containers_description -> "Boxes, shelves, rooms, and other places that contains objects"
+            Strings.TypesOfData.suppliers_description -> "Shops and other places where objects are got from"
+            Strings.TypesOfData.suppliers_title -> "suppliers"
         }
     }
 

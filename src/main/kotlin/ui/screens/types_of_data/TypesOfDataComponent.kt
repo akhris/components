@@ -60,7 +60,7 @@ class TypesOfDataComponent(
                     }
                 )
             )
-            is FilterConfig.None -> ITypesOfData.FilterChild.None
+//            is FilterConfig.None -> ITypesOfData.FilterChild.None
         }
     }
 
@@ -76,7 +76,7 @@ class TypesOfDataComponent(
                     componentContext = componentContext
                 )
             )
-            is EntitiesListConfig.None -> ITypesOfData.ListChild.None
+//            is EntitiesListConfig.None -> ITypesOfData.ListChild.None
         }
     }
 
@@ -84,16 +84,16 @@ class TypesOfDataComponent(
         @Parcelize
         class EntitiesList(val type: ITypesSelector.Type) : EntitiesListConfig()
 
-        @Parcelize
-        object None : EntitiesListConfig()
+//        @Parcelize
+//        object None : EntitiesListConfig()
     }
 
     sealed class FilterConfig : Parcelable {
         @Parcelize
         data class Filter(val selectedType: ITypesSelector.Type?) : FilterConfig()
 
-        @Parcelize
-        object None : FilterConfig()
+//        @Parcelize
+//        object None : FilterConfig()
     }
 
 

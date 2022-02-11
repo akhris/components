@@ -1,17 +1,26 @@
 package ui.screens
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import domain.entities.fieldsmappers.EntityField
-import domain.entities.fieldsmappers.IFieldsMapperFactory
+import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import ui.screens.entity_renderers.*
+import ui.screens.types_of_data.types_selector.ITypesSelector
+import ui.theme.ContentSettings
 import ui.theme.DialogSettings
+import utils.toLocalizedString
 
 @Composable
 fun EntityScreen() {
@@ -19,44 +28,172 @@ fun EntityScreen() {
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
+    entityType: ITypesSelector.Type? = null,
     entities: List<T>,
     onEntityRemoved: ((T) -> Unit)? = null
 ) {
 
-    Column {
-        entities.forEach { entity ->
-            RenderEntity(
-                entity,
-                onEntityChanged = { println("entity changed: $it") },
-                onEntityRemoved = onEntityRemoved)
+    val lazyColumnState = rememberLazyListState()
+
+    val headerElevation by animateDpAsState(
+        if (lazyColumnState.firstVisibleItemIndex == 0) {
+            ContentSettings.stickyHeaderElevationOnRest
+        } else ContentSettings.stickyHeaderElevationOnScroll
+    )
+
+    val itemRepresentationType = remember<ItemRepresentationType> { ItemRepresentationType.Table }
+
+    val di = localDI()
+    val factory: FieldsMapperFactory by di.instance()
+
+    val mapper = remember(entities, factory) { entities.firstOrNull()?.let { factory.getFieldsMapper(it::class) } }
+
+    val fieldsSet = remember(mapper, entities) {
+        entities.flatMap { entity -> mapper?.getEntityColumns(entity) ?: listOf() }
+            .toSet()
+    }
+
+    LazyColumn(state = lazyColumnState) {
+
+
+        entityType?.let {
+
+            stickyHeader(key = "main title") {
+                Surface(modifier = Modifier.fillMaxWidth(), elevation = headerElevation) {
+                    ListItem(
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
+                        text = {
+                            Text(
+                                text = entityType.name?.toLocalizedString() ?: "",
+                                style = MaterialTheme.typography.h3
+                            )
+                        },
+                        secondaryText = {
+                            Text(text = entityType.description?.toLocalizedString() ?: "")
+                        }
+                    )
+                }
+            }
+
+
         }
+
+        when (itemRepresentationType) {
+            ItemRepresentationType.Card -> {
+                items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        RenderCardEntity(
+                            entity,
+                            onEntityChanged = { println("entity changed: $entity") },
+                            onEntityRemoved = onEntityRemoved
+                        )
+                    }
+                })
+            }
+
+            ItemRepresentationType.Table -> {
+
+                stickyHeader(key = "table_header") {
+                    LazyRow {
+                        itemsIndexed(fieldsSet.toList()) { index, field ->
+                            Text(
+                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
+                                text = field.name
+                            )
+                        }
+                    }
+                }
+
+                itemsIndexed(entities) { index, entity ->
+                    val fields = fieldsSet.mapNotNull { mapper?.getFieldByColumn(entity, fieldsSet.elementAt(index)) }
+                    LazyRow {
+                        items(fields) {
+
+                            Text(
+                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
+                                text = when (it) {
+                                    is EntityField.BooleanField -> it.value.toString()
+                                    is EntityField.CaptionField -> it.caption
+                                    is EntityField.EntityLink -> ""
+                                    is EntityField.EntityLinksList -> ""
+                                    is EntityField.FavoriteField -> it.isFavorite.toString()
+                                    is EntityField.FloatField -> it.value.toString()
+                                    is EntityField.StringField -> it.value
+                                    is EntityField.URLField -> it.url
+                                }
+                            )
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+//        entities.forEach { entity ->
+//            RenderEntity(
+//                entity,
+//                onEntityChanged = { println("entity changed: $it") },
+//                onEntityRemoved = onEntityRemoved
+//            )
+//        }
     }
 
 
 }
 
+@Composable
+fun <T : IEntity<*>> LazyListScope.renderCards(entities: List<T>, onEntityRemoved: ((T) -> Unit)? = null) {
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun <T : IEntity<*>> LazyListScope.renderTable(entities: List<T>, onEntityRemoved: ((T) -> Unit)? = null) {
+
+
+//
+//    items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
+//
+//
+//        Box(modifier = Modifier.fillMaxWidth()) {
+//            RenderCardEntity(
+//                entity,
+//                onEntityChanged = { println("entity changed: $entity") },
+//                onEntityRemoved = onEntityRemoved
+//            )
+//        }
+//    })
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun <T : IEntity<*>> RenderEntity(
+private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntityChanged: (T) -> Unit,
     onEntityRemoved: ((T) -> Unit)? = null
 ) {
     val di = localDI()
-    val factory: IFieldsMapperFactory by di.instance()
+    val factory: FieldsMapperFactory by di.instance()
     val mapper = remember(factory) { factory.getFieldsMapper(initialEntity::class) }
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
 
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
 
-    val fields = remember(mapper, entity) { mapper.mapFields(entity) }
+    val fields =
+        remember(mapper, entity) {
+
+            mapper.getEntityColumns(entity = entity).mapNotNull { mapper.getFieldByColumn(entity, it) }
+        }
+
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .align(Alignment.Center)
+            .widthIn(min = ContentSettings.contentCardMinWidth, max = ContentSettings.contentCardMaxWidth)
             .wrapContentHeight()
             .padding(8.dp)
     ) {
@@ -93,10 +230,14 @@ private fun <T : IEntity<*>> RenderEntity(
                 TextButton(onClick = {
                     showDeletePrompt = null
                 }, content = { Text(text = "cancel") })
-                Button(onClick = {
-                    onEntityRemoved?.invoke(e)
-                    showDeletePrompt = null
-                }, content = { Text("delete")}, colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error))
+                Button(
+                    onClick = {
+                        onEntityRemoved?.invoke(e)
+                        showDeletePrompt = null
+                    },
+                    content = { Text("delete") },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.error)
+                )
             }
         }, title = {
             Text(text = "delete ${e::class.simpleName} ?")
@@ -111,14 +252,17 @@ private fun <T : IEntity<*>> RenderEntity(
 }
 
 @Composable
-private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Unit)?=null) {
-    if(onFieldChange==null){
+private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Unit)? = null) {
+    if (onFieldChange == null) {
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)
             is EntityField.CaptionField -> RenderCaptionFieldReadOnly(field)
             is EntityField.EntityLink -> RenderEntityLinkReadOnly(field)
             is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
             is EntityField.StringField -> RenderTextFieldReadOnly(field)
+            is EntityField.FavoriteField -> RenderIsFavoriteFieldReadOnly(field)
+            is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
+            is EntityField.URLField -> RenderUrlFieldReadOnly(field)
         }
     } else {
         when (field) {
@@ -131,6 +275,18 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
             is EntityField.StringField -> RenderTextField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
+            is EntityField.FavoriteField -> RenderIsFavoriteField(field,
+                onValueChange = { newValue -> onFieldChange(field.copy(isFavorite = newValue)) })
+            is EntityField.FloatField -> RenderFloatField(
+                field,
+                onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
+            is EntityField.URLField -> RenderURLField(field,
+                onValueChange = { newValue -> onFieldChange(field.copy(url = newValue)) })
         }
     }
+}
+
+sealed interface ItemRepresentationType {
+    object Card : ItemRepresentationType
+    object Table : ItemRepresentationType
 }

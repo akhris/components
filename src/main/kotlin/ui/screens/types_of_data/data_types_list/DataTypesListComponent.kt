@@ -27,7 +27,7 @@ class DataTypesListComponent(
     private val scope =
         CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private val _state = MutableValue(IDataTypesList.State(listOf()))
+    private val _state = MutableValue(IDataTypesList.State(type, listOf()))
 
     override val state: Value<IDataTypesList.State> = _state
 
@@ -45,6 +45,7 @@ class DataTypesListComponent(
             ITypesSelector.Type.Parameters -> Parameter::class
             ITypesSelector.Type.Units -> Unit::class
             ITypesSelector.Type.None -> null
+            ITypesSelector.Type.Suppliers -> Supplier::class
         }
         return entityClass
 //

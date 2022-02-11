@@ -18,11 +18,11 @@ interface ITypesOfData {
 
     sealed class ListChild {
         class List(val component: IDataTypesList) : ListChild()
-        object None : ListChild()
+//        object None : ListChild()
     }
 
     sealed class FilterChild {
-        object None : FilterChild()
+//        object None : FilterChild()
         data class Filter(val component: ITypesSelector) : FilterChild()
     }
 

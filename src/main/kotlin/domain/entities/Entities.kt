@@ -2,6 +2,7 @@ package domain.entities
 
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.IDUtils
+import java.time.LocalDateTime
 
 data class Item(
     override val id: String = IDUtils.newID(),
@@ -54,4 +55,38 @@ data class Container(
     val name: String = "",
     val description: String = "",
     val parentContainer: Container? = null
+) : IEntity<String>
+
+
+data class ItemIncome(
+    override val id: String = IDUtils.newID(),
+    val item: Item? = null,
+    val container: Container? = null,
+    val quantity: Long = 0L,
+    val dateTime: LocalDateTime,
+    val supplier: Supplier? = null
+) : IEntity<String>
+
+data class ItemOutcome(
+    override val id: String = IDUtils.newID(),
+    val item: Item? = null,
+    val container: Container? = null,
+    val quantity: Long = 0L,
+    val dateTime: LocalDateTime
+) : IEntity<String>
+
+
+data class Supplier(
+    override val id: String = IDUtils.newID(),
+    val name: String = "",
+    val description: String = "",
+    val url: String = "",
+    val isFavorite: Boolean = false
+) : IEntity<String>
+
+data class Project(
+    override val id: String = IDUtils.newID(),
+    val name: String = "",
+    val description: String = "",
+    val items: List<Pair<Item, Long>> = listOf()
 ) : IEntity<String>

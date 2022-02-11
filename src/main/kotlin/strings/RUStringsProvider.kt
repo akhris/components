@@ -21,6 +21,8 @@ class RUStringsProvider : IStringsProvider {
             Strings.TypesOfData.units_title -> "единицы измерения"
             Strings.TypesOfData.containers_description -> "Ящики, шкафы, комнаты - все места, где хранятся компоненты"
             Strings.TypesOfData.containers_title -> "контейнеры"
+            Strings.TypesOfData.suppliers_description -> "Магазины, физ.лица и прочие места, где можно получить компоненты"
+            Strings.TypesOfData.suppliers_title -> "поставщики"
         }
     }
 }
