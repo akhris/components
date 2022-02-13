@@ -22,7 +22,7 @@ interface ITypesOfData {
     }
 
     sealed class FilterChild {
-//        object None : FilterChild()
+        //        object None : FilterChild()
         data class Filter(val component: ITypesSelector) : FilterChild()
     }
 

@@ -4,13 +4,9 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -39,9 +35,10 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
     }
 
     val columnWidth = remember { 180.dp }
-    val rowHeight = remember { 32.dp }
+    val headerRowHeight = remember { 32.dp }
+    val rowHeight = remember { 60.dp }
 
-    val rowState = rememberLazyListState()
+
     val scrollState = rememberScrollState()
 
     LazyColumn {
@@ -54,7 +51,7 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
                             modifier =
                             Modifier
                                 .width(columnWidth)
-                                .height(rowHeight)
+                                .height(headerRowHeight)
                                 .border(1.dp, Color.DarkGray)
                                 .padding(4.dp),
                             text = field.name,
@@ -77,7 +74,7 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
                     field?.let {
 
                         RenderEntityFieldCell(
-                            modifier = Modifier.width(columnWidth).border(1.dp, Color.LightGray),
+                            modifier = Modifier.width(columnWidth).height(rowHeight).border(1.dp, Color.LightGray),
                             it,
                             onFieldChange = { changedField ->
                                 fieldsMapper.mapIntoEntity(entity, changedField)
@@ -95,14 +92,16 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
 
 
 @Composable
-private fun RenderEntityFieldCell(
+private fun RowScope.RenderEntityFieldCell(
     modifier: Modifier = Modifier,
     field: EntityField,
     onFieldChange: ((EntityField) -> Unit)? = null
 ) {
     when (field) {
         is EntityField.BooleanField -> {
-
+            RenderBooleanFieldCell(modifier = modifier, field, onValueChange = {
+                onFieldChange?.invoke(field.copy(value = it))
+            })
         }
         is EntityField.CaptionField -> {
 

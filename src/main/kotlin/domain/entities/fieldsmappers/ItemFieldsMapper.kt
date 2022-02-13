@@ -7,26 +7,40 @@ import utils.replace
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
+    private val tag_const_part = "tag_value_"
 
     override fun getFields(entity: Item): Map<EntityFieldID, Any?> {
         return listOf(
-            EntityFieldID.NameID to entity.name,
-            EntityFieldID.ObjectTypeID to entity.type
-        ).plus(entity.values.map {
-            EntityFieldID.ValueID(valueID = it.id, parameterName = it.parameter.name) to it
+            EntityFieldID.StringID(tag = "tag_name", name = "name") to entity.name,
+            EntityFieldID.EntityID(tag = "tag_type", name = "object type") to entity.type
+        ).plus(entity.values.map { v ->
+            EntityFieldID.EntityID(tag = "$tag_const_part${v.parameter.id}", name = v.parameter.name) to v
         }).toMap()
     }
 
 
     override fun mapIntoEntity(entity: Item, field: EntityField): Item {
-        return when (val column = field.fieldID) {
-            EntityFieldID.NameID -> entity.copy(name = (field as EntityField.StringField).value)
-            EntityFieldID.ObjectTypeID -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
-            is EntityFieldID.ValueID -> entity.copy(values = entity.values.replace((field as EntityField.EntityLink).entity as Value) {
-                it.id == column.valueID
-            })
-            else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")
+        return when (val fieldID = field.fieldID) {
+            is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
+            is EntityFieldID.EntityID -> {
+                when (fieldID.tag) {
+                    "tag_type" -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
+                    else -> setValue(entity, field)
+                } ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+            }
+            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }
+    }
+
+    private fun setValue(item: Item, field: EntityField): Item? {
+        val fieldID = field.fieldID
+        val valueParameterID = fieldID.tag.substring(startIndex = tag_const_part.length)
+
+        return item.copy(
+            values = item.values.replace((field as EntityField.EntityLink).entity as Value) {
+                it.parameter.id == valueParameterID
+            }
+        )
     }
 
 }

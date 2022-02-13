@@ -8,12 +8,15 @@ import com.arkivanov.decompose.value.reduce
 class TypesSelectorComponent(
     componentContext: ComponentContext,
     selectedType: ITypesSelector.Type? = null,
-    private val onTypeSelected: (ITypesSelector.Type) -> Unit
-) :
+    private val onTypeSelected: (ITypesSelector.Type) -> Unit,
+    private val onRepresentationTypeChanged: (ITypesSelector.ItemRepresentationType) -> Unit,
+
+    ) :
     ITypesSelector, ComponentContext by componentContext {
 
     private val _models = MutableValue(
         ITypesSelector.Model(
+            itemRepresentationType = ITypesSelector.ItemRepresentationType.Card,
             types = ITypesSelector.Type.getAllTypes(),
             selectedType = selectedType
         )
@@ -24,6 +27,11 @@ class TypesSelectorComponent(
     override fun onTypeClicked(type: ITypesSelector.Type) {
         onTypeSelected(type)
         _models.reduce { it.copy(selectedType = type) }
+    }
+
+    override fun onItemRepresentationTypeChanged(type: ITypesSelector.ItemRepresentationType) {
+        _models.reduce { it.copy(itemRepresentationType = type) }
+        onRepresentationTypeChanged(type)
     }
 
 }

@@ -6,8 +6,8 @@ class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
     override fun getFields(entity: Unit): Map<EntityFieldID, Any?> {
         return mapOf(
-            EntityFieldID.StringID() to entity.unit,
-            EntityFieldID.BooleanID() to entity.isMultipliable
+            EntityFieldID.StringID("tag_unit", "unit") to entity.unit,
+            EntityFieldID.BooleanID("tag_is_multipliable", "is multipliable") to entity.isMultipliable
         )
     }
 

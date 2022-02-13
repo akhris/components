@@ -9,5 +9,9 @@ interface IDataTypesList {
 
     fun onEntityRemoved(entity: IEntity<*>)
 
-    data class State(val selectedType: ITypesSelector.Type,val entities: List<IEntity<*>>)
+    data class State(
+        val selectedType: ITypesSelector.Type,
+        val entities: List<IEntity<*>>,
+        val itemRepresentationType: ITypesSelector.ItemRepresentationType
+    )
 }

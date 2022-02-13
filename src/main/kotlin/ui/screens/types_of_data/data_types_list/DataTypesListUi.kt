@@ -11,8 +11,8 @@ fun DataTypesListUi(component: IDataTypesList) {
 
     val componentState by component.state.subscribeAsState()
     EntityScreenContent(
-        componentState.selectedType,
-        componentState.entities,
+        itemRepresentationType = componentState.itemRepresentationType,
+        entities = componentState.entities,
         onEntityRemoved = component::onEntityRemoved
     )
 

@@ -1,9 +1,6 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
-import domain.entities.Parameter
-import domain.entities.Unit
-import domain.entities.Value
 
 abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 
@@ -14,55 +11,6 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 //        val fieldValue = getFieldValueByColumn(entity, fieldColumn)
 
         return when (fieldID) {
-            EntityFieldID.NameID -> {
-                EntityField.StringField(
-                    fieldID = fieldID,
-                    description = "item's name",
-                    value = (fieldValue as? String) ?: ""
-                )
-            }
-            EntityFieldID.ObjectTypeID -> {
-                EntityField.EntityLink(
-                    fieldID = fieldID,
-                    description = "item's object type",
-                    entity = (fieldValue as? IEntity<out Any>)
-                )
-            }
-            is EntityFieldID.ValueID -> {
-                val value = fieldValue as? Value
-                val descr = StringBuilder(value?.parameter?.name ?: "")
-                value?.parameter?.unit?.let {
-                    descr.append(", ${it.unit}")
-                }
-                EntityField.EntityLink(
-                    fieldID = fieldID,
-                    description = descr.toString(),
-                    entity = value
-                )
-            }
-            is EntityFieldID.ParameterID -> {
-                val param = fieldValue as? Parameter
-                EntityField.EntityLink(
-                    fieldID = fieldID,
-                    description = param?.description ?: "",
-                    entity = param
-                )
-            }
-            EntityFieldID.DescriptionID -> EntityField.StringField(
-                fieldID = fieldID,
-                description = "item's description",
-                value = (fieldValue as? String) ?: ""
-            )
-
-            is EntityFieldID.UnitID -> {
-                val unit = fieldValue as? Unit
-
-                EntityField.EntityLink(
-                    fieldID = fieldID,
-                    description = "parameter unit",
-                    entity = unit
-                )
-            }
             is EntityFieldID.FloatID -> {
                 EntityField.FloatField(
                     fieldID = fieldID,
@@ -84,7 +32,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                     value = (fieldValue as? Boolean) ?: false
                 )
             }
-            is EntityFieldID.ContainerID -> {
+            is EntityFieldID.EntityID -> {
                 EntityField.EntityLink(
                     fieldID = fieldID,
                     description = "item's object type",

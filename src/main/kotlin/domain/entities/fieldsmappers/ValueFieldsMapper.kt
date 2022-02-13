@@ -7,9 +7,9 @@ class ValueFieldsMapper : BaseFieldsMapper<Value>() {
 
     override fun getFields(entity: Value): Map<EntityFieldID, Any?> {
         return mapOf(
-            EntityFieldID.StringID() to entity.value,
-            EntityFieldID.FloatID() to entity.factor,
-            EntityFieldID.ParameterID(entity.parameter.id, entity.parameter.name) to entity.parameter
+            EntityFieldID.StringID(tag = "tag_value", name = "value") to entity.value,
+            EntityFieldID.FloatID(tag = "tag_factor", name = "factor") to entity.factor,
+            EntityFieldID.EntityID(tag = "tag_parameter", name = "parameter") to entity.parameter
         )
     }
 
@@ -18,7 +18,7 @@ class ValueFieldsMapper : BaseFieldsMapper<Value>() {
         return when (val column = field.fieldID) {
             is EntityFieldID.StringID -> entity.copy(value = (field as EntityField.StringField).value)
             is EntityFieldID.FloatID -> entity.copy(factor = (field as EntityField.FloatField).value)
-            is EntityFieldID.ParameterID -> entity.copy(parameter = (field as EntityField.EntityLink).entity as Parameter)
+            is EntityFieldID.EntityID -> entity.copy(parameter = (field as EntityField.EntityLink).entity as Parameter)
             else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")
         }
     }

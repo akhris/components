@@ -30,7 +30,7 @@ fun EntityScreen() {
 @OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
-    entityType: ITypesSelector.Type? = null,
+    itemRepresentationType: ITypesSelector.ItemRepresentationType = ITypesSelector.ItemRepresentationType.Card,
     entities: List<T>,
     onEntityRemoved: ((T) -> Unit)? = null
 ) {
@@ -42,8 +42,6 @@ fun <T : IEntity<*>> EntityScreenContent(
             ContentSettings.stickyHeaderElevationOnRest
         } else ContentSettings.stickyHeaderElevationOnScroll
     )
-
-    val itemRepresentationType = remember<ItemRepresentationType> { ItemRepresentationType.Table }
 
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
@@ -74,7 +72,7 @@ fun <T : IEntity<*>> EntityScreenContent(
     //content depending on representation type:
     when (itemRepresentationType) {
         //cards
-        ItemRepresentationType.Card -> {
+        ITypesSelector.ItemRepresentationType.Card -> {
             LazyColumn(state = lazyColumnState) {
                 items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -89,10 +87,10 @@ fun <T : IEntity<*>> EntityScreenContent(
         }
 
         //table
-            ItemRepresentationType.Table -> {
-                mapper?.let {
-                    EntityTableContent(entities = entities, fieldsMapper = it)
-                }
+        ITypesSelector.ItemRepresentationType.Table -> {
+            mapper?.let {
+                EntityTableContent(entities = entities, fieldsMapper = it)
+            }
 //                stickyHeader(key = "table_header") {
 //                    LazyRow {
 //                        itemsIndexed(fieldsSet.toList()) { index, field ->
@@ -282,7 +280,4 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
     }
 }
 
-sealed interface ItemRepresentationType {
-    object Card : ItemRepresentationType
-    object Table : ItemRepresentationType
-}
+

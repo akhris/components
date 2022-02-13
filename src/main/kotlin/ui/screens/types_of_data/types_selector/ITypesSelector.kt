@@ -11,13 +11,26 @@ interface ITypesSelector {
 
     fun onTypeClicked(type: Type)
 
+    fun onItemRepresentationTypeChanged(type: ItemRepresentationType)
+
+
     data class Model(
+        val itemRepresentationType: ItemRepresentationType,
         val types: List<Type>,
         val selectedType: Type?
     )
 
     @Parcelize
-    sealed class Type(val name: Strings?, val description: Strings?):Parcelable {
+    sealed interface ItemRepresentationType : Parcelable {
+        @Parcelize
+        object Card : ItemRepresentationType
+
+        @Parcelize
+        object Table : ItemRepresentationType
+    }
+
+    @Parcelize
+    sealed class Type(val name: Strings?, val description: Strings?) : Parcelable {
         @Parcelize
         object ObjectType : Type(Strings.TypesOfData.types_title, Strings.TypesOfData.types_description)
 

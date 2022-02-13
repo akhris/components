@@ -19,7 +19,8 @@ import kotlin.reflect.KClass
 class DataTypesListComponent(
     getListUseCaseFactory: IGetListUseCaseFactory,
     type: ITypesSelector.Type,
-    componentContext: ComponentContext
+    componentContext: ComponentContext,
+    representationType: Value<ITypesSelector.ItemRepresentationType>
 ) :
     IDataTypesList,
     ComponentContext by componentContext {
@@ -27,7 +28,7 @@ class DataTypesListComponent(
     private val scope =
         CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private val _state = MutableValue(IDataTypesList.State(type, listOf()))
+    private val _state = MutableValue(IDataTypesList.State(type, listOf(), ITypesSelector.ItemRepresentationType.Card))
 
     override val state: Value<IDataTypesList.State> = _state
 
@@ -65,7 +66,14 @@ class DataTypesListComponent(
 
 
     init {
+        representationType.subscribe { newType ->
+            _state.reduce { it.copy(itemRepresentationType = newType) }
+        }
+
         lifecycle.subscribe(onDestroy = {
+            representationType.unsubscribe {
+
+            }
             scope.coroutineContext.cancelChildren()
         })
 
@@ -74,6 +82,8 @@ class DataTypesListComponent(
             val useCase = getListUseCaseFactory.getListUseCase(it)
             loadEntities(useCase)
         }
+
+
     }
 
 

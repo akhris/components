@@ -23,6 +23,9 @@ class TypesOfDataComponent(
 
     override val selectedItem: Value<ITypesSelector.Type> = _selectedItem
 
+    private val _representationType =
+        MutableValue<ITypesSelector.ItemRepresentationType>(ITypesSelector.ItemRepresentationType.Card)
+
     private val listRouter =
         router<EntitiesListConfig, ITypesOfData.ListChild>(
             initialConfiguration = EntitiesListConfig.EntitiesList(ITypesSelector.Type.getDefaultHomeType()),
@@ -57,6 +60,9 @@ class TypesOfDataComponent(
                         _selectedItem.reduce {
                             selection
                         }
+                    },
+                    onRepresentationTypeChanged = { newType ->
+                        _representationType.reduce { newType }
                     }
                 )
             )
@@ -73,7 +79,8 @@ class TypesOfDataComponent(
                 DataTypesListComponent(
                     type = entitiesListConfig.type,
                     getListUseCaseFactory = getListUseCaseFactory,
-                    componentContext = componentContext
+                    componentContext = componentContext,
+                    representationType = _representationType
                 )
             )
 //            is EntitiesListConfig.None -> ITypesOfData.ListChild.None

@@ -7,23 +7,29 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
 
 
     override fun getFields(entity: Parameter): Map<EntityFieldID, Any?> {
-        return listOfNotNull(
-            EntityFieldID.NameID to entity.name,
-            EntityFieldID.DescriptionID to entity.description,
-            entity.unit?.let { EntityFieldID.UnitID(it.id, it.unit) to entity.unit }
+        return listOf(
+            EntityFieldID.StringID(tag = "tag_name", name = "name") to entity.name,
+            EntityFieldID.StringID(tag = "tag_description", name = "description") to entity.description,
+            EntityFieldID.EntityID(tag = "tag_unit", name = "unit") to entity.unit
         ).toMap()
     }
 
 
     override fun mapIntoEntity(entity: Parameter, field: EntityField): Parameter {
-        return when (val column = field.fieldID) {
-            EntityFieldID.NameID -> entity.copy(name = (field as EntityField.StringField).value)
-            EntityFieldID.DescriptionID -> entity.copy(description = (field as EntityField.StringField).value)
-            is EntityFieldID.UnitID -> {
+        return when (val fieldID = field.fieldID) {
+            is EntityFieldID.StringID -> {
+                when (fieldID.tag) {
+                    "tag_name" -> entity.copy(name = (field as EntityField.StringField).value)
+                    "tag_description" -> entity.copy(description = (field as EntityField.StringField).value)
+                    else -> throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+                }
+
+            }
+            is EntityFieldID.EntityID -> {
                 val unit = (field as? EntityField.EntityLink)?.entity as? Unit
                 entity.copy(unit = unit)
             }
-            else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")
+            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }
     }
 }
