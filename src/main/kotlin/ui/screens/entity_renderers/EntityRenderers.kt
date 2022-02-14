@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.getName
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -25,7 +26,7 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
         }, secondaryText = {
             Text(text = field.description)
         }, trailing = {
-            Switch(field.value, onCheckedChange = onValueChange)
+            Checkbox(field.value, onCheckedChange = onValueChange)
         })
 }
 
@@ -33,9 +34,9 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
 fun RenderIsFavoriteField(field: EntityField.FavoriteField, onValueChange: (Boolean) -> Unit) {
     RenderBooleanField(
         EntityField.BooleanField(
-            field.fieldID,
-            field.description,
-            field.isFavorite
+            fieldID = field.fieldID,
+            value = field.isFavorite,
+            description = field.description
         ),
         onValueChange
     )
@@ -125,7 +126,7 @@ fun RenderEntityLink(field: EntityField.EntityLink, onEntityLinkSelect: () -> Un
             modifier = Modifier.clickable {
                 onEntityLinkSelect()
             },
-            text = { Text(text = field.fieldID.name) },
+            text = { Text(text = field.getName()) },
             secondaryText = { Text(text = field.description) },
             trailing = {
                 Icon(

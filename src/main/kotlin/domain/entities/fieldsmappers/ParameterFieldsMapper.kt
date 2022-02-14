@@ -5,15 +5,36 @@ import domain.entities.Unit
 
 class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
 
+    private val tag_unit = "tag_unit"
 
-    override fun getFields(entity: Parameter): Map<EntityFieldID, Any?> {
+    override fun getEntityIDs(entity: Parameter): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(tag = "tag_name", name = "name") to entity.name,
-            EntityFieldID.StringID(tag = "tag_description", name = "description") to entity.description,
-            EntityFieldID.EntityID(tag = "tag_unit", name = "unit") to entity.unit
-        ).toMap()
+            EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
+            EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),
+            EntityFieldID.EntityID(tag = tag_unit, name = "unit")
+        )
     }
 
+
+    override fun getFieldParamsByFieldID(entity: Parameter, fieldID: EntityFieldID): DescriptiveFieldValue {
+        return when (fieldID) {
+            is EntityFieldID.EntityID -> DescriptiveFieldValue(entity.unit, description = "parameter's unit")
+            is EntityFieldID.StringID -> {
+                when (fieldID.tag) {
+                    EntityFieldID.tag_name -> DescriptiveFieldValue(
+                        value = entity.name,
+                        description = "parameter's name"
+                    )
+                    EntityFieldID.tag_description -> DescriptiveFieldValue(
+                        value = entity.description,
+                        description = "parameter's description"
+                    )
+                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+                }
+            }
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+        }
+    }
 
     override fun mapIntoEntity(entity: Parameter, field: EntityField): Parameter {
         return when (val fieldID = field.fieldID) {
@@ -33,41 +54,3 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
         }
     }
 }
-
-
-//    override fun mapFields(entity: Any): List<EntityField> {
-//        return when (entity) {
-//            is Parameter -> mapParameterFields(entity)
-//            else -> throw IllegalArgumentException("$this cannot map $entity fields, use another mapper")
-//        }
-//    }
-
-
-//    private fun mapParameterFields(param: Parameter): List<EntityField> {
-//        return listOfNotNull(
-//            EntityField.StringField(
-//                tag = "parameter_field_name",
-//                name = "name",
-//                description = "parameter name",
-//                value = param.name
-//            ), EntityField.StringField(
-//                tag = "parameter_field_description",
-//                name = "description",
-//                description = "parameter description",
-//                value = param.description
-//            ),
-//
-//            EntityField.EntityLink(
-//                tag = "parameter_unit",
-//                name = param.unit?.unit ?: "unit",
-//                description = "parameter unit",
-//                entity = param.unit
-//            ),
-//            EntityField.CaptionField(
-//                tag = "parameter_field_id",
-//                name = "UUID",
-//                description = "unique id of the parameter",
-//                caption = param.id
-//            )
-//        )
-//    }

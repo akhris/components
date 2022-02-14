@@ -9,14 +9,14 @@ class TypesSelectorComponent(
     componentContext: ComponentContext,
     selectedType: ITypesSelector.Type? = null,
     private val onTypeSelected: (ITypesSelector.Type) -> Unit,
-    private val onRepresentationTypeChanged: (ITypesSelector.ItemRepresentationType) -> Unit,
+    private val onRepresentationTypeChanged: (ItemRepresentationType) -> Unit,
 
     ) :
     ITypesSelector, ComponentContext by componentContext {
 
     private val _models = MutableValue(
         ITypesSelector.Model(
-            itemRepresentationType = ITypesSelector.ItemRepresentationType.Card,
+            itemRepresentationType = ItemRepresentationType.Card,
             types = ITypesSelector.Type.getAllTypes(),
             selectedType = selectedType
         )
@@ -29,7 +29,7 @@ class TypesSelectorComponent(
         _models.reduce { it.copy(selectedType = type) }
     }
 
-    override fun onItemRepresentationTypeChanged(type: ITypesSelector.ItemRepresentationType) {
+    override fun onItemRepresentationTypeChanged(type: ItemRepresentationType) {
         _models.reduce { it.copy(itemRepresentationType = type) }
         onRepresentationTypeChanged(type)
     }

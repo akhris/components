@@ -10,7 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
@@ -26,14 +28,17 @@ fun RootUi() {
     val di = localDI()
     val appSettingsRepository by di.instance<AppSettingsRepository>()
     val lifecycle = LifecycleRegistry()
-    val getListUseCaseFactory by di.instance<IGetListUseCaseFactory>()
-
+    val updateUseCaseFactory by di.instance<IUpdateUseCaseFactory>()
+    val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
+    val fieldsMapperFactory: FieldsMapperFactory by di.instance()
     val navHostComponent =
         remember {
             NavHostComponent(
                 componentContext = DefaultComponentContext(lifecycle),
-                appSettingsRepository,
-                getListUseCaseFactory
+                fieldsMapperFactory = fieldsMapperFactory,
+                appSettingsRepository = appSettingsRepository,
+                updateUseCaseFactory = updateUseCaseFactory,
+                getListUseCaseFactory = listUseCaseFactory
             )
         }
 

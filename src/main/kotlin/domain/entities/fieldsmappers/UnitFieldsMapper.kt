@@ -4,11 +4,27 @@ import domain.entities.Unit
 
 class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
-    override fun getFields(entity: Unit): Map<EntityFieldID, Any?> {
-        return mapOf(
-            EntityFieldID.StringID("tag_unit", "unit") to entity.unit,
-            EntityFieldID.BooleanID("tag_is_multipliable", "is multipliable") to entity.isMultipliable
+    private val tag_unit = "tag_unit"
+    private val tag_is_multipliable = "tag_is_multipliable"
+
+
+    override fun getEntityIDs(entity: Unit): List<EntityFieldID> {
+        return listOf(
+            EntityFieldID.StringID(tag_unit, "unit"),
+            EntityFieldID.BooleanID(tag_is_multipliable, "is multipliable")
         )
+    }
+
+
+    override fun getFieldParamsByFieldID(entity: Unit, fieldID: EntityFieldID): DescriptiveFieldValue {
+        return when (fieldID) {
+            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.unit, description = "unit")
+            is EntityFieldID.BooleanID -> DescriptiveFieldValue(
+                value = entity.isMultipliable,
+                description = "can be prefixed with k-, m-, u-, ..."
+            )
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+        }
     }
 
     override fun mapIntoEntity(entity: Unit, field: EntityField): Unit {

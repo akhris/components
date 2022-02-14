@@ -7,10 +7,14 @@ import com.arkivanov.decompose.router.router
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import domain.entities.ItemIncome
+import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import navigation.NavItem
 import navigation.Screen
 import settings.AppSettingsRepository
+import ui.screens.entity_screen_with_filter.EntityWithFilterComponent
 import ui.screens.settings.SettingsComponent
 import ui.screens.types_of_data.TypesOfDataComponent
 
@@ -19,7 +23,9 @@ import ui.screens.types_of_data.TypesOfDataComponent
  */
 class NavHostComponent(
     componentContext: ComponentContext,
+    private val fieldsMapperFactory: FieldsMapperFactory,
     private val appSettingsRepository: AppSettingsRepository,
+    private val updateUseCaseFactory: IUpdateUseCaseFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory
 ) :
     INavHost, ComponentContext by componentContext {
@@ -53,10 +59,17 @@ class NavHostComponent(
     private fun createChild(config: Config, componentContext: ComponentContext): INavHost.Child {
         val screen = when (config.route) {
             Screen.Warehouse.route -> null
-            Screen.Income.route -> null
+            Screen.Income.route -> INavHost.Child.EntitiesListWithFilter(
+                EntityWithFilterComponent(
+                    componentContext = componentContext,
+                    entityClass = ItemIncome::class,
+                    fieldsMapperFactory = fieldsMapperFactory
+                )
+            )
             Screen.Types.route -> INavHost.Child.TypesOfData(
                 TypesOfDataComponent(
                     componentContext = componentContext,
+                    updateUseCaseFactory = updateUseCaseFactory,
                     getListUseCaseFactory = getListUseCaseFactory
                 )
             )

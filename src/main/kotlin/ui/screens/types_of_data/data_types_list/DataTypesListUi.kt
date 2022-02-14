@@ -13,7 +13,8 @@ fun DataTypesListUi(component: IDataTypesList) {
     EntityScreenContent(
         itemRepresentationType = componentState.itemRepresentationType,
         entities = componentState.entities,
-        onEntityRemoved = component::onEntityRemoved
+        onEntityRemoved = component::onEntityRemoved,
+        onEntityUpdated = component::onEntityUpdated
     )
 
 }

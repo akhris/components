@@ -3,6 +3,9 @@ package di
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.GetListUseCaseFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import domain.entities.usecase_factories.UpdateUseCaseFactory
+import domain.repository.RepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import org.kodein.di.DI
@@ -17,18 +20,26 @@ val di = DI {
 
     bindSingleton<IStringsProvider> { RUStringsProvider() }
 
-
-
-
     import(objectTypesModule)
     import(itemsModule)
     import(unitsModule)
     import(parametersModule)
     import(containersModule)
     import(suppliersModule)
+    import(itemIncomeModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }
+    bindSingleton {
+        RepositoryFactory(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
 
     bindSingleton { SettingsMapper() }
     bindSingleton<IGetListUseCaseFactory> {
@@ -40,6 +51,18 @@ val di = DI {
             instance(),
             instance()
         )
+    }
+
+    bindSingleton<IUpdateUseCaseFactory> {
+        UpdateUseCaseFactory(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+
     }
 
     bindSingleton { FieldsMapperFactory() }

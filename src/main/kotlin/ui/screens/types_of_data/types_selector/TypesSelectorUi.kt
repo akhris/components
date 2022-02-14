@@ -28,8 +28,8 @@ fun TypesSelectorUi(typesSelectorComponent: ITypesSelector) {
 
     val representationTypes = remember {
         listOf(
-            ITypesSelector.ItemRepresentationType.Card,
-            ITypesSelector.ItemRepresentationType.Table
+            ItemRepresentationType.Card,
+            ItemRepresentationType.Table
         )
     }
 
@@ -73,15 +73,16 @@ fun TypesSelectorUi(typesSelectorComponent: ITypesSelector) {
 
 @Composable
 fun RepresentationTypesSelector(
-    representationTypes: List<ITypesSelector.ItemRepresentationType>,
-    currentType: ITypesSelector.ItemRepresentationType,
-    onTypeChanged: (ITypesSelector.ItemRepresentationType) -> Unit
+    representationTypes: List<ItemRepresentationType>,
+    currentType: ItemRepresentationType,
+    onTypeChanged: (ItemRepresentationType) -> Unit
 ) {
     val cornerRadius = remember { 8.dp }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
 
 
@@ -131,8 +132,8 @@ fun RepresentationTypesSelector(
                 Icon(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     painter = when (itemRepresentationType) {
-                        ITypesSelector.ItemRepresentationType.Card -> painterResource("vector/view_agenda_black_24dp.svg")
-                        ITypesSelector.ItemRepresentationType.Table -> painterResource("vector/grid_view_black_24dp.svg")
+                        ItemRepresentationType.Card -> painterResource("vector/view_agenda_black_24dp.svg")
+                        ItemRepresentationType.Table -> painterResource("vector/grid_view_black_24dp.svg")
                     },
                     contentDescription = "Representation selector",
                     tint = if (currentType == itemRepresentationType) {

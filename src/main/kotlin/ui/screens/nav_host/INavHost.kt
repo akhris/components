@@ -2,6 +2,7 @@ package ui.screens.nav_host
 
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
+import ui.screens.entity_screen_with_filter.IEntityWithFilter
 import ui.screens.settings.ISettings
 import ui.screens.types_of_data.ITypesOfData
 
@@ -26,5 +27,6 @@ interface INavHost {
     sealed class Child {
         class Settings(val component: ISettings) : Child()
         class TypesOfData(val component: ITypesOfData) : Child()
+        class EntitiesListWithFilter(val component: IEntityWithFilter) : Child()
     }
 }

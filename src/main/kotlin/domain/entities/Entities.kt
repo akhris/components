@@ -19,7 +19,9 @@ data class ObjectType(
     override val id: String = IDUtils.newID(),
     val name: String = "",
     val parameters: List<Parameter> = listOf()
-) : IEntity<String>
+) : IEntity<String>{
+    override fun toString(): String = name
+}
 
 /**
  * e.g. name = resistance
@@ -29,14 +31,18 @@ data class Parameter(
     val name: String = "",
     val description: String = "",
     val unit: Unit? = null
-) : IEntity<String>
+) : IEntity<String> {
+    override fun toString(): String = name
+}
 
 data class Value(
     override val id: String = IDUtils.newID(),
     val parameter: Parameter,
     val value: String,
     val factor: Float? = null
-) : IEntity<String>
+) : IEntity<String> {
+    override fun toString(): String = value
+}
 
 /**
  * e.g. m, cm, km
@@ -45,7 +51,9 @@ data class Unit(
     override val id: String = IDUtils.newID(),
     val unit: String = "",
     val isMultipliable: Boolean = false
-) : IEntity<String>
+) : IEntity<String> {
+    override fun toString(): String = unit
+}
 
 /**
  * Box #1, Box #2, Room 407
@@ -55,7 +63,9 @@ data class Container(
     val name: String = "",
     val description: String = "",
     val parentContainer: Container? = null
-) : IEntity<String>
+) : IEntity<String> {
+    override fun toString(): String = name
+}
 
 
 data class ItemIncome(
@@ -63,7 +73,7 @@ data class ItemIncome(
     val item: Item? = null,
     val container: Container? = null,
     val quantity: Long = 0L,
-    val dateTime: LocalDateTime,
+    val dateTime: LocalDateTime?,
     val supplier: Supplier? = null
 ) : IEntity<String>
 

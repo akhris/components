@@ -5,14 +5,32 @@ import domain.entities.Value
 
 class ValueFieldsMapper : BaseFieldsMapper<Value>() {
 
-    override fun getFields(entity: Value): Map<EntityFieldID, Any?> {
-        return mapOf(
-            EntityFieldID.StringID(tag = "tag_value", name = "value") to entity.value,
-            EntityFieldID.FloatID(tag = "tag_factor", name = "factor") to entity.factor,
-            EntityFieldID.EntityID(tag = "tag_parameter", name = "parameter") to entity.parameter
+    private val tag_value = "tag_value"
+    private val tag_factor = "tag_factor"
+    private val tag_parameter = "tag_parameter"
+
+    override fun getEntityIDs(entity: Value): List<EntityFieldID> {
+        return listOf(
+            EntityFieldID.StringID(tag = tag_value, name = "value"),
+            EntityFieldID.FloatID(tag = tag_factor, name = "factor"),
+            EntityFieldID.EntityID(tag = tag_parameter, name = "parameter")
         )
     }
 
+    override fun getFieldParamsByFieldID(entity: Value, fieldID: EntityFieldID): DescriptiveFieldValue {
+        return when (fieldID) {
+            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.value, description = "value")
+            is EntityFieldID.FloatID -> DescriptiveFieldValue(
+                value = entity.factor,
+                description = "factor of the value"
+            )
+            is EntityFieldID.EntityID -> DescriptiveFieldValue(
+                value = entity.parameter,
+                description = "parameter of the value"
+            )
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+        }
+    }
 
     override fun mapIntoEntity(entity: Value, field: EntityField): Value {
         return when (val column = field.fieldID) {

@@ -1,32 +1,32 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
+import java.time.LocalDateTime
 
-sealed class EntityField(
-    open val description: String
-) {
+sealed class EntityField {
     abstract val fieldID: EntityFieldID
+    abstract val description: String
 
     data class StringField(
         override val fieldID: EntityFieldID,
         override val description: String,
         val value: String
     ) :
-        EntityField(description)
+        EntityField()
 
     data class URLField(
         override val fieldID: EntityFieldID,
         override val description: String,
         val url: String
     ) :
-        EntityField(description)
+        EntityField()
 
     data class FloatField(
         override val fieldID: EntityFieldID,
         override val description: String,
         val value: Float
     ) :
-        EntityField(description)
+        EntityField()
 
     //non-changeable field like ID
     data class CaptionField(
@@ -34,29 +34,45 @@ sealed class EntityField(
         override val description: String,
         val caption: String
     ) :
-        EntityField(description)
+        EntityField()
 
     data class BooleanField(
         override val fieldID: EntityFieldID,
         override val description: String,
         val value: Boolean
-    ) : EntityField(description)
+    ) : EntityField()
 
     data class FavoriteField(
         override val fieldID: EntityFieldID,
-        override val description: String = "",
+        override val description: String,
         val isFavorite: Boolean
-    ) : EntityField(description)
+    ) : EntityField()
+
+    data class LongField(
+        override val fieldID: EntityFieldID.LongID,
+        override val description: String,
+        val value: Long
+    ) : EntityField()
+
+    data class DateTimeField(
+        override val fieldID: EntityFieldID.DateTimeID,
+        override val description: String,
+        val value: LocalDateTime?
+    ) : EntityField()
 
     data class EntityLink(
         override val fieldID: EntityFieldID,
         override val description: String,
         val entity: IEntity<out Any>?
-    ) : EntityField(description)
+    ) : EntityField()
 
     data class EntityLinksList(
         override val fieldID: EntityFieldID,
         override val description: String,
         val entities: List<EntityLink>
-    ) : EntityField(description)
+    ) : EntityField()
+}
+
+fun EntityField.EntityLink.getName(): String {
+    return entity?.toString()?.ifEmpty { fieldID.name } ?: ""
 }

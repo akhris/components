@@ -2,8 +2,8 @@ package ui.screens.entity_renderers
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Checkbox
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -12,7 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import com.akhris.domain.core.entities.IEntity
 import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.getName
 
 @Composable
 fun RowScope.RenderTextFieldCell(
@@ -21,7 +23,7 @@ fun RowScope.RenderTextFieldCell(
     onValueChange: (String) -> Unit
 ) {
     OutlinedTextField(
-        modifier = modifier.fillMaxHeight(),
+        modifier = modifier.align(Alignment.CenterVertically),
         value = field.value,
 //        label = { Text(text = field.fieldID.name) },
         onValueChange = onValueChange,
@@ -40,12 +42,22 @@ fun RowScope.RenderBooleanFieldCell(
     field: EntityField.BooleanField,
     onValueChange: (Boolean) -> Unit
 ) {
+    Checkbox(
+        modifier = modifier.align(Alignment.CenterVertically),
+        checked = field.value,
+        onCheckedChange = onValueChange
+    )
+}
+
+@Composable
+fun RowScope.RenderEntityLinkFieldCell(
+    modifier: Modifier = Modifier,
+    field: EntityField.EntityLink,
+    onValueChange: (IEntity<out Any>?) -> Unit
+) {
     Text(
-        modifier = modifier.fillMaxWidth().align(Alignment.CenterVertically).clickable { onValueChange(!field.value) },
-        text = when (field.value) {
-            true -> "yes"
-            false -> "no"
-        },
+        modifier = modifier.fillMaxWidth().align(Alignment.CenterVertically).clickable { onValueChange(field.entity) },
+        text = field.getName(),
         textAlign = TextAlign.Center
     )
 }

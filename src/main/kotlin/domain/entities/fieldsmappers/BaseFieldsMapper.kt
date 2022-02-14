@@ -1,49 +1,73 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
+import java.time.LocalDateTime
 
 abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 
-    abstract fun getFields(entity: T): Map<EntityFieldID, Any?>
+    abstract fun getFieldParamsByFieldID(entity: T, fieldID: EntityFieldID): DescriptiveFieldValue
 
     override fun getFieldByID(entity: T, fieldID: EntityFieldID): EntityField? {
-        val fieldValue = getFields(entity)[fieldID]
-//        val fieldValue = getFieldValueByColumn(entity, fieldColumn)
+        val fieldParams = getFieldParamsByFieldID(entity, fieldID)
 
         return when (fieldID) {
             is EntityFieldID.FloatID -> {
                 EntityField.FloatField(
                     fieldID = fieldID,
-                    description = "factor",
-                    value = (fieldValue as? Float) ?: 1f
+                    value = (fieldParams.value as? Float) ?: 1f,
+                    description = fieldParams.description
                 )
             }
             is EntityFieldID.StringID -> {
                 EntityField.StringField(
                     fieldID = fieldID,
-                    description = "value",
-                    value = (fieldValue as? String) ?: ""
+                    value = (fieldParams.value as? String) ?: "",
+                    description = fieldParams.description
                 )
             }
             is EntityFieldID.BooleanID -> {
                 EntityField.BooleanField(
                     fieldID = fieldID,
-                    description = "boolean",
-                    value = (fieldValue as? Boolean) ?: false
+                    value = (fieldParams.value as? Boolean) ?: false,
+                    description = fieldParams.description
                 )
             }
             is EntityFieldID.EntityID -> {
                 EntityField.EntityLink(
                     fieldID = fieldID,
-                    description = "item's object type",
-                    entity = (fieldValue as? IEntity<out Any>)
+                    entity = (fieldParams.value as? IEntity<out Any>),
+                    description = fieldParams.description
                 )
             }
+            is EntityFieldID.EntitiesListID -> {
+                EntityField.EntityLinksList(
+                    fieldID = fieldID,
+                    entities = fieldID.entitiesIDs.map { entityID ->
+                        val entityField = getFieldParamsByFieldID(entity, entityID)
+                        EntityField.EntityLink(
+                            fieldID = entityID,
+                            entity = entityField.value as? IEntity<out Any>,
+                            description = entityField.description
+                        )
+                    },
+                    description = fieldParams.description
+                )
+            }
+            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
+                fieldID = fieldID,
+                description = fieldParams.description,
+                value = fieldParams.value as? LocalDateTime
+            )
+            is EntityFieldID.LongID -> EntityField.LongField(
+                fieldID = fieldID,
+                description = fieldParams.description,
+                value = fieldParams.value as? Long ?: 0L
+            )
         }
     }
 
-    override fun getEntityColumns(entity: T): List<EntityFieldID> {
-        return getFields(entity).keys.toList()
-    }
 
 }
+
+data class DescriptiveFieldValue(val value: Any? = null, val description: String = "")
+//data class DescriptiveEntity(val entity: IEntity<out Any>, val name: String, val description: String)

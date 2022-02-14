@@ -4,12 +4,25 @@ import domain.entities.Container
 
 class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
 
-    override fun getFields(entity: Container): Map<EntityFieldID, Any?> {
-        return mapOf(
-            EntityFieldID.StringID(name = "name", tag = "tag_name") to entity.name,
-            EntityFieldID.StringID(name = "description", tag = "tag_description") to entity.description,
-            EntityFieldID.EntityID(tag = "entity_id", "parent container") to entity.parentContainer?.id
+
+    override fun getEntityIDs(entity: Container): List<EntityFieldID> {
+        return listOf(
+            EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
+            EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),
+            EntityFieldID.EntityID(tag = "entity_id", "parent container")
         )
+    }
+
+    override fun getFieldParamsByFieldID(entity: Container, fieldID: EntityFieldID): DescriptiveFieldValue {
+        return when (fieldID) {
+            is EntityFieldID.EntityID -> DescriptiveFieldValue(value = entity.parentContainer, description = "parent container")
+            is EntityFieldID.StringID -> when(fieldID.tag){
+                EntityFieldID.tag_name->DescriptiveFieldValue(value = entity.name, description = "item's name")
+                EntityFieldID.tag_description->DescriptiveFieldValue(value = entity.description, description = "item's description")
+                else->throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+            }
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+        }
     }
 
 

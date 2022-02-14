@@ -9,12 +9,15 @@ import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import ui.screens.types_of_data.data_types_list.DataTypesListComponent
 import ui.screens.types_of_data.types_selector.ITypesSelector
+import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import ui.screens.types_of_data.types_selector.TypesSelectorComponent
 
 class TypesOfDataComponent(
     componentContext: ComponentContext,
+    private val updateUseCaseFactory: IUpdateUseCaseFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory
 ) :
     ITypesOfData, ComponentContext by componentContext {
@@ -24,7 +27,7 @@ class TypesOfDataComponent(
     override val selectedItem: Value<ITypesSelector.Type> = _selectedItem
 
     private val _representationType =
-        MutableValue<ITypesSelector.ItemRepresentationType>(ITypesSelector.ItemRepresentationType.Card)
+        MutableValue<ItemRepresentationType>(ItemRepresentationType.Card)
 
     private val listRouter =
         router<EntitiesListConfig, ITypesOfData.ListChild>(
@@ -66,7 +69,6 @@ class TypesOfDataComponent(
                     }
                 )
             )
-//            is FilterConfig.None -> ITypesOfData.FilterChild.None
         }
     }
 
@@ -78,29 +80,23 @@ class TypesOfDataComponent(
             is EntitiesListConfig.EntitiesList -> ITypesOfData.ListChild.List(
                 DataTypesListComponent(
                     type = entitiesListConfig.type,
-                    getListUseCaseFactory = getListUseCaseFactory,
                     componentContext = componentContext,
-                    representationType = _representationType
+                    representationType = _representationType,
+                    updateUseCaseFactory = updateUseCaseFactory,
+                    getListUseCaseFactory = getListUseCaseFactory
                 )
             )
-//            is EntitiesListConfig.None -> ITypesOfData.ListChild.None
         }
     }
 
     sealed class EntitiesListConfig : Parcelable {
         @Parcelize
         class EntitiesList(val type: ITypesSelector.Type) : EntitiesListConfig()
-
-//        @Parcelize
-//        object None : EntitiesListConfig()
     }
 
     sealed class FilterConfig : Parcelable {
         @Parcelize
         data class Filter(val selectedType: ITypesSelector.Type?) : FilterConfig()
-
-//        @Parcelize
-//        object None : FilterConfig()
     }
 
 

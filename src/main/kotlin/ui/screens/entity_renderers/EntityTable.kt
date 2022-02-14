@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
@@ -21,6 +24,7 @@ import domain.entities.Container
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.fieldsmappers.IFieldsMapper
+import domain.entities.fieldsmappers.flatten
 import test.Containers
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -28,9 +32,7 @@ import test.Containers
 fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFieldsMapper<T>) {
     val fields = remember(fieldsMapper, entities) {
         entities.flatMap {
-            val columns = fieldsMapper.getEntityColumns(it)
-            println()
-            columns
+            fieldsMapper.getEntityIDs(it).flatten()
         }.toSet()
     }
 
@@ -53,10 +55,13 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
                                 .width(columnWidth)
                                 .height(headerRowHeight)
                                 .border(1.dp, Color.DarkGray)
-                                .padding(4.dp),
+                                .padding(4.dp)
+                                .align(Alignment.CenterVertically),
                             text = field.name,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.h6
                         )
                     }
                 }
@@ -107,7 +112,9 @@ private fun RowScope.RenderEntityFieldCell(
 
         }
         is EntityField.EntityLink -> {
-
+            RenderEntityLinkFieldCell(modifier = modifier, field, onValueChange = {
+                onFieldChange?.invoke(field.copy(entity = it))
+            })
         }
         is EntityField.EntityLinksList -> {
 

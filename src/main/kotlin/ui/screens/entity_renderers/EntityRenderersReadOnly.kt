@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.getName
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -30,7 +31,13 @@ fun RenderBooleanFieldReadOnly(field: EntityField.BooleanField) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderIsFavoriteFieldReadOnly(field: EntityField.FavoriteField) {
-    RenderBooleanFieldReadOnly(EntityField.BooleanField(field.fieldID, field.description, field.isFavorite))
+    RenderBooleanFieldReadOnly(
+        EntityField.BooleanField(
+            fieldID = field.fieldID,
+            value = field.isFavorite,
+            description = field.description
+        )
+    )
 }
 
 
@@ -79,8 +86,13 @@ fun RenderCaptionFieldReadOnly(field: EntityField.CaptionField) {
 @Composable
 fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
     if (field.entity != null) {
+
         ListItem(
-            text = { Text(text = field.fieldID.name) },
+            text = {
+                Text(
+                    text = field.getName()
+                )
+            },
             secondaryText = { Text(text = field.description) }
         )
     }
@@ -98,8 +110,6 @@ fun RenderEntityLinksListReadOnly(field: EntityField.EntityLinksList) {
         field.entities.forEach {
             RenderEntityLinkReadOnly(it)
         }
-
     }
-
 }
 

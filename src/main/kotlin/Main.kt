@@ -84,12 +84,14 @@ private fun PrepopulateDatabase() {
 
     val di = localDI()
 
+
     val insertObjectType by di.instance<InsertObjectType>()
     val insertParameter by di.instance<InsertParameter>()
     val insertUnit by di.instance<InsertUnit>()
     val insertItem by di.instance<InsertItem>()
     val insertContainer by di.instance<InsertContainer>()
     val insertSupplier by di.instance<InsertSupplier>()
+    val insertItemIncome by di.instance<InsertItemIncome>()
 
     LaunchedEffect(wasInitialized) {
         if (!wasInitialized) {
@@ -99,10 +101,12 @@ private fun PrepopulateDatabase() {
                 Items.Capacitors.capacitor1,
                 Items.Capacitors.capacitor2
             ).forEach {
+
                 insertItem(InsertEntity.Insert(it))
             }
 
             listOf(Types.resistorsType, Types.capacitorsType).forEach {
+//                objectTypesRepo.insert(it)
                 insertObjectType(InsertEntity.Insert(it))
             }
             listOf(
@@ -116,6 +120,7 @@ private fun PrepopulateDatabase() {
                 Parameters.Material.length,
                 Parameters.Material.weight
             ).forEach {
+//                parameterRepo.insert(it)
                 insertParameter(InsertEntity.Insert(it))
             }
             listOf(
@@ -129,6 +134,7 @@ private fun PrepopulateDatabase() {
                 Units.Common.pcs,
                 Units.Common.percent
             ).forEach {
+//                unitsRepository.insert(it)
                 insertUnit(InsertEntity.Insert(it))
             }
 
@@ -139,11 +145,17 @@ private fun PrepopulateDatabase() {
                 Containers.box2,
                 Containers.box3
             ).forEach {
+//                containersRepository.insert(it)
                 insertContainer(InsertEntity.Insert(it))
             }
 
             Suppliers.getAll().forEach {
+//                suppliersRepository.insert(it)
                 insertSupplier(InsertEntity.Insert(it))
+            }
+
+            listOf(Incomes.income1, Incomes.income2).forEach {
+                insertItemIncome(InsertEntity.Insert(it))
             }
 
             wasInitialized = true

@@ -32,6 +32,8 @@ open class BaseEntityTestRepository<ID : Any, T : IEntity<ID>> : BaseCachedRepos
     }
 
     override suspend fun query(specification: ISpecification): List<T> {
+        println("query in $this: $specification")
+        println("values: $repo")
         return if (specification is Specification) {
             query(specification)
         } else listOf()

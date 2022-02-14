@@ -1,7 +1,9 @@
 package ui.screens.types_of_data.data_types_list
 
 import com.akhris.domain.core.application.GetEntities
+import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.utils.unpack
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -11,16 +13,19 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import domain.entities.*
 import domain.entities.Unit
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import kotlinx.coroutines.*
 import persistence.repository.Specification
 import ui.screens.types_of_data.types_selector.ITypesSelector
+import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import kotlin.reflect.KClass
 
 class DataTypesListComponent(
-    getListUseCaseFactory: IGetListUseCaseFactory,
-    type: ITypesSelector.Type,
+    private val updateUseCaseFactory: IUpdateUseCaseFactory,
+    private val getListUseCaseFactory: IGetListUseCaseFactory,
+    private val type: ITypesSelector.Type,
     componentContext: ComponentContext,
-    representationType: Value<ITypesSelector.ItemRepresentationType>
+    representationType: Value<ItemRepresentationType>
 ) :
     IDataTypesList,
     ComponentContext by componentContext {
@@ -28,13 +33,27 @@ class DataTypesListComponent(
     private val scope =
         CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private val _state = MutableValue(IDataTypesList.State(type, listOf(), ITypesSelector.ItemRepresentationType.Card))
+    private val _state = MutableValue(IDataTypesList.State(type, listOf(), ItemRepresentationType.Card))
 
     override val state: Value<IDataTypesList.State> = _state
 
 
     override fun onEntityRemoved(entity: IEntity<*>) {
 
+    }
+
+    override fun onEntityUpdated(entity: IEntity<*>) {
+        val typeClass = getTypeClass(type)
+        typeClass?.let { entClass ->
+//            val repo = repositoryFactory.getRepository(entClass)
+//            updateEntities(repo = repo as IRepository<String, IEntity<String>>, entity = entity as IEntity<String>)
+            val updateUseCase = updateUseCaseFactory.getUpdateUseCase(entClass)
+            updateEntities(
+                useCase = updateUseCase as UpdateEntity<String, IEntity<String>>,
+                entity = entity as IEntity<String>
+            )
+
+        }
     }
 
 
@@ -49,11 +68,8 @@ class DataTypesListComponent(
             ITypesSelector.Type.Suppliers -> Supplier::class
         }
         return entityClass
-//
-//        val useCase = getListUseCaseFactory.getListUseCase(entityClass)
-//
-//        loadEntities(useCase)
     }
+
 
     private fun loadEntities(useCase: GetEntities<String, *>) {
         scope.launch {
@@ -64,6 +80,30 @@ class DataTypesListComponent(
         }
     }
 
+    private fun loadEntities(repo: IRepository<*, *>) {
+        scope.launch {
+            val entities = repo.query(Specification.QueryAll)
+
+            println("repo: $repo")
+            println("loaded entities:")
+            println(entities)
+            _state.reduce {
+                it.copy(entities = entities)
+            }
+        }
+    }
+
+    private fun updateEntities(repo: IRepository<String, IEntity<String>>, entity: IEntity<String>) {
+        scope.launch {
+            repo.update(entity)
+        }
+    }
+
+    private fun updateEntities(useCase: UpdateEntity<String, IEntity<String>>, entity: IEntity<String>) {
+        scope.launch {
+            useCase(UpdateEntity.Update(entity))
+        }
+    }
 
     init {
         representationType.subscribe { newType ->
@@ -79,8 +119,8 @@ class DataTypesListComponent(
 
         val typeClass = getTypeClass(type)
         typeClass?.let {
-            val useCase = getListUseCaseFactory.getListUseCase(it)
-            loadEntities(useCase)
+            val getEntitiesList = getListUseCaseFactory.getListUseCase(it)
+            loadEntities(getEntitiesList)
         }
 
 

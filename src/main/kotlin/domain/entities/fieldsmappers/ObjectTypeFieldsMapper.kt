@@ -5,37 +5,61 @@ import domain.entities.Parameter
 
 class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
-    private val tag_const_part = "tag_parameter_"
+    private val tag_parameters = "tag_parameters"
 
-    override fun getFields(entity: ObjectType): Map<EntityFieldID, Any?> {
-        return listOfNotNull(
-            EntityFieldID.StringID("tag_name", "name") to entity.name
-        ).plus(
-            entity.parameters.mapIndexed { index, p ->
-                EntityFieldID.EntityID(tag = "$tag_const_part$index", name = "parameter 1") to p
-//                EntityFieldID.ParameterID(it.id, it.name) to it
-            }
-        ).toMap()
+    override fun getEntityIDs(entity: ObjectType): List<EntityFieldID> {
+        return listOf(
+            EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
+            EntityFieldID.EntitiesListID(
+                tag = tag_parameters,
+                name = "parameters",
+                entitiesIDs = entity.parameters.mapIndexed { index, parameter ->
+                    EntityFieldID.EntityID(
+                        tag = "$tag_parameters$index",
+                        name = "parameter ${index + 1}"
+                    )
+                }
+            )
+        )
     }
 
 
-    override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
-        return when (val column = field.fieldID) {
-            is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
-            is EntityFieldID.EntityID -> setParameter(entity, field)
-            else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")
+    override fun getFieldParamsByFieldID(entity: ObjectType, fieldID: EntityFieldID): DescriptiveFieldValue {
+        return when (fieldID) {
+            is EntityFieldID.EntityID -> {
+                val index = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
+                val parameter = entity.parameters.getOrNull(index)
+                DescriptiveFieldValue(parameter, description = parameter?.name ?: "")
+            }
+            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
+                value = entity.parameters,
+                description = "parameters"
+            )
+            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.name, description = "type's name")
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
 
-    private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType {
-        val fieldID = field.fieldID
-        val paramIndex = fieldID.tag.substring(startIndex = tag_const_part.length).toIntOrNull() ?: return objectType
+    override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
+        return when (val fieldID = field.fieldID) {
+            is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
+            is EntityFieldID.EntityID -> setParameter(entity, field)
+                ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
+        }
+    }
 
+    private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType? {
+        val fieldID = field.fieldID
+        val paramIndex = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: return null
+        if (objectType.parameters.getOrNull(paramIndex) == null) {
+            return null
+        }
         return objectType.copy(
-            parameters = objectType.parameters.mapIndexed { index, parameter ->
+            parameters = objectType.parameters.mapIndexed { index, param ->
                 if (index == paramIndex) {
                     (field as EntityField.EntityLink).entity as Parameter
-                } else parameter
+                } else param
             }
         )
     }

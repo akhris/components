@@ -17,7 +17,7 @@ import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
-import ui.screens.types_of_data.types_selector.ITypesSelector
+import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import ui.theme.ContentSettings
 import ui.theme.DialogSettings
 
@@ -30,9 +30,10 @@ fun EntityScreen() {
 @OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
-    itemRepresentationType: ITypesSelector.ItemRepresentationType = ITypesSelector.ItemRepresentationType.Card,
+    itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
     entities: List<T>,
-    onEntityRemoved: ((T) -> Unit)? = null
+    onEntityRemoved: ((T) -> Unit)? = null,
+    onEntityUpdated: ((T) -> Unit)? = null
 ) {
 
     val lazyColumnState = rememberLazyListState()
@@ -72,13 +73,16 @@ fun <T : IEntity<*>> EntityScreenContent(
     //content depending on representation type:
     when (itemRepresentationType) {
         //cards
-        ITypesSelector.ItemRepresentationType.Card -> {
+        ItemRepresentationType.Card -> {
             LazyColumn(state = lazyColumnState) {
                 items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         RenderCardEntity(
                             entity,
-                            onEntityChanged = { println("entity changed: $entity") },
+                            onEntityChanged = {
+                                println("entity changed: $it")
+                                onEntityUpdated?.invoke(it)
+                            },
                             onEntityRemoved = onEntityRemoved
                         )
                     }
@@ -87,7 +91,7 @@ fun <T : IEntity<*>> EntityScreenContent(
         }
 
         //table
-        ITypesSelector.ItemRepresentationType.Table -> {
+        ItemRepresentationType.Table -> {
             mapper?.let {
                 EntityTableContent(entities = entities, fieldsMapper = it)
             }
@@ -125,7 +129,7 @@ fun <T : IEntity<*>> EntityScreenContent(
 //                }
 
 
-            }
+        }
 
 //        entities.forEach { entity ->
 //            RenderEntity(
@@ -179,8 +183,7 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
 
     val fields =
         remember(mapper, entity) {
-
-            mapper.getEntityColumns(entity = entity).mapNotNull { mapper.getFieldByID(entity, it) }
+            mapper.getEntityIDs(entity = entity).mapNotNull { mapper.getFieldByID(entity, it) }
         }
 
 
@@ -195,6 +198,7 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
             fields.forEach {
                 RenderField(it, onFieldChange = { changedField ->
                     entity = mapper.mapIntoEntity(entity, changedField)
+                    println("entity after mapping: $entity")
 //                    onEntityChanged(mapper.mapIntoEntity(initialEntity, changedField))
                 })
             }
@@ -257,6 +261,8 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
             is EntityField.FavoriteField -> RenderIsFavoriteFieldReadOnly(field)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
             is EntityField.URLField -> RenderUrlFieldReadOnly(field)
+            is EntityField.DateTimeField -> {}
+            is EntityField.LongField -> {}
         }
     } else {
         when (field) {
@@ -276,6 +282,8 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
             is EntityField.URLField -> RenderURLField(field,
                 onValueChange = { newValue -> onFieldChange(field.copy(url = newValue)) })
+            is EntityField.DateTimeField -> {}
+            is EntityField.LongField -> {}
         }
     }
 }
