@@ -5,6 +5,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import com.akhris.domain.core.utils.log
 
 @Serializable
 data class AppSettings(val settings: List<AppSetting>)
@@ -31,6 +32,6 @@ fun AppSettings.toJson(): String = Json.encodeToString(this)
 fun String.toAppSettings(): AppSettings? = try {
     Json.decodeFromString<AppSettings>(this)
 } catch (e: SerializationException) {
-    println("Cannot decode AppSettings from $this")
+    log("Cannot decode AppSettings from $this")
     null
 }

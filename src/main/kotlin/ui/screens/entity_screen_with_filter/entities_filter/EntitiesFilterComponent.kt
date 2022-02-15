@@ -1,6 +1,7 @@
 package ui.screens.entity_screen_with_filter.entities_filter
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -25,20 +26,21 @@ class EntitiesFilterComponent<T : IEntity<*>>(
         _state.reduce {
             it.copy(itemRepresentationType = itemRepresentationType)
         }
+        onFilterModelChanged(_state.value)
     }
 
     override fun setFilter(filterSettings: IEntitiesFilter.FilterSettings) {
         _state.reduce { model ->
-            val isFilterPresented = model.filters.find { it.fieldID == filterSettings.fieldID } != null
+
+
+//            val isFilterPresented = model.filters.find { it.fieldID == filterSettings.fieldID } != null
 
             model.copy(
-                filters = if (isFilterPresented) {
-                    model.filters.replace(filterSettings) { fs ->
-                        fs.fieldID == filterSettings.fieldID
-                    }
-                } else {
-                    model.filters.plus(filterSettings)
+                filters =
+                model.filters.replace(filterSettings.copy(isActive = true)) { fs ->
+                    fs.fieldID == filterSettings.fieldID
                 }
+
             )
         }
         onFilterModelChanged(_state.value)
@@ -46,21 +48,34 @@ class EntitiesFilterComponent<T : IEntity<*>>(
 
     override fun removeFilter(filterSettings: IEntitiesFilter.FilterSettings) {
         _state.reduce { model ->
-            val filterPresented = model.filters.find { it.fieldID == filterSettings.fieldID }
+            val filterPresented =
+                model.filters.find { it.fieldID == filterSettings.fieldID } ?: IEntitiesFilter.FilterSettings(
+                    filterSettings.fieldID
+                )
+
             model.copy(
-                filters = filterPresented?.let {
-                    model.filters.minus(it)
-                } ?: model.filters
+                filters = model.filters.replace(filterPresented.copy(isActive = false)) { fs ->
+                    fs.fieldID == filterSettings.fieldID
+                }
             )
         }
         onFilterModelChanged(_state.value)
     }
 
     init {
-        listModel.subscribe {
-            //get set of field id's here and update _state if necessary
-            val fieldIDs = it.entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
-
-        }
+        listModel
+            .subscribe {
+                log("got new entities list in $this : $it")
+                //get set of field id's here and update _state if necessary
+                val fieldIDs = it.entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
+                _state.reduce { m ->
+                    m.copy(filters = fieldIDs.map { fId ->
+                        val fields = it.entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }
+                        IEntitiesFilter.FilterSettings(
+                            fieldID = fId,
+                            fieldsList = fields.map { f->IEntitiesFilter.FilteredField(field = f, isFiltered = false) })
+                    })
+                }
+            }
     }
 }

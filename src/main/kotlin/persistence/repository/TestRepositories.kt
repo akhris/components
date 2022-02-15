@@ -11,3 +11,4 @@ class ObjectTypesTestRepository : BaseEntityTestRepository<String, ObjectType>()
 class UnitsTestRepository : BaseEntityTestRepository<String, Unit>(), IUnitsRepository
 class SuppliersTestRepository : BaseEntityTestRepository<String, Supplier>(), ISuppliersRepository
 class ItemIncomeTestRepository : BaseEntityTestRepository<String, ItemIncome>(), IItemIncomeRepository
+class ItemOutcomeTestRepository : BaseEntityTestRepository<String, ItemOutcome>(), IItemOutcomeRepository

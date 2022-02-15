@@ -6,6 +6,7 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import ui.screens.projects_screen_with_selector.EntitiesWithSelectorUi
 import ui.screens.entity_screen_with_filter.EntitiesWithFilterUi
 import ui.screens.settings.SettingsUi
 import ui.screens.types_of_data.TypesOfDataUi
@@ -21,6 +22,7 @@ fun NavHostUi(component: INavHost) {
             is INavHost.Child.Settings -> SettingsUi(child.component)
             is INavHost.Child.TypesOfData -> TypesOfDataUi(child.component)
             is INavHost.Child.EntitiesListWithFilter -> EntitiesWithFilterUi(child.component)
+            is INavHost.Child.Projects -> EntitiesWithSelectorUi(child.component)
         }
     }
 }

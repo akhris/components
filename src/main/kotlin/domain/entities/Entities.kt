@@ -9,7 +9,9 @@ data class Item(
     val name: String = "",
     val type: ObjectType? = null,
     val values: List<Value> = listOf()
-) : IEntity<String>
+) : IEntity<String> {
+    override fun toString(): String = name
+}
 
 /**
  * e.g. name = resistors,
@@ -19,7 +21,7 @@ data class ObjectType(
     override val id: String = IDUtils.newID(),
     val name: String = "",
     val parameters: List<Parameter> = listOf()
-) : IEntity<String>{
+) : IEntity<String> {
     override fun toString(): String = name
 }
 
@@ -82,7 +84,7 @@ data class ItemOutcome(
     val item: Item? = null,
     val container: Container? = null,
     val quantity: Long = 0L,
-    val dateTime: LocalDateTime
+    val dateTime: LocalDateTime?
 ) : IEntity<String>
 
 
@@ -92,7 +94,9 @@ data class Supplier(
     val description: String = "",
     val url: String = "",
     val isFavorite: Boolean = false
-) : IEntity<String>
+) : IEntity<String>{
+    override fun toString(): String = name
+}
 
 data class Project(
     override val id: String = IDUtils.newID(),

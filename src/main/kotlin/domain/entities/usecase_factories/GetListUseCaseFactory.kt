@@ -13,11 +13,13 @@ class GetListUseCaseFactory(
     private val getUnits: GetUnits,
     private val getObjectTypes: GetObjectTypes,
     private val getContainersList: GetContainersList,
-    private val getSuppliersList: GetSuppliersList
+    private val getSuppliersList: GetSuppliersList,
+    private val getItemIncomesList: GetItemIncomesList,
+    private val getItemOutcomesList: GetItemOutcomesList,
 ) :
     IGetListUseCaseFactory {
 
-    override fun <ID, T : IEntity<ID>> getListUseCase(entityClass: KClass<out T>): GetEntities<ID, out T> {
+    override fun <T : IEntity<*>> getListUseCase(entityClass: KClass<out T>): GetEntities<*, out T> {
         val a = when (entityClass) {
             Item::class -> getItemsList
             Parameter::class -> getParametersList
@@ -25,9 +27,11 @@ class GetListUseCaseFactory(
             ObjectType::class -> getObjectTypes
             Container::class -> getContainersList
             Supplier::class -> getSuppliersList
+            ItemIncome::class -> getItemIncomesList
+            ItemOutcome::class -> getItemOutcomesList
             else -> throw IllegalArgumentException("not found get-list-use-case for entity class: $entityClass")
         }
-        return a as GetEntities<ID, out T>
+        return a as GetEntities<*, out T>
     }
 
 }

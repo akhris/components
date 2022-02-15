@@ -27,6 +27,7 @@ val di = DI {
     import(containersModule)
     import(suppliersModule)
     import(itemIncomeModule)
+    import(itemOutcomeModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }
@@ -49,12 +50,16 @@ val di = DI {
             instance(),
             instance(),
             instance(),
+            instance(),
+            instance(),
             instance()
         )
     }
 
     bindSingleton<IUpdateUseCaseFactory> {
         UpdateUseCaseFactory(
+            instance(),
+            instance(),
             instance(),
             instance(),
             instance(),

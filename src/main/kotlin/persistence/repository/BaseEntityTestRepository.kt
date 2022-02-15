@@ -3,6 +3,8 @@ package persistence.repository
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.BaseCachedRepository
 import com.akhris.domain.core.repository.ISpecification
+import com.akhris.domain.core.utils.log
+
 
 open class BaseEntityTestRepository<ID : Any, T : IEntity<ID>> : BaseCachedRepository<ID, T>() {
 
@@ -32,8 +34,8 @@ open class BaseEntityTestRepository<ID : Any, T : IEntity<ID>> : BaseCachedRepos
     }
 
     override suspend fun query(specification: ISpecification): List<T> {
-        println("query in $this: $specification")
-        println("values: $repo")
+        log("query in $this: $specification")
+        log("values: $repo")
         return if (specification is Specification) {
             query(specification)
         } else listOf()

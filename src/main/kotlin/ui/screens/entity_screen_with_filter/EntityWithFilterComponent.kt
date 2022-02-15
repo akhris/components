@@ -10,16 +10,18 @@ import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.fieldsmappers.FieldsMapperFactory
+import domain.entities.usecase_factories.IGetListUseCaseFactory
 import ui.screens.entity_screen_with_filter.entities_filter.EntitiesFilterComponent
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter
 import ui.screens.entity_screen_with_filter.entities_list.EntitiesListComponent
 import ui.screens.entity_screen_with_filter.entities_list.IEntitiesList
 import kotlin.reflect.KClass
 
-class EntityWithFilterComponent<T: IEntity<*>>(
+class EntityWithFilterComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
     private val entityClass: KClass<T>,
-    private val fieldsMapperFactory: FieldsMapperFactory
+    private val fieldsMapperFactory: FieldsMapperFactory,
+    private val getListUseCaseFactory: IGetListUseCaseFactory
 ) : IEntityWithFilter,
     ComponentContext by componentContext {
 
@@ -68,6 +70,7 @@ class EntityWithFilterComponent<T: IEntity<*>>(
         entitiesListConfig: EntitiesListConfig,
         componentContext: ComponentContext
     ): IEntityWithFilter.ListChild {
+
         return when (entitiesListConfig) {
             is EntitiesListConfig.EntitiesList -> IEntityWithFilter.ListChild.List(
                 EntitiesListComponent<T>(
@@ -75,7 +78,9 @@ class EntityWithFilterComponent<T: IEntity<*>>(
                     filterModel = _filterModel,
                     onListModelChanged = { changedModel ->
                         _listModel.reduce { changedModel }
-                    })
+                    },
+                    getEntities = getListUseCaseFactory.getListUseCase(entityClass)
+                )
             )
         }
     }

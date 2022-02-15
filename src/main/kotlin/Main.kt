@@ -7,6 +7,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.akhris.domain.core.application.InsertEntity
+import com.akhris.domain.core.utils.LogUtils
 import di.di
 import domain.application.*
 import navigation.Screen
@@ -20,6 +21,7 @@ import ui.theme.AppSettings
 import ui.theme.AppTheme
 
 fun main() = application {
+    LogUtils.isLogEnabled = true
     Window(
         onCloseRequest = ::exitApplication,
         title = AppSettings.appTitle,
@@ -92,6 +94,7 @@ private fun PrepopulateDatabase() {
     val insertContainer by di.instance<InsertContainer>()
     val insertSupplier by di.instance<InsertSupplier>()
     val insertItemIncome by di.instance<InsertItemIncome>()
+    val insertItemOutcome by di.instance<InsertItemOutcome>()
 
     LaunchedEffect(wasInitialized) {
         if (!wasInitialized) {
@@ -156,6 +159,10 @@ private fun PrepopulateDatabase() {
 
             listOf(Incomes.income1, Incomes.income2).forEach {
                 insertItemIncome(InsertEntity.Insert(it))
+            }
+
+            listOf(Outcomes.outcome1, Outcomes.outcome2).forEach {
+                insertItemOutcome(InsertEntity.Insert(it))
             }
 
             wasInitialized = true

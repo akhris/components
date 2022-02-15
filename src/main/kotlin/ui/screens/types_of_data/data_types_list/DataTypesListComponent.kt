@@ -4,6 +4,7 @@ import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
+import com.akhris.domain.core.utils.log
 import com.akhris.domain.core.utils.unpack
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -71,7 +72,7 @@ class DataTypesListComponent(
     }
 
 
-    private fun loadEntities(useCase: GetEntities<String, *>) {
+    private fun loadEntities(useCase: GetEntities<*, *>) {
         scope.launch {
             val entities = useCase(GetEntities.GetBySpecification(Specification.QueryAll)).unpack()
             _state.reduce {
@@ -84,9 +85,9 @@ class DataTypesListComponent(
         scope.launch {
             val entities = repo.query(Specification.QueryAll)
 
-            println("repo: $repo")
-            println("loaded entities:")
-            println(entities)
+            log("repo: $repo")
+            log("loaded entities:")
+            log(entities)
             _state.reduce {
                 it.copy(entities = entities)
             }

@@ -11,7 +11,7 @@ interface IGetUseCaseFactory {
 }
 
 interface IGetListUseCaseFactory {
-    fun <ID, T : IEntity<ID>> getListUseCase(entityClass: KClass<out T>): GetEntities<ID, out T>
+    fun <T : IEntity<*>> getListUseCase(entityClass: KClass<out T>): GetEntities<*, out T>
 }
 
 interface IUpdateUseCaseFactory {

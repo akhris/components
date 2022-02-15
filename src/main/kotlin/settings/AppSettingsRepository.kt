@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import utils.FileUtils
+import com.akhris.domain.core.utils.log
 import utils.replace
 import kotlin.io.path.*
 
@@ -77,9 +78,9 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
     }
 
     private suspend fun invalidateSettings() {
-        println("invalidate settings")
+        log("invalidate settings")
         if (appSettingsFile.exists()) {
-            println("File $appSettingsFile exists")
+            log("File $appSettingsFile exists")
             val settingsText = withContext(Dispatchers.IO) {
                 appSettingsFile.readText()
             }
@@ -87,14 +88,14 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             settings?.let {
                 _settingsValue.value = it
             }
-            println("loaded settings from file: $settings")
+            log("loaded settings from file: $settings")
         } else {
-            println("File $appSettingsFile does not exist, creating one:")
+            log("File $appSettingsFile does not exist, creating one:")
             val path = withContext(Dispatchers.IO) {
                 appSettingsPath.createDirectories()
                 appSettingsFile.createFile()
             }
-            println("File $path created")
+            log("File $path created")
         }
     }
 

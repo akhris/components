@@ -8,13 +8,16 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.ItemIncome
+import domain.entities.ItemOutcome
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IGetUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import navigation.NavItem
 import navigation.Screen
 import settings.AppSettingsRepository
 import ui.screens.entity_screen_with_filter.EntityWithFilterComponent
+import ui.screens.projects_screen_with_selector.ProjectWithSelector
 import ui.screens.settings.SettingsComponent
 import ui.screens.types_of_data.TypesOfDataComponent
 
@@ -25,6 +28,7 @@ class NavHostComponent(
     componentContext: ComponentContext,
     private val fieldsMapperFactory: FieldsMapperFactory,
     private val appSettingsRepository: AppSettingsRepository,
+    private val getUseCaseFactory: IGetUseCaseFactory,
     private val updateUseCaseFactory: IUpdateUseCaseFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory
 ) :
@@ -63,7 +67,16 @@ class NavHostComponent(
                 EntityWithFilterComponent(
                     componentContext = componentContext,
                     entityClass = ItemIncome::class,
-                    fieldsMapperFactory = fieldsMapperFactory
+                    fieldsMapperFactory = fieldsMapperFactory,
+                    getListUseCaseFactory = getListUseCaseFactory
+                )
+            )
+            Screen.Outcome.route -> INavHost.Child.EntitiesListWithFilter(
+                EntityWithFilterComponent(
+                    componentContext = componentContext,
+                    entityClass = ItemOutcome::class,
+                    fieldsMapperFactory = fieldsMapperFactory,
+                    getListUseCaseFactory = getListUseCaseFactory
                 )
             )
             Screen.Types.route -> INavHost.Child.TypesOfData(
@@ -79,7 +92,13 @@ class NavHostComponent(
                     appSettingsRepository = appSettingsRepository
                 )
             )
-            Screen.Projects.route -> null
+            Screen.Projects.route -> INavHost.Child.Projects(
+                ProjectWithSelector(
+                    componentContext = componentContext,
+                    getListUseCaseFactory = getListUseCaseFactory,
+                    getUseCaseFactory = getUseCaseFactory
+                )
+            )
             else -> null
         }
         return screen ?: throw UnsupportedOperationException("unknown root: ${config.route}")

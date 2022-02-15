@@ -6,6 +6,14 @@ import com.arkivanov.decompose.value.Value
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter
 import ui.screens.entity_screen_with_filter.entities_list.IEntitiesList
 
+/**
+ * Interface for Entity-with-filter component.
+ * Consists of two components:
+ * 1. Entities List component
+ *      Component that fetches a list of entities from repository depending on filter settings
+ * 2. Filter settings component
+ *      Component that handles filtering
+ */
 interface IEntityWithFilter{
 
     val listRouterState: Value<RouterState<*, ListChild>>

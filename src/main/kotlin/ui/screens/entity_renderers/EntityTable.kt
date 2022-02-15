@@ -108,9 +108,6 @@ private fun RowScope.RenderEntityFieldCell(
                 onFieldChange?.invoke(field.copy(value = it))
             })
         }
-        is EntityField.CaptionField -> {
-
-        }
         is EntityField.EntityLink -> {
             RenderEntityLinkFieldCell(modifier = modifier, field, onValueChange = {
                 onFieldChange?.invoke(field.copy(entity = it))
@@ -119,9 +116,7 @@ private fun RowScope.RenderEntityFieldCell(
         is EntityField.EntityLinksList -> {
 
         }
-        is EntityField.FavoriteField -> {
 
-        }
         is EntityField.FloatField -> {
 
         }
@@ -130,9 +125,8 @@ private fun RowScope.RenderEntityFieldCell(
                 onFieldChange?.invoke(field.copy(value = it))
             })
         }
-        is EntityField.URLField -> {
-
-        }
+        is EntityField.DateTimeField -> {}
+        is EntityField.LongField -> {}
     }
 }
 

@@ -10,7 +10,6 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
 
@@ -28,18 +27,6 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
         }, trailing = {
             Checkbox(field.value, onCheckedChange = onValueChange)
         })
-}
-
-@Composable
-fun RenderIsFavoriteField(field: EntityField.FavoriteField, onValueChange: (Boolean) -> Unit) {
-    RenderBooleanField(
-        EntityField.BooleanField(
-            fieldID = field.fieldID,
-            value = field.isFavorite,
-            description = field.description
-        ),
-        onValueChange
-    )
 }
 
 @Composable
@@ -84,37 +71,6 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
                 contentDescription = "clear text"
             )
         }
-    )
-}
-
-@Composable
-fun RenderURLField(field: EntityField.URLField, onValueChange: (String) -> Unit) {
-
-    TextField(
-        modifier = Modifier.fillMaxWidth(),
-        value = field.url,
-        label = { Text(text = field.fieldID.name) },
-        onValueChange = onValueChange,
-        leadingIcon = {
-            Icon(painter = painterResource("vector/language_black_24dp.svg"), contentDescription = "url")
-        },
-        trailingIcon = {
-            Icon(
-                modifier = Modifier.clickable { onValueChange("") },
-                imageVector = Icons.Rounded.Clear,
-                contentDescription = "clear text"
-            )
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun RenderCaptionField(field: EntityField.CaptionField) {
-    ListItem(
-        text = { Text(text = field.caption, style = MaterialTheme.typography.caption) },
-        secondaryText = { Text(text = field.description) },
-        overlineText = { Text(text = field.fieldID.name) }
     )
 }
 

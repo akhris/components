@@ -43,11 +43,9 @@ fun TypesOfDataUi(component: ITypesOfData) {
         isModal = true,
         content = {
             ListPane(component.listRouterState)
-//            DataTypesListUi(component = dataTypesListComponent)
         },
         filterContent = {
             FilterPane(component.filterRouterState)
-//            TypesSelectorUi(typesSelectorComponent = typesSelectorComponent)
         }
     )
 
@@ -72,9 +70,6 @@ fun FilterPane(routerState: Value<RouterState<*, ITypesOfData.FilterChild>>) {
             is ITypesOfData.FilterChild.Filter -> {
                 TypesSelectorUi(child.component)
             }
-//            ITypesOfData.FilterChild.None -> {
-//
-//            }
         }
     }
 }

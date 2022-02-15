@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
@@ -80,7 +81,7 @@ fun <T : IEntity<*>> EntityScreenContent(
                         RenderCardEntity(
                             entity,
                             onEntityChanged = {
-                                println("entity changed: $it")
+                                log("entity changed: $it")
                                 onEntityUpdated?.invoke(it)
                             },
                             onEntityRemoved = onEntityRemoved
@@ -198,7 +199,7 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
             fields.forEach {
                 RenderField(it, onFieldChange = { changedField ->
                     entity = mapper.mapIntoEntity(entity, changedField)
-                    println("entity after mapping: $entity")
+                    log("entity after mapping: $entity")
 //                    onEntityChanged(mapper.mapIntoEntity(initialEntity, changedField))
                 })
             }
@@ -254,13 +255,10 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
     if (onFieldChange == null) {
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)
-            is EntityField.CaptionField -> RenderCaptionFieldReadOnly(field)
             is EntityField.EntityLink -> RenderEntityLinkReadOnly(field)
             is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
             is EntityField.StringField -> RenderTextFieldReadOnly(field)
-            is EntityField.FavoriteField -> RenderIsFavoriteFieldReadOnly(field)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
-            is EntityField.URLField -> RenderUrlFieldReadOnly(field)
             is EntityField.DateTimeField -> {}
             is EntityField.LongField -> {}
         }
@@ -269,19 +267,14 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
             is EntityField.BooleanField -> RenderBooleanField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.CaptionField -> RenderCaptionField(field)
             is EntityField.EntityLink -> RenderEntityLink(field, {}, {})
             is EntityField.EntityLinksList -> RenderEntityLinksList(field, {})
             is EntityField.StringField -> RenderTextField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.FavoriteField -> RenderIsFavoriteField(field,
-                onValueChange = { newValue -> onFieldChange(field.copy(isFavorite = newValue)) })
             is EntityField.FloatField -> RenderFloatField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.URLField -> RenderURLField(field,
-                onValueChange = { newValue -> onFieldChange(field.copy(url = newValue)) })
             is EntityField.DateTimeField -> {}
             is EntityField.LongField -> {}
         }

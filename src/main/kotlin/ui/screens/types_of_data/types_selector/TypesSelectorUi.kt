@@ -26,17 +26,9 @@ fun TypesSelectorUi(typesSelectorComponent: ITypesSelector) {
     val selectedType = remember(selectorState) { selectorState.selectedType }
 
 
-    val representationTypes = remember {
-        listOf(
-            ItemRepresentationType.Card,
-            ItemRepresentationType.Table
-        )
-    }
-
     Column(modifier = Modifier.fillMaxHeight().selectableGroup()) {
         //representation type selector
         RepresentationTypesSelector(
-            representationTypes = representationTypes,
             currentType = selectorState.itemRepresentationType,
             onTypeChanged = {
                 typesSelectorComponent.onItemRepresentationTypeChanged(it)
@@ -73,7 +65,10 @@ fun TypesSelectorUi(typesSelectorComponent: ITypesSelector) {
 
 @Composable
 fun RepresentationTypesSelector(
-    representationTypes: List<ItemRepresentationType>,
+    representationTypes: List<ItemRepresentationType> = listOf(
+        ItemRepresentationType.Card,
+        ItemRepresentationType.Table
+    ),
     currentType: ItemRepresentationType,
     onTypeChanged: (ItemRepresentationType) -> Unit
 ) {
