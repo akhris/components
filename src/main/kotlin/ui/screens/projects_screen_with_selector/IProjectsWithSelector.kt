@@ -13,13 +13,13 @@ import ui.screens.projects_screen_with_selector.projects_selector.IProjectsSelec
  * 2. Selector settings component
  *      Component that handles selection.
  */
-interface IEntitiesWithSelector {
+interface IProjectsWithSelector {
 
-    val listRouterState: Value<RouterState<*, ListChild>>
+    val detailsRouterState: Value<RouterState<*, DetailsChild>>
     val selectorRouterState: Value<RouterState<*, SelectorChild>>
 
-    sealed class ListChild{
-        class List(val component: IProjectDetails) : ListChild()
+    sealed class DetailsChild{
+        class Details(val component: IProjectDetails) : DetailsChild()
     }
 
     sealed class SelectorChild {

@@ -20,11 +20,11 @@ class ProjectWithSelector(
     componentContext: ComponentContext,
     private val getListUseCaseFactory: IGetListUseCaseFactory,
     private val getUseCaseFactory: IGetUseCaseFactory
-) : IEntitiesWithSelector,
+) : IProjectsWithSelector,
     ComponentContext by componentContext {
 
 
-    private val listRouter: Router<ProjectDetailsConfig, IEntitiesWithSelector.ListChild> =
+    private val listRouter: Router<ProjectDetailsConfig, IProjectsWithSelector.DetailsChild> =
         router(
             initialConfiguration = ProjectDetailsConfig.ProjectDetails(),
             key = "list_router",
@@ -39,16 +39,16 @@ class ProjectWithSelector(
             childFactory = ::createSelectorChild
         )
 
-    override val listRouterState: Value<RouterState<*, IEntitiesWithSelector.ListChild>> = listRouter.state
-    override val selectorRouterState: Value<RouterState<*, IEntitiesWithSelector.SelectorChild>> = selectorRouter.state
+    override val detailsRouterState: Value<RouterState<*, IProjectsWithSelector.DetailsChild>> = listRouter.state
+    override val selectorRouterState: Value<RouterState<*, IProjectsWithSelector.SelectorChild>> = selectorRouter.state
 
 
     private fun createSelectorChild(
         projectsFilterConfig: ProjectsSelectorConfig,
         componentContext: ComponentContext
-    ): IEntitiesWithSelector.SelectorChild {
+    ): IProjectsWithSelector.SelectorChild {
         return when (projectsFilterConfig) {
-            ProjectsSelectorConfig.Selector -> IEntitiesWithSelector.SelectorChild.Selector(
+            ProjectsSelectorConfig.Selector -> IProjectsWithSelector.SelectorChild.Selector(
                 ProjectsSelectorComponent(
                     componentContext = componentContext,
                     getProjectsList = getListUseCaseFactory.getListUseCase(Project::class) as GetProjectsList,
@@ -67,9 +67,9 @@ class ProjectWithSelector(
     private fun createListChild(
         projectDetailsConfig: ProjectDetailsConfig,
         componentContext: ComponentContext
-    ): IEntitiesWithSelector.ListChild {
+    ): IProjectsWithSelector.DetailsChild {
         return when (projectDetailsConfig) {
-            is ProjectDetailsConfig.ProjectDetails -> IEntitiesWithSelector.ListChild.List(
+            is ProjectDetailsConfig.ProjectDetails -> IProjectsWithSelector.DetailsChild.Details(
                 ProjectDetailsComponent(
                     componentContext = componentContext,
                     projectID = projectDetailsConfig.selectedProject,

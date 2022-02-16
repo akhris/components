@@ -5,8 +5,11 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import navigation.NavItem
 
-class NavigationRailComponent(private val onNavigateTo: (NavItem) -> Unit) :
-    INavigationRail{
+class NavigationRailComponent(
+    private val onNavigateTo: (NavItem) -> Unit,
+    private val onAddButtonClicked: (NavItem) -> Unit
+) :
+    INavigationRail {
 
     private val _models = MutableValue(
         INavigationRail.Model(
@@ -17,6 +20,11 @@ class NavigationRailComponent(private val onNavigateTo: (NavItem) -> Unit) :
 
     override val models: Value<INavigationRail.Model> = _models
 
+
+    override fun onAddButtonClicked() {
+        val currentDestination = _models.value.currentDestination
+        onAddButtonClicked(currentDestination)
+    }
 
     override fun onDestinationSelected(destination: NavItem) {
         onNavigateTo(destination)

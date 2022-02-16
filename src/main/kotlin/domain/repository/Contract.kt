@@ -13,3 +13,4 @@ interface IContainersRepository : IRepository<String, Container>, IRepositoryCal
 interface ISuppliersRepository : IRepository<String, Supplier>, IRepositoryCallback<Supplier>
 interface IItemIncomeRepository : IRepository<String, ItemIncome>, IRepositoryCallback<ItemIncome>
 interface IItemOutcomeRepository : IRepository<String, ItemOutcome>, IRepositoryCallback<ItemOutcome>
+interface IProjectRepository : IRepository<String, Project>, IRepositoryCallback<Project>

@@ -12,6 +12,12 @@ sealed class EntityFieldID {
     ) :
         EntityFieldID()
 
+//    data class EntityCountableID(
+//        override val tag: String,
+//        override val name: String
+//    ) :
+//        EntityID(tag, name)
+
     data class EntitiesListID(
         override val tag: String,
         override val name: String,
@@ -49,7 +55,7 @@ sealed class EntityFieldID {
         EntityFieldID()
 
 
-    companion object{
+    companion object {
         const val tag_name = "tag_name"
         const val tag_description = "tag_description"
     }

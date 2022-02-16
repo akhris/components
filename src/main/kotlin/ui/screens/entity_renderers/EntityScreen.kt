@@ -1,6 +1,5 @@
 package ui.screens.entity_renderers
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +20,7 @@ import org.kodein.di.instance
 import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import ui.theme.ContentSettings
 import ui.theme.DialogSettings
+import kotlin.reflect.KClass
 
 @Composable
 fun EntityScreen() {
@@ -39,11 +39,11 @@ fun <T : IEntity<*>> EntityScreenContent(
 
     val lazyColumnState = rememberLazyListState()
 
-    val headerElevation by animateDpAsState(
-        if (lazyColumnState.firstVisibleItemIndex == 0) {
-            ContentSettings.stickyHeaderElevationOnRest
-        } else ContentSettings.stickyHeaderElevationOnScroll
-    )
+//    val headerElevation by animateDpAsState(
+//        if (lazyColumnState.firstVisibleItemIndex == 0) {
+//            ContentSettings.stickyHeaderElevationOnRest
+//        } else ContentSettings.stickyHeaderElevationOnScroll
+//    )
 
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
@@ -170,10 +170,11 @@ fun <T : IEntity<*>> LazyListScope.renderTable(entities: List<T>, onEntityRemove
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
+fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntityChanged: (T) -> Unit,
-    onEntityRemoved: ((T) -> Unit)? = null
+    onEntityRemoved: ((T) -> Unit)? = null,
+    onAddEntityClicked: (() -> Unit)? = null
 ) {
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
@@ -197,11 +198,14 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             fields.forEach {
-                RenderField(it, onFieldChange = { changedField ->
-                    entity = mapper.mapIntoEntity(entity, changedField)
-                    log("entity after mapping: $entity")
+                RenderField(
+                    it,
+                    onFieldChange = { changedField ->
+                        entity = mapper.mapIntoEntity(entity, changedField)
+                        log("entity after mapping: $entity")
 //                    onEntityChanged(mapper.mapIntoEntity(initialEntity, changedField))
-                })
+                    }
+                )
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(
@@ -251,12 +255,16 @@ private fun <T : IEntity<*>> BoxScope.RenderCardEntity(
 }
 
 @Composable
-private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Unit)? = null) {
+private fun RenderField(
+    field: EntityField,
+    onFieldChange: ((EntityField) -> Unit)? = null
+) {
     if (onFieldChange == null) {
+        //render read-only mode
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)
-            is EntityField.EntityLink -> RenderEntityLinkReadOnly(field)
-            is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
+            is EntityField.EntityLink<*> -> RenderEntityLinkReadOnly(field)
+            is EntityField.EntityLinksList<*> -> RenderEntityLinksListReadOnly(field)
             is EntityField.StringField -> RenderTextFieldReadOnly(field)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
             is EntityField.DateTimeField -> {}
@@ -267,8 +275,20 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
             is EntityField.BooleanField -> RenderBooleanField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.EntityLink -> RenderEntityLink(field, {}, {})
-            is EntityField.EntityLinksList -> RenderEntityLinksList(field, {})
+            is EntityField.EntityLink<*> -> RenderEntityLink(field, {}, onEntityLinkClear = {
+                onFieldChange(field.copy(entity = null))
+            })
+            is EntityField.EntityLinksList<*> -> RenderEntityLinksList(
+                field,
+                onEntityLinkAdd = {
+                    //on add entity clicked
+                    println("going to add entity of type:")
+                    println(field.entities.mapNotNull { it.entity }.getEntityType())
+                },
+                onEntityLinkClear = {
+                    onFieldChange(field.copy(entities = field.entities.minus(it)))
+                }
+            )
             is EntityField.StringField -> RenderTextField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
@@ -281,4 +301,4 @@ private fun RenderField(field: EntityField, onFieldChange: ((EntityField) -> Uni
     }
 }
 
-
+inline fun <reified T : IEntity<*>> List<T>.getEntityType(): KClass<T> = T::class

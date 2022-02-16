@@ -14,6 +14,7 @@ import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IGetUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
@@ -41,7 +42,7 @@ fun RootUi() {
                 appSettingsRepository = appSettingsRepository,
                 updateUseCaseFactory = updateUseCaseFactory,
                 getListUseCaseFactory = listUseCaseFactory,
-                getUseCaseFactory =getUseCaseFactory
+                getUseCaseFactory = getUseCaseFactory
             )
         }
 
@@ -50,10 +51,25 @@ fun RootUi() {
 
         NavigationRailUi(NavigationRailComponent(onNavigateTo = {
             navHostComponent.setDestination(it.route)
+        }, onAddButtonClicked = {
+            handleAddButtonClicks(it)
         }))
 
         Box(modifier = Modifier.fillMaxHeight().weight(1f)) {
             NavHostUi(component = navHostComponent)
         }
+    }
+}
+
+private fun handleAddButtonClicks(navItem: NavItem) {
+    println("add button clicked at $navItem")
+    when (navItem) {
+        NavItem.DataTypes -> {}
+        NavItem.Income -> {}
+        NavItem.Outcome -> {}
+        NavItem.Places -> {}
+        NavItem.Projects -> {}
+        NavItem.Settings -> {}
+        NavItem.Warehouse -> {}
     }
 }

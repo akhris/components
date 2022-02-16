@@ -15,7 +15,8 @@ class UpdateUseCaseFactory(
     private val updateContainer: UpdateContainer,
     private val updateSupplier: UpdateSupplier,
     private val updateItemIncome: UpdateItemIncome,
-    private val updateItemOutcome: UpdateItemIncome
+    private val updateItemOutcome: UpdateItemIncome,
+    private val updateProject: UpdateProject
 ) : IUpdateUseCaseFactory {
 
     override fun <ID, T : IEntity<ID>> getUpdateUseCase(entityClass: KClass<out T>): UpdateEntity<ID, out T> {
@@ -26,8 +27,9 @@ class UpdateUseCaseFactory(
             ObjectType::class -> updateObjectType
             Container::class -> updateContainer
             Supplier::class -> updateSupplier
-            ItemIncome::class->updateItemIncome
-            ItemOutcome::class->updateItemOutcome
+            ItemIncome::class -> updateItemIncome
+            ItemOutcome::class -> updateItemOutcome
+            Project::class -> updateProject
             else -> throw IllegalArgumentException("not found update-use-case for entity class: $entityClass")
         }
         return a as UpdateEntity<ID, out T>

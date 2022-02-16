@@ -62,7 +62,9 @@ fun NavigationRailUi(component: NavigationRailComponent) {
                         .align(Alignment.CenterHorizontally)
                         .padding(8.dp),
                     backgroundColor = MaterialTheme.colors.primarySurface,
-                    onClick = {},
+                    onClick = {
+                        component.onAddButtonClicked()
+                    },
                     content = {
                         Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add button")
                     }

@@ -95,6 +95,7 @@ private fun PrepopulateDatabase() {
     val insertSupplier by di.instance<InsertSupplier>()
     val insertItemIncome by di.instance<InsertItemIncome>()
     val insertItemOutcome by di.instance<InsertItemOutcome>()
+    val insertProject by di.instance<InsertProject>()
 
     LaunchedEffect(wasInitialized) {
         if (!wasInitialized) {
@@ -163,6 +164,10 @@ private fun PrepopulateDatabase() {
 
             listOf(Outcomes.outcome1, Outcomes.outcome2).forEach {
                 insertItemOutcome(InsertEntity.Insert(it))
+            }
+
+            listOf(Projects.project1, Projects.project2).forEach {
+                insertProject(InsertEntity.Insert(it))
             }
 
             wasInitialized = true

@@ -1,10 +1,7 @@
 package di
 
 import domain.entities.fieldsmappers.FieldsMapperFactory
-import domain.entities.usecase_factories.GetListUseCaseFactory
-import domain.entities.usecase_factories.IGetListUseCaseFactory
-import domain.entities.usecase_factories.IUpdateUseCaseFactory
-import domain.entities.usecase_factories.UpdateUseCaseFactory
+import domain.entities.usecase_factories.*
 import domain.repository.RepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -28,6 +25,7 @@ val di = DI {
     import(suppliersModule)
     import(itemIncomeModule)
     import(itemOutcomeModule)
+    import(projectModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }
@@ -52,12 +50,29 @@ val di = DI {
             instance(),
             instance(),
             instance(),
+            instance(),
             instance()
         )
     }
 
     bindSingleton<IUpdateUseCaseFactory> {
         UpdateUseCaseFactory(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+
+    }
+
+    bindSingleton<IGetUseCaseFactory> {
+        GetUseCaseFactory(
+            instance(),
             instance(),
             instance(),
             instance(),

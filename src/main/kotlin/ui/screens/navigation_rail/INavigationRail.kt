@@ -8,6 +8,7 @@ interface INavigationRail {
     val models: Value<Model>
 
     fun onDestinationSelected(destination: NavItem)
+    fun onAddButtonClicked()
 
     data class Model(
         val destinations: List<NavItem>,

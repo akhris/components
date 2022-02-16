@@ -19,6 +19,7 @@ class FieldsMapperFactory {
             Supplier::class -> SupplierFieldsMapper()
             ItemIncome::class -> ItemIncomeFieldsMapper()
             ItemOutcome::class -> ItemOutcomeFieldsMapper()
+            Project::class -> ProjectFieldsMapper()
             else -> throw IllegalArgumentException("$this cannot get factory for $entityClass")
         } as IFieldsMapper<T>
     }

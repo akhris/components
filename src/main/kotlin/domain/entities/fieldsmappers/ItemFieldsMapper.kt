@@ -52,7 +52,8 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
                     else -> setValue(entity, field)
                 }
             }
-            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
+            is EntityFieldID.EntitiesListID -> entity.copy(values = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity } as List<Value>)
+            else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
         }
     }
 
