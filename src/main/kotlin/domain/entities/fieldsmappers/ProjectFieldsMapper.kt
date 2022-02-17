@@ -18,9 +18,11 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 entitiesIDs = entity.items.mapIndexed { index, item ->
                     EntityFieldID.EntityID(
                         tag = "$tag_items$index",
-                        name = "item ${index + 1}"
+                        name = "item ${index + 1}",
+                        entityClass = Item::class
                     )
-                }
+                },
+                entityClass = Item::class
             )
         )
     }

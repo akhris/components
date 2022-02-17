@@ -13,8 +13,8 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
 
     override fun getEntityIDs(entity: ItemOutcome): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = tag_item, name = "item"),
-            EntityFieldID.EntityID(tag = tag_container, name = "container"),
+            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
+            EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
             EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
             EntityFieldID.DateTimeID(tag = tag_date_time, name = "date")
         )
@@ -42,8 +42,8 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         return when (val fieldID = field.fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_item -> entity.copy(item = (field as? EntityField.EntityLink<ItemOutcome>)?.entity as? Item)
-                    tag_container -> entity.copy(container = (field as? EntityField.EntityLink<ItemOutcome>)?.entity as? Container)
+                    tag_item -> entity.copy(item = (field as? EntityField.EntityLink)?.entity as? Item)
+                    tag_container -> entity.copy(container = (field as? EntityField.EntityLink)?.entity as? Container)
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }

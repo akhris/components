@@ -41,7 +41,8 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                         val entityField = getFieldParamsByFieldID(entity, entityID)
                         mapEntity(entityID, entityField)
                     },
-                    description = fieldParams.description
+                    description = fieldParams.description,
+                    entityClass = fieldID.entityClass
                 )
             }
             is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
@@ -60,7 +61,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
     private fun mapEntity(
         fieldID: EntityFieldID.EntityID,
         fieldParams: DescriptiveFieldValue
-    ): EntityField.EntityLink<T> {
+    ): EntityField.EntityLink {
 
         val entity: T?
         val count: Long?
@@ -85,7 +86,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         return EntityField.EntityLink(
             fieldID = fieldID,
             entity = entity,
-//            entityClass = entity::class,
+            entityClass = fieldID.entityClass,
             description = fieldParams.description,
             count = count
         )

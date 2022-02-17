@@ -17,6 +17,8 @@ import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
+import ui.screens.entity_select_dialog.EntityPickerMultiDialog
+import ui.screens.entity_select_dialog.EntityPickerSingleDialog
 import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import ui.theme.ContentSettings
 import ui.theme.DialogSettings
@@ -259,12 +261,16 @@ private fun RenderField(
     field: EntityField,
     onFieldChange: ((EntityField) -> Unit)? = null
 ) {
+    var showSelectEntityDialog by remember { mutableStateOf<KClass<out IEntity<*>>?>(null) }
+    var showSelectEntitiesDialog by remember { mutableStateOf<KClass<out IEntity<*>>?>(null) }
+
+
     if (onFieldChange == null) {
         //render read-only mode
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)
-            is EntityField.EntityLink<*> -> RenderEntityLinkReadOnly(field)
-            is EntityField.EntityLinksList<*> -> RenderEntityLinksListReadOnly(field)
+            is EntityField.EntityLink -> RenderEntityLinkReadOnly(field)
+            is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
             is EntityField.StringField -> RenderTextFieldReadOnly(field)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
             is EntityField.DateTimeField -> {}
@@ -275,15 +281,21 @@ private fun RenderField(
             is EntityField.BooleanField -> RenderBooleanField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.EntityLink<*> -> RenderEntityLink(field, {}, onEntityLinkClear = {
+            is EntityField.EntityLink -> RenderEntityLink(field, onEntityLinkSelect = {
+                //on entity select clicked
+                println("going to select entity of type:")
+                println(field.entityClass)
+                showSelectEntityDialog = field.entityClass
+            }, onEntityLinkClear = {
                 onFieldChange(field.copy(entity = null))
             })
-            is EntityField.EntityLinksList<*> -> RenderEntityLinksList(
+            is EntityField.EntityLinksList -> RenderEntityLinksList(
                 field,
                 onEntityLinkAdd = {
                     //on add entity clicked
                     println("going to add entity of type:")
-                    println(field.entities.mapNotNull { it.entity }.getEntityType())
+                    println(field.entityClass)
+                    showSelectEntitiesDialog = field.entityClass
                 },
                 onEntityLinkClear = {
                     onFieldChange(field.copy(entities = field.entities.minus(it)))
@@ -298,6 +310,26 @@ private fun RenderField(
             is EntityField.DateTimeField -> {}
             is EntityField.LongField -> {}
         }
+    }
+
+    showSelectEntityDialog?.let {
+        EntityPickerSingleDialog(
+            it,
+            onDismiss = { showSelectEntityDialog = null },
+            onEntitySelected = {
+
+            }
+        )
+    }
+
+    showSelectEntitiesDialog?.let {
+        EntityPickerMultiDialog(
+            it,
+            onDismiss = { showSelectEntitiesDialog = null },
+            onEntitiesSelected = {
+
+            }
+        )
     }
 }
 

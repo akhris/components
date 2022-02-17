@@ -1,14 +1,18 @@
 package domain.entities.fieldsmappers
 
+import com.akhris.domain.core.entities.IEntity
+import kotlin.reflect.KClass
+
 
 sealed class EntityFieldID {
 
     abstract val name: String
     abstract val tag: String
 
-    data class EntityID(
+    data class EntityID constructor(
         override val tag: String,
-        override val name: String
+        override val name: String,
+        val entityClass: KClass<out IEntity<*>>
     ) :
         EntityFieldID()
 
@@ -21,7 +25,8 @@ sealed class EntityFieldID {
     data class EntitiesListID(
         override val tag: String,
         override val name: String,
-        val entitiesIDs: List<EntityID> = listOf()
+        val entitiesIDs: List<EntityID> = listOf(),
+        val entityClass: KClass<out IEntity<*>>
     ) : EntityFieldID()
 
     data class StringID(

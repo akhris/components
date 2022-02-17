@@ -79,7 +79,7 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderEntityLink(
-    field: EntityField.EntityLink<*>,
+    field: EntityField.EntityLink,
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: () -> Unit
 ) {
@@ -131,9 +131,9 @@ fun RenderEntityLink(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderEntityLinksList(
-    field: EntityField.EntityLinksList<*>,
+    field: EntityField.EntityLinksList,
     onEntityLinkAdd: () -> Unit,
-    onEntityLinkClear: (EntityField.EntityLink<*>) -> Unit
+    onEntityLinkClear: (EntityField.EntityLink) -> Unit
 ) {
     Column {
         ListItem(

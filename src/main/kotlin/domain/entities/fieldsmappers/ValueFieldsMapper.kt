@@ -13,7 +13,7 @@ class ValueFieldsMapper : BaseFieldsMapper<Value>() {
         return listOf(
             EntityFieldID.StringID(tag = tag_value, name = "value"),
             EntityFieldID.FloatID(tag = tag_factor, name = "factor"),
-            EntityFieldID.EntityID(tag = tag_parameter, name = "parameter")
+            EntityFieldID.EntityID(tag = tag_parameter, name = "parameter", entityClass = Parameter::class)
         )
     }
 

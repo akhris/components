@@ -12,11 +12,11 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
 
     override fun getEntityIDs(entity: ItemIncome): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = tag_item, name = "item"),
-            EntityFieldID.EntityID(tag = tag_container, name = "container"),
+            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
+            EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
 //            EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
             EntityFieldID.DateTimeID(tag = tag_date_time, name = "date"),
-            EntityFieldID.EntityID(tag = tag_supplier, name = "supplier")
+            EntityFieldID.EntityID(tag = tag_supplier, name = "supplier", entityClass = Supplier::class)
         )
     }
 

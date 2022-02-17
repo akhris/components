@@ -30,6 +30,7 @@ open class BaseEntityTestRepository<ID : Any, T : IEntity<ID>> : BaseCachedRepos
     protected open suspend fun query(specification: Specification): List<T> {
         return when (specification) {
             Specification.QueryAll -> repo.values.toList()
+            is Specification.Search -> repo.values.toList()
         }
     }
 

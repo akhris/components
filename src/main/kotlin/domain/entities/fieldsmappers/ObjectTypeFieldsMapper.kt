@@ -16,9 +16,11 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                 entitiesIDs = entity.parameters.mapIndexed { index, parameter ->
                     EntityFieldID.EntityID(
                         tag = "$tag_parameters$index",
-                        name = "parameter ${index + 1}"
+                        name = "parameter ${index + 1}",
+                        entityClass = Parameter::class
                     )
-                }
+                },
+                entityClass = Parameter::class
             )
         )
     }

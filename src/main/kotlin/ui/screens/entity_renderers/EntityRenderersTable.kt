@@ -53,7 +53,7 @@ fun RowScope.RenderBooleanFieldCell(
 fun RowScope.RenderEntityLinkFieldCell(
     modifier: Modifier = Modifier,
     field: EntityField.EntityLink,
-    onValueChange: (IEntity<out Any>?) -> Unit
+    onValueChange: (IEntity<*>?) -> Unit
 ) {
     Text(
         modifier = modifier.fillMaxWidth().align(Alignment.CenterVertically).clickable { onValueChange(field.entity) },

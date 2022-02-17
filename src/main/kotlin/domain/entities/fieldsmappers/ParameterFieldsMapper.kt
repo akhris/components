@@ -11,7 +11,7 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
         return listOf(
             EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
             EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),
-            EntityFieldID.EntityID(tag = tag_unit, name = "unit")
+            EntityFieldID.EntityID(tag = tag_unit, name = "unit", entityClass = Unit::class)
         )
     }
 

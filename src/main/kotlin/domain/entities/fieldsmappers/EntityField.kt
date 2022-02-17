@@ -3,6 +3,7 @@ package domain.entities.fieldsmappers
 import com.akhris.domain.core.entities.IEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.KClass
 
 sealed class EntityField {
     abstract val fieldID: EntityFieldID
@@ -51,11 +52,11 @@ sealed class EntityField {
         override fun toString(): String = value?.format(DateTimeFormatter.BASIC_ISO_DATE) ?: "no date"
     }
 
-    data class EntityLink<T : IEntity<*>>(
+    data class EntityLink constructor(
         override val fieldID: EntityFieldID,
         override val description: String,
-        val entity: T?,
-//        val entityClass: KClass<T>,
+        val entity: IEntity<*>?,
+        val entityClass: KClass<out IEntity<*>>,
         val count: Long? = null
     ) : EntityField() {
         override fun toString(): String = entity?.toString() ?: description
@@ -70,15 +71,16 @@ sealed class EntityField {
 //        override fun toString(): String  = entity?.toString()?:description
 //    }
 
-    data class EntityLinksList<T : IEntity<*>>(
+    data class EntityLinksList(
         override val fieldID: EntityFieldID,
         override val description: String,
-        val entities: List<EntityLink<T>>
+        val entities: List<EntityLink>,
+        val entityClass: KClass<out IEntity<*>>
     ) : EntityField() {
         override fun toString(): String = description
     }
 }
 
-fun EntityField.EntityLink<IEntity<*>>.getName(): String {
+fun EntityField.EntityLink.getName(): String {
     return entity?.toString()?.ifEmpty { fieldID.name } ?: ""
 }
