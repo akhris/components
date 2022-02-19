@@ -27,6 +27,9 @@ import domain.entities.fieldsmappers.IFieldsMapper
 import domain.entities.fieldsmappers.flatten
 import test.Containers
 
+/**
+ * Renders list of entities in a table-mode.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFieldsMapper<T>) {
@@ -95,7 +98,9 @@ fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFields
 
 }
 
-
+/**
+ * Renders entity's field cell
+ */
 @Composable
 private fun RowScope.RenderEntityFieldCell(
     modifier: Modifier = Modifier,

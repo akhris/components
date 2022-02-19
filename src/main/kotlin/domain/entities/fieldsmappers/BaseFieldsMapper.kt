@@ -1,7 +1,6 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
-import domain.entities.EntityCountable
 import java.time.LocalDateTime
 
 abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
@@ -39,7 +38,14 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                     fieldID = fieldID,
                     entities = fieldID.entitiesIDs.map { entityID ->
                         val entityField = getFieldParamsByFieldID(entity, entityID)
-                        mapEntity(entityID, entityField)
+                        EntityField.EntityLink(
+                            fieldID = fieldID,
+                            entity = entityField.value as? T,
+                            entityClass = fieldID.entityClass,
+                            description = fieldParams.description,
+                            count = entityField.count
+                        )
+//                        mapEntity(entityID, entityField)
                     },
                     description = fieldParams.description,
                     entityClass = fieldID.entityClass
@@ -63,24 +69,23 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         fieldParams: DescriptiveFieldValue
     ): EntityField.EntityLink {
 
-        val entity: T?
-        val count: Long?
+        val entity: T? = fieldParams.value as? T
+        val count: Long? = fieldParams.count
 
-        when (val e = fieldParams.value) {
-            is IEntity<*> -> {
-                entity = e as T
-                count = null
-            }
-            is EntityCountable<*> -> {
-                entity = e.entity as T
-                count = e.count
-            }
-            else -> {
-                entity = null
-                count = null
-            }
-        }
-
+//        when (val e = fieldParams.value) {
+//            is IEntity<*> -> {
+//                entity = e as T
+//                count = null
+//            }
+//            is EntityCountable<*> -> {
+//                entity = e.entity as T
+//                count = e.count
+//            }
+//            else -> {
+//                entity = null
+//                count = null
+//            }
+//        }
 
 
         return EntityField.EntityLink(
@@ -96,4 +101,8 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 }
 
 
-data class DescriptiveFieldValue constructor(val value: Any? = null, val description: String = "")
+data class DescriptiveFieldValue constructor(
+    val value: Any? = null,
+    val description: String = "",
+    val count: Long? = null
+)

@@ -68,7 +68,10 @@ fun <T : IEntity<*>> EntityPickerSingleDialog(
                     spec = Specification.Search(it)
                 },
                 onCancelClicked = onDismiss,
-                onEntitySelected = onEntitySelected
+                onEntitySelected = {
+                    onEntitySelected(it)
+                    onDismiss()
+                }
             )
         })
 
@@ -169,6 +172,7 @@ private fun <T : IEntity<*>> EntityPickerSingleDialogContent(
 
             Button(modifier = Modifier.padding(4.dp), onClick = {
                 onEntitySelected(selectedEntity)
+
             }) {
                 Text(text = "ok")
             }

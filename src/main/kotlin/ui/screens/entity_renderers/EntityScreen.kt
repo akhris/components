@@ -3,7 +3,6 @@ package ui.screens.entity_renderers
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -14,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.log
 import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
@@ -24,13 +24,10 @@ import ui.theme.ContentSettings
 import ui.theme.DialogSettings
 import kotlin.reflect.KClass
 
-@Composable
-fun EntityScreen() {
-
-}
-
-
-@OptIn(ExperimentalMaterialApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+/**
+ * Entity screen content - renders list of Entities in a way that depends on [itemRepresentationType] parameter.
+ */
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
@@ -41,37 +38,10 @@ fun <T : IEntity<*>> EntityScreenContent(
 
     val lazyColumnState = rememberLazyListState()
 
-//    val headerElevation by animateDpAsState(
-//        if (lazyColumnState.firstVisibleItemIndex == 0) {
-//            ContentSettings.stickyHeaderElevationOnRest
-//        } else ContentSettings.stickyHeaderElevationOnScroll
-//    )
-
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
 
     val mapper = remember(entities, factory) { entities.firstOrNull()?.let { factory.getFieldsMapper(it::class) } }
-
-
-    //main title
-//        entityType?.let {
-//            stickyHeader(key = "main title") {
-//                Surface(modifier = Modifier.fillMaxWidth(), elevation = headerElevation) {
-//                    ListItem(
-//                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 2.dp),
-//                        text = {
-//                            Text(
-//                                text = entityType.name?.toLocalizedString() ?: "",
-//                                style = MaterialTheme.typography.h3
-//                            )
-//                        },
-//                        secondaryText = {
-//                            Text(text = entityType.description?.toLocalizedString() ?: "")
-//                        }
-//                    )
-//                }
-//            }
-//        }
 
     //content depending on representation type:
     when (itemRepresentationType) {
@@ -98,78 +68,16 @@ fun <T : IEntity<*>> EntityScreenContent(
             mapper?.let {
                 EntityTableContent(entities = entities, fieldsMapper = it)
             }
-//                stickyHeader(key = "table_header") {
-//                    LazyRow {
-//                        itemsIndexed(fieldsSet.toList()) { index, field ->
-//                            Text(
-//                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
-//                                text = field.name
-//                            )
-//                        }
-//                    }
-//                }
-//
-//                itemsIndexed(entities) { index, entity ->
-//                    val fields = fieldsSet.mapNotNull { mapper?.getFieldByID(entity, fieldsSet.elementAt(index)) }
-//                    LazyRow {
-//                        items(fields) {
-//
-//                            Text(
-//                                modifier = Modifier.border(width = 2.dp, color = Color.DarkGray).padding(4.dp),
-//                                text = when (it) {
-//                                    is EntityField.BooleanField -> it.value.toString()
-//                                    is EntityField.CaptionField -> it.caption
-//                                    is EntityField.EntityLink -> ""
-//                                    is EntityField.EntityLinksList -> ""
-//                                    is EntityField.FavoriteField -> it.isFavorite.toString()
-//                                    is EntityField.FloatField -> it.value.toString()
-//                                    is EntityField.StringField -> it.value
-//                                    is EntityField.URLField -> it.url
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-
-
         }
-
-//        entities.forEach { entity ->
-//            RenderEntity(
-//                entity,
-//                onEntityChanged = { println("entity changed: $it") },
-//                onEntityRemoved = onEntityRemoved
-//            )
-//        }
     }
 
 
 }
 
-@Composable
-fun <T : IEntity<*>> LazyListScope.renderCards(entities: List<T>, onEntityRemoved: ((T) -> Unit)? = null) {
-
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun <T : IEntity<*>> LazyListScope.renderTable(entities: List<T>, onEntityRemoved: ((T) -> Unit)? = null) {
-
-
-//
-//    items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
-//
-//
-//        Box(modifier = Modifier.fillMaxWidth()) {
-//            RenderCardEntity(
-//                entity,
-//                onEntityChanged = { println("entity changed: $entity") },
-//                onEntityRemoved = onEntityRemoved
-//            )
-//        }
-//    })
-}
-
+/**
+ * Renders entity in a card way - all it's fields in a column one by one.
+ * At the bottom of the card there are three buttons: delete entity, save changes and discard changes.
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : IEntity<*>> BoxScope.RenderCardEntity(
@@ -256,6 +164,10 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     }
 }
 
+/**
+ * Renders [EntityField] depending on it's type. And depending on [onFieldChange] callback.
+ * If callback is null - render in read-only mode.
+ */
 @Composable
 private fun RenderField(
     field: EntityField,
@@ -312,25 +224,47 @@ private fun RenderField(
         }
     }
 
-    showSelectEntityDialog?.let {
+    showSelectEntityDialog?.let { entityClass ->
         EntityPickerSingleDialog(
-            it,
+            entityClass,
             onDismiss = { showSelectEntityDialog = null },
-            onEntitySelected = {
-
+            onEntitySelected = { changedEntity ->
+                val changedField = (field as? EntityField.EntityLink)?.copy(entity = changedEntity)
+                changedField?.let { cf ->
+                    onFieldChange?.invoke(cf)
+                }
             }
         )
     }
 
-    showSelectEntitiesDialog?.let {
-        EntityPickerMultiDialog(
-            it,
-            onDismiss = { showSelectEntitiesDialog = null },
-            onEntitiesSelected = {
+    showSelectEntitiesDialog?.let { entityClass ->
 
-            }
+        val fieldToChange = field as? EntityField.EntityLinksList
+
+        EntityPickerMultiDialog(
+            entityClass,
+            onDismiss = { showSelectEntitiesDialog = null },
+            onEntitiesSelected = { changedEntitiesList ->
+                fieldToChange?.let { ell ->
+                    onFieldChange?.invoke(
+                        ell.copy(
+                            entities =
+                            changedEntitiesList.map {
+                                EntityField.EntityLink(
+                                    fieldID = EntityFieldID.EntityID(
+                                        tag = "",
+                                        name = "",
+                                        entityClass = entityClass
+                                    ),
+                                    entity = it,
+                                    entityClass = entityClass
+                                )
+                            }
+                        )
+                    )
+                }
+            },
+            initialSelection = fieldToChange?.entities?.mapNotNull { it.entity } ?: listOf()
         )
     }
 }
-
-inline fun <reified T : IEntity<*>> List<T>.getEntityType(): KClass<T> = T::class

@@ -29,7 +29,11 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
                         description = "container where item was put"
                     )
                     tag_supplier -> DescriptiveFieldValue(entity.supplier, description = "where items has come from")
-                    tag_item->DescriptiveFieldValue(entity.item , description = "item that came")
+                    tag_item -> DescriptiveFieldValue(
+                        entity.item?.entity,
+                        description = "item that came",
+                        count = entity.item?.count
+                    )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }

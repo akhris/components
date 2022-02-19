@@ -80,9 +80,8 @@ data class ItemIncome(
 
 data class ItemOutcome(
     override val id: String = IDUtils.newID(),
-    val item: Item? = null,
+    val item: EntityCountable<Item>? = null,
     val container: Container? = null,
-    val quantity: Long = 0L,
     val dateTime: LocalDateTime?
 ) : IEntity<String>
 
@@ -105,7 +104,7 @@ data class Project(
 ) : IEntity<String>
 
 
-data class EntityCountable<T : IEntity<*>>(
+data class EntityCountable<T : IEntity<*>> constructor(
     val entity: T,
     val count: Long
 )

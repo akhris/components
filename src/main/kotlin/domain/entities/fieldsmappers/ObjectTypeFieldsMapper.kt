@@ -47,7 +47,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
             is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
             is EntityFieldID.EntityID -> setParameter(entity, field)
                 ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
-            is EntityFieldID.EntitiesListID -> entity.copy(parameters = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity } as List<Parameter>)
+            is EntityFieldID.EntitiesListID -> entity.copy(parameters = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity as? Parameter })
             else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }
     }

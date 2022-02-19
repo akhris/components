@@ -1,6 +1,7 @@
 package domain.entities.fieldsmappers
 
 import domain.entities.Container
+import domain.entities.EntityCountable
 import domain.entities.Item
 import domain.entities.ItemOutcome
 
@@ -24,7 +25,11 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_item -> DescriptiveFieldValue(entity.item, description = "item that came")
+                    tag_item -> DescriptiveFieldValue(
+                        entity.item?.entity,
+                        description = "item that came",
+                        count = entity.item?.count
+                    )
                     tag_container -> DescriptiveFieldValue(
                         entity.container,
                         description = "container where item was put"
@@ -32,7 +37,7 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-            is EntityFieldID.LongID -> DescriptiveFieldValue(entity.quantity, description = "quantity of items")
+//            is EntityFieldID.LongID -> DescriptiveFieldValue(entity.quantity, description = "quantity of items")
             is EntityFieldID.DateTimeID -> DescriptiveFieldValue(entity.dateTime, description = "when items came")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
@@ -42,12 +47,17 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         return when (val fieldID = field.fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_item -> entity.copy(item = (field as? EntityField.EntityLink)?.entity as? Item)
+                    tag_item -> {
+                        val item = (field as? EntityField.EntityLink)?.entity as? Item
+                            ?: throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+                        val count = (field as? EntityField.EntityLink)?.count ?: 0L
+                        entity.copy(item = EntityCountable(item, count))
+                    }
                     tag_container -> entity.copy(container = (field as? EntityField.EntityLink)?.entity as? Container)
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-            is EntityFieldID.LongID -> entity.copy(quantity = (field as? EntityField.LongField)?.value ?: 0L)
+//            is EntityFieldID.LongID -> entity.copy(quantity = (field as? EntityField.LongField)?.value ?: 0L)
             is EntityFieldID.DateTimeID -> entity.copy(dateTime = (field as? EntityField.DateTimeField)?.value)
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }

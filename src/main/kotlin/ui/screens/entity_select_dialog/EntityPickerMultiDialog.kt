@@ -33,6 +33,7 @@ import kotlin.reflect.KClass
 @Composable
 fun <T : IEntity<*>> EntityPickerMultiDialog(
     entityClass: KClass<out T>,
+    initialSelection: List<T> = listOf(),
     onDismiss: () -> Unit,
     onEntitiesSelected: (List<T>) -> Unit
 ) {
@@ -58,9 +59,19 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
         title = "select ${entityClass.simpleName}",
         onCloseRequest = onDismiss,
         content = {
-            EntityMultiSelectDialogContent(entities = entities, fieldsMapper = fieldsMapper, onSearchStringChanged = {
-                spec = Specification.Search(it)
-            }, onCancelClicked = onDismiss, onEntitiesSelected = onEntitiesSelected)
+            EntityMultiSelectDialogContent(
+                entities = entities,
+                fieldsMapper = fieldsMapper,
+                initialSelection = initialSelection,
+                onSearchStringChanged = {
+                    spec = Specification.Search(it)
+                },
+                onCancelClicked = onDismiss,
+                onEntitiesSelected = {
+                    onEntitiesSelected(it)
+                    onDismiss()
+                }
+            )
         })
 
 
@@ -75,6 +86,7 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
 private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
     entities: List<T>,
     fieldsMapper: IFieldsMapper<T>,
+    initialSelection: List<T> = listOf(),
     onSearchStringChanged: (String) -> Unit,
     onCancelClicked: () -> Unit,
     onEntitiesSelected: (List<T>) -> Unit
@@ -82,7 +94,7 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
 
     var searchString by remember { mutableStateOf("") }
 
-    val checksMap = remember { mutableStateMapOf<T, Boolean>() }
+    val checksMap = remember { initialSelection.map { it to true }.toMutableStateMap() }
 
 
 

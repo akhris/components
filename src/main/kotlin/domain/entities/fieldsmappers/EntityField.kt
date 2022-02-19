@@ -5,6 +5,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
+/**
+ * Value of the entity's field
+ */
 sealed class EntityField {
     abstract val fieldID: EntityFieldID
     abstract val description: String
@@ -54,24 +57,15 @@ sealed class EntityField {
 
     data class EntityLink constructor(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val description: String = "",
         val entity: IEntity<*>?,
         val entityClass: KClass<out IEntity<*>>,
         val count: Long? = null
     ) : EntityField() {
         override fun toString(): String = entity?.toString() ?: description
     }
-//
-//    data class EntityCountableLink(
-//        override val fieldID: EntityFieldID,
-//        override val description: String,
-//        val entity: IEntity<out Any>?,
-//        val count: Long
-//    ) : EntityField(){
-//        override fun toString(): String  = entity?.toString()?:description
-//    }
 
-    data class EntityLinksList(
+    data class EntityLinksList constructor(
         override val fieldID: EntityFieldID,
         override val description: String,
         val entities: List<EntityLink>,
