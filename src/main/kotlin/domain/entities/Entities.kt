@@ -49,6 +49,7 @@ data class Value(
 /**
  * e.g. m, cm, km
  */
+//@FieldsEntity
 data class Unit(
     override val id: String = IDUtils.newID(),
     val unit: String = "",
@@ -86,6 +87,13 @@ data class ItemOutcome(
 ) : IEntity<String>
 
 
+data class WarehouseItem(
+    override val id: String = IDUtils.newID(),
+    val item: Item? = null,
+    val container: Container? = null,
+    val count: Long = 0L
+) : IEntity<String>
+
 data class Supplier(
     override val id: String = IDUtils.newID(),
     val name: String = "",
@@ -108,7 +116,3 @@ data class EntityCountable<T : IEntity<*>> constructor(
     val entity: T,
     val count: Long
 )
-
-interface ICountable {
-    val count: Long
-}

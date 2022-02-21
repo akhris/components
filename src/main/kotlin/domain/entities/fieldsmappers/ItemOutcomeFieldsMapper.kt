@@ -16,7 +16,7 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         return listOf(
             EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
             EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
-            EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
+//            EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
             EntityFieldID.DateTimeID(tag = tag_date_time, name = "date")
         )
     }

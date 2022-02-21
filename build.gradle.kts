@@ -1,11 +1,14 @@
+
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
 plugins {
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.serialization") version "1.6.10"
-    id("org.jetbrains.compose") version "1.0.1"
+    kotlin("jvm")
+    kotlin("kapt")
+    kotlin("plugin.serialization")
+    id("org.jetbrains.compose")
 }
 
 val exposedVersion: String by project
@@ -17,7 +20,7 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    maven ( "https://jitpack.io")
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -43,12 +46,15 @@ dependencies {
     //serialization:
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
 
     //decompose:
     implementation("com.arkivanov.decompose:decompose:0.5.1")
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.1")
+
+    //annotation processing:
+    compileOnly("com.squareup:kotlinpoet:1.10.2")
 
 }
 
