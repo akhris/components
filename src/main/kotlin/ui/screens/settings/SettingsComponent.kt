@@ -3,8 +3,11 @@ package ui.screens.settings
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import settings.AppSetting
 import settings.AppSettingsRepository
+
 
 class SettingsComponent(
     componentContext: ComponentContext,
@@ -14,7 +17,7 @@ class SettingsComponent(
     ComponentContext by componentContext {
 
 
-    override val state: Value<ISettings.Model> =
+    override val state: Flow<ISettings.Model> =
         appSettingsRepository
             .settingsValue
             .map { appsettings ->

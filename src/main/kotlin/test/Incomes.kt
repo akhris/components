@@ -18,4 +18,10 @@ object Incomes {
         dateTime = LocalDateTime.of(2020, Month.APRIL, 2, 10, 0),
         supplier = Suppliers.dkoElectronshik
     )
+    val income3 = ItemIncome(
+        item = EntityCountable(Items.Resistors.resistor2, 40L),
+        container = Containers.box3,
+        dateTime = LocalDateTime.of(2020, Month.APRIL, 3, 10, 0),
+        supplier = Suppliers.dkoElectronshik
+    )
 }

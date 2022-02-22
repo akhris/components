@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import settings.AppSetting
 import strings.Strings
 import ui.composable.ScrollableBox
@@ -21,7 +20,7 @@ import kotlin.io.path.extension
 @Composable
 fun SettingsUi(settingsComponent: ISettings) {
 
-    val settings by settingsComponent.state.subscribeAsState()
+    val settings by settingsComponent.state.collectAsState(null)
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -36,7 +35,7 @@ fun SettingsUi(settingsComponent: ISettings) {
         }
         ScrollableBox(modifier = Modifier.weight(1f).padding(horizontal = 32.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(32.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-                settings.settings.forEach {
+                settings?.settings?.forEach {
                     when (val s = it.setting) {
                         is AppSetting.BooleanSetting -> {
                             SwitchPreference(
@@ -61,17 +60,6 @@ fun SettingsUi(settingsComponent: ISettings) {
                         }
                     }
                 }
-//                val isLightTheme by remember(settingsRepository) { settingsRepository.isLightTheme }.collectAsState(null)
-//                val dbLocation by remember(settingsRepository) { settingsRepository.dbLocation }.collectAsState(null)
-//
-//
-//                DatabaseLocationPicker(dbLocation ?: "") {
-//                    settingsRepository.setDBLocation(it)
-//                }
-//
-//                LightDarkThemeSelector(isLightTheme ?: true) {
-//                    settingsRepository.setIsLightTheme(it)
-//                }
             }
         }
     }

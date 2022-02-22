@@ -1,21 +1,23 @@
 package settings
 
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
+import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import utils.FileUtils
-import com.akhris.domain.core.utils.log
 import utils.replace
 import kotlin.io.path.*
 
 class AppSettingsRepository(private val scope: CoroutineScope) {
 
-    private val _settingsValue = MutableValue(AppSettings(listOf()))
+    private val _settingsValue = MutableStateFlow(AppSettings(listOf()))
 
-    val settingsValue: Value<AppSettings> = _settingsValue
+    val settingsValue: StateFlow<AppSettings> = _settingsValue
 
     private val currentUserPath = System.getProperty("user.home")       //"/home/user"
     private val componentsSupPath = ".components_app"
@@ -57,6 +59,16 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
         }
     }
 
+    fun observeSetting(key: String): Flow<AppSetting?> {
+        return _settingsValue
+            .map {
+                it.settings.find { s -> s.key == key }
+            }
+    }
+
+    fun getSetting(key: String): AppSetting? {
+        return _settingsValue.value.settings.find { it.key == key }
+    }
 
     private suspend fun setSetting(appSetting: AppSetting) {
         val currentSettings = _settingsValue.value ?: AppSettings(listOf())

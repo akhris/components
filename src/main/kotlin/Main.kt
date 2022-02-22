@@ -10,10 +10,13 @@ import com.akhris.domain.core.application.InsertEntity
 import com.akhris.domain.core.utils.LogUtils
 import di.di
 import domain.application.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import navigation.Screen
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import settings.AppSetting
 import settings.AppSettingsRepository
 import test.*
 import ui.screens.root.RootUi
@@ -40,12 +43,19 @@ private fun mainWindow() = withDI(di) {
     val settingsRepository: AppSettingsRepository by di.instance()
 
     PrepopulateDatabase()
-//
-//    val isLightTheme by remember(settingsRepository) {
-//        settingsRepository.isLightTheme
-//    }.collectAsState(null)
 
-    AppTheme(darkTheme = false) {
+    val isLightTheme by remember(settingsRepository) {
+        settingsRepository
+            .observeSetting(AppSettingsRepository.key_is_light_theme)
+            .distinctUntilChanged()
+            .map {
+                if (it is AppSetting.BooleanSetting) {
+                    it.value
+                } else false
+            }
+    }.collectAsState(true)
+
+    AppTheme(darkTheme = !isLightTheme) {
 
         val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
 
@@ -158,7 +168,7 @@ private fun PrepopulateDatabase() {
                 insertSupplier(InsertEntity.Insert(it))
             }
 
-            listOf(Incomes.income1, Incomes.income2).forEach {
+            listOf(Incomes.income1, Incomes.income2, Incomes.income3).forEach {
                 insertItemIncome(InsertEntity.Insert(it))
             }
 

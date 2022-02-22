@@ -1,11 +1,11 @@
 package ui.screens.settings
 
-import com.arkivanov.decompose.value.Value
+import kotlinx.coroutines.flow.Flow
 import settings.AppSetting
 
 interface ISettings {
 
-    val state: Value<Model>
+    val state: Flow<Model>
 
     fun onSettingClicked()
 

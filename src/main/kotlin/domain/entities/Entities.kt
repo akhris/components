@@ -89,9 +89,8 @@ data class ItemOutcome(
 
 data class WarehouseItem(
     override val id: String = IDUtils.newID(),
-    val item: Item? = null,
-    val container: Container? = null,
-    val count: Long = 0L
+    val item: EntityCountable<Item>? = null,
+    val container: Container? = null
 ) : IEntity<String>
 
 data class Supplier(

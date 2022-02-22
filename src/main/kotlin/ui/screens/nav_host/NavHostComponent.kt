@@ -9,6 +9,7 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.ItemIncome
 import domain.entities.ItemOutcome
+import domain.entities.WarehouseItem
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IGetUseCaseFactory
@@ -62,7 +63,14 @@ class NavHostComponent(
      */
     private fun createChild(config: Config, componentContext: ComponentContext): INavHost.Child {
         val screen = when (config.route) {
-            Screen.Warehouse.route -> null
+            Screen.Warehouse.route -> INavHost.Child.EntitiesListWithFilter(
+                EntityWithFilterComponent(
+                    componentContext = componentContext,
+                    entityClass = WarehouseItem::class,
+                    fieldsMapperFactory = fieldsMapperFactory,
+                    getListUseCaseFactory = getListUseCaseFactory
+                )
+            )
             Screen.Income.route -> INavHost.Child.EntitiesListWithFilter(
                 EntityWithFilterComponent(
                     componentContext = componentContext,

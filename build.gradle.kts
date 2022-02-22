@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
 }
@@ -54,7 +53,7 @@ dependencies {
     implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.1")
 
     //annotation processing:
-    compileOnly("com.squareup:kotlinpoet:1.10.2")
+//    compileOnly("com.squareup:kotlinpoet:1.10.2")
 
 }
 
