@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.composable.ScrollableBox
-import ui.screens.entity_renderers.RenderCardEntity
+import ui.entity_renderers.RenderCardEntity
 
 
 @Composable
@@ -19,7 +19,7 @@ fun ProjectDetailsUi(component: IProjectDetails) {
 
             RenderCardEntity(
                 it,
-                onEntityChanged = {
+                onEntitySaveClicked = {
 //            onEntityUpdated?.invoke(it)
                 },
                 onEntityRemoved =

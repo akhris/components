@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import ui.screens.entity_renderers.EntityScreenContent
+import ui.entity_renderers.EntityScreenContent
 
 @Composable
 fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>) {

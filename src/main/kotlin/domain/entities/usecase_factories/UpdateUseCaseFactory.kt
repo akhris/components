@@ -20,6 +20,8 @@ class UpdateUseCaseFactory(
     private val updateWarehouseItem: UpdateWarehouseItem
 ) : IUpdateUseCaseFactory {
 
+
+
     override fun <ID, T : IEntity<ID>> getUpdateUseCase(entityClass: KClass<out T>): UpdateEntity<ID, out T> {
         val a = when (entityClass) {
             Item::class -> updateItem

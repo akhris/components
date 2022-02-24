@@ -97,87 +97,95 @@ private fun <T : IEntity<*>> EntityPickerSingleDialogContent(
 
     var selectedEntity by remember(initSelection) { mutableStateOf<T?>(initSelection) }
 
-
-    Column(modifier = Modifier.fillMaxHeight()) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            stickyHeader {
-                Surface {
-                    OutlinedTextField(
-                        label = { Text(text = "search") },
-                        modifier = Modifier.fillMaxWidth(),
-                        value = searchString,
-                        onValueChange = { searchString = it },
-                        trailingIcon = { Icon(Icons.Rounded.Search, "search field") }
-                    )
+    Surface {
+        Column(modifier = Modifier.fillMaxHeight()) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                stickyHeader {
+                    Surface {
+                        OutlinedTextField(
+                            label = { Text(text = "search") },
+                            modifier = Modifier.fillMaxWidth(),
+                            value = searchString,
+                            onValueChange = { searchString = it },
+                            trailingIcon = { Icon(Icons.Rounded.Search, "search field") }
+                        )
+                    }
                 }
-            }
 
-            items(entities) { entity ->
-                val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs(entity).flatten() }
-                val fields =
-                    remember(fieldsMapper, entityIDs) { entityIDs.mapNotNull { fieldsMapper.getFieldByID(entity, it) } }
+                items(entities) { entity ->
+                    val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs(entity).flatten() }
+                    val fields =
+                        remember(fieldsMapper, entityIDs) {
+                            entityIDs.mapNotNull {
+                                fieldsMapper.getFieldByID(
+                                    entity,
+                                    it
+                                )
+                            }
+                        }
 
-                val textString = remember(fields) {
-                    val builder = StringBuilder()
-                    fields.forEach {
-                        builder.append(it.fieldID.name)
-                        builder.append(": ")
-                        builder.append(
-                            when (it) {
-                                is EntityField.BooleanField -> it.value
-                                is EntityField.DateTimeField -> it.value ?: ""
-                                is EntityField.EntityLink -> it.entity?.toString() ?: ""
-                                is EntityField.EntityLinksList -> ""
-                                is EntityField.FloatField -> it.value
-                                is EntityField.LongField -> it.value
-                                is EntityField.StringField -> it.value
+                    val textString = remember(fields) {
+                        val builder = StringBuilder()
+                        fields.forEach {
+                            builder.append(it.fieldID.name)
+                            builder.append(": ")
+                            builder.append(
+                                when (it) {
+                                    is EntityField.BooleanField -> it.value
+                                    is EntityField.DateTimeField -> it.value ?: ""
+                                    is EntityField.EntityLink -> it.entity?.toString() ?: ""
+                                    is EntityField.EntityLinksList -> ""
+                                    is EntityField.FloatField -> it.value
+                                    is EntityField.LongField -> it.value
+                                    is EntityField.StringField -> it.value
+                                }
+                            )
+                            builder.append(" ")
+                        }
+                        builder.toString()
+                    }
+                    Surface(
+                        color = when (entity == selectedEntity) {
+                            true -> MaterialTheme.colors.primary
+                            false -> MaterialTheme.colors.surface
+                        }
+                    ) {
+                        ListItem(modifier = Modifier.clickable {
+                            selectedEntity = if (selectedEntity != entity) {
+                                entity
+                            } else {
+                                null
+                            }
+                        },
+                            text = {
+                                Text(
+                                    textString
+                                )
                             }
                         )
-                        builder.append(" ")
                     }
-                    builder.toString()
                 }
-                Surface(
-                    color = when (entity == selectedEntity) {
-                        true -> MaterialTheme.colors.primary
-                        false -> MaterialTheme.colors.surface
-                    }
-                ) {
-                    ListItem(modifier = Modifier.clickable {
-                        selectedEntity = if (selectedEntity != entity) {
-                            entity
-                        } else {
-                            null
-                        }
-                    },
-                        text = {
-                            Text(
-                                textString
-                            )
-                        }
-                    )
+
+
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(modifier = Modifier.padding(4.dp), onClick = onCancelClicked) {
+                    Text(text = "cancel")
+                }
+
+                Button(modifier = Modifier.padding(4.dp), onClick = {
+                    onEntitySelected(selectedEntity)
+
+                }) {
+                    Text(text = "ok")
                 }
             }
 
-
         }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(modifier = Modifier.padding(4.dp), onClick = onCancelClicked) {
-                Text(text = "cancel")
-            }
-
-            Button(modifier = Modifier.padding(4.dp), onClick = {
-                onEntitySelected(selectedEntity)
-
-            }) {
-                Text(text = "ok")
-            }
-        }
-
     }
 }
 

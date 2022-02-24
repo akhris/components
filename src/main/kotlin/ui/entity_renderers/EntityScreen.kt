@@ -1,4 +1,4 @@
-package ui.screens.entity_renderers
+package ui.entity_renderers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -52,7 +52,7 @@ fun <T : IEntity<*>> EntityScreenContent(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         RenderCardEntity(
                             entity,
-                            onEntityChanged = {
+                            onEntitySaveClicked = {
                                 log("entity changed: $it")
                                 onEntityUpdated?.invoke(it)
                             },
@@ -82,9 +82,9 @@ fun <T : IEntity<*>> EntityScreenContent(
 @Composable
 fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
-    onEntityChanged: (T) -> Unit,
-    onEntityRemoved: ((T) -> Unit)? = null,
-    onAddEntityClicked: (() -> Unit)? = null
+    onEntitySaveClicked: (T) -> Unit,
+    onEntityRemoved: ((T) -> Unit)? = null
+//    onAddEntityClicked: (() -> Unit)? = null
 ) {
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
@@ -103,7 +103,6 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
         modifier = Modifier
             .align(Alignment.Center)
             .widthIn(min = ContentSettings.contentCardMinWidth, max = ContentSettings.contentCardMaxWidth)
-            .wrapContentHeight()
             .padding(8.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -118,10 +117,13 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                 )
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(
-                    modifier = Modifier.padding(ButtonDefaults.ContentPadding),
-                    onClick = { showDeletePrompt = initialEntity },
-                    content = { Text(text = "delete", color = MaterialTheme.colors.error) })
+                onEntityRemoved?.let { onRemoveCallback ->
+                    TextButton(
+                        modifier = Modifier.padding(ButtonDefaults.ContentPadding),
+                        onClick = { showDeletePrompt = initialEntity },
+                        content = { Text(text = "delete", color = MaterialTheme.colors.error) })
+                }
+
 
                 if (entity != initialEntity) {
                     TextButton(
@@ -130,7 +132,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                         content = { Text(text = "discard") })
                     Button(
                         modifier = Modifier.padding(ButtonDefaults.ContentPadding),
-                        onClick = { onEntityChanged(entity) },
+                        onClick = { onEntitySaveClicked(entity) },
                         content = { Text(text = "save") })
                 }
             }
@@ -140,9 +142,11 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     showDeletePrompt?.let { e ->
         AlertDialog(onDismissRequest = { showDeletePrompt = null }, buttons = {
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+
                 TextButton(onClick = {
                     showDeletePrompt = null
                 }, content = { Text(text = "cancel") })
+
                 Button(
                     onClick = {
                         onEntityRemoved?.invoke(e)
@@ -200,7 +204,10 @@ private fun RenderField(
                 showSelectEntityDialog = field.entityClass
             }, onEntityLinkClear = {
                 onFieldChange(field.copy(entity = null))
-            })
+            }, onCountChanged = {
+                println("on count changed: $it")
+            }
+            )
             is EntityField.EntityLinksList -> RenderEntityLinksList(
                 field,
                 onEntityLinkAdd = {

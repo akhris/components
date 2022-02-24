@@ -1,4 +1,4 @@
-package ui.screens.entity_renderers
+package ui.entity_renderers
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,7 +52,6 @@ fun RenderTextFieldReadOnly(field: EntityField.StringField) {
 @Composable
 fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
     if (field.entity != null) {
-
         ListItem(
             text = {
                 Text(

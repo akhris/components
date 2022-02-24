@@ -1,4 +1,4 @@
-package ui.screens.entity_renderers
+package ui.entity_renderers
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope

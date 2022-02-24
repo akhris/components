@@ -75,7 +75,7 @@ data class ItemIncome(
     override val id: String = IDUtils.newID(),
     val item: EntityCountable<Item>? = null,
     val container: Container? = null,
-    val dateTime: LocalDateTime?,
+    val dateTime: LocalDateTime? = null,
     val supplier: Supplier? = null
 ) : IEntity<String>
 
@@ -83,7 +83,7 @@ data class ItemOutcome(
     override val id: String = IDUtils.newID(),
     val item: EntityCountable<Item>? = null,
     val container: Container? = null,
-    val dateTime: LocalDateTime?
+    val dateTime: LocalDateTime? = null
 ) : IEntity<String>
 
 

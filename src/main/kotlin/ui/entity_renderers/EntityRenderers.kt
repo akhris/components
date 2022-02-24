@@ -1,5 +1,6 @@
-package ui.screens.entity_renderers
+package ui.entity_renderers
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
+import kotlinx.coroutines.delay
 
+
+/**
+ * Composable functions that render [EntityField.BooleanField]s
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean) -> Unit) {
@@ -76,12 +82,13 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun RenderEntityLink(
     field: EntityField.EntityLink,
     onEntityLinkSelect: () -> Unit,
-    onEntityLinkClear: () -> Unit
+    onEntityLinkClear: () -> Unit,
+    onCountChanged: ((Long) -> Unit)? = null
 ) {
     if (field.entity != null) {
         Column {
@@ -101,21 +108,48 @@ fun RenderEntityLink(
                     )
                 }
             )
+
+
+
             field.count?.let {
+
+                var count by remember { mutableStateOf<Long?>(it) }
+
                 OutlinedTextField(
                     modifier = Modifier.align(Alignment.End),
-                    value = it.toString(),
-                    onValueChange = {},
+                    value = count?.toString() ?: "",
+                    onValueChange = { newValue ->
+                        count = newValue.toLongOrNull()
+                    },
+                    label = { Text(text = "quantity") },
                     trailingIcon = {
                         Column {
-                            Icon(Icons.Rounded.Add, contentDescription = "count up")
+                            Icon(modifier = Modifier.clickable {
+                                count = count?.let { it + 1 } ?: 1L
+                            }, imageVector = Icons.Rounded.Add, contentDescription = "count up")
                             Icon(
+                                modifier = Modifier.clickable {
+                                    count = count?.let { it - 1 } ?: 0L
+                                },
                                 painter = painterResource("vector/remove_black_24dp.svg"),
                                 contentDescription = "count down"
                             )
                         }
                     }
                 )
+
+                //debounce logic:
+                LaunchedEffect(count) {
+                    if (count == field.count) {
+                        return@LaunchedEffect
+                    }
+                    //when count changes:
+                    delay(500L)
+                    count?.let {
+                        onCountChanged?.invoke(it)
+                    }
+                }
+
             }
         }
     } else {

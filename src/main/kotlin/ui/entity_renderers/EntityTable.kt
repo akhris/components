@@ -1,4 +1,4 @@
-package ui.screens.entity_renderers
+package ui.entity_renderers
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi

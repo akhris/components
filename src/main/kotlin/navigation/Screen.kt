@@ -19,8 +19,6 @@ sealed class Screen(val route: String) {
 
     object Projects : Screen("screen_projects")
 
-    object Places : Screen("screen_places")
-
     object Settings : Screen("screen_settings")
 
     object Empty : Screen("")
@@ -72,12 +70,6 @@ sealed class NavItem(val pathToIcon: String, val title: Strings, val route: Stri
         pathToIcon = "vector/settings_black_24dp.svg",
         title = Strings.navitem_settings_title,
         Screen.Settings.route
-    )
-
-    object Places : NavItem(
-        pathToIcon = "vector/inventory_2_black_24dp.svg",
-        title = Strings.navitem_places_title,
-        Screen.Places.route
     )
 
     companion object {
