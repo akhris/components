@@ -48,9 +48,8 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
                 when (fieldID.tag) {
                     tag_item -> {
                         val item = (field as? EntityField.EntityLink)?.entity as? Item
-                            ?: throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                         val count = (field as? EntityField.EntityLink)?.count ?: 0L
-                        entity.copy(item = EntityCountable(item, count))
+                        entity.copy(item = item?.let { EntityCountable(it, count) })
                     }
                     tag_container -> entity.copy(container = (field as? EntityField.EntityLink)?.entity as? Container)
                     tag_supplier -> entity.copy(supplier = (field as? EntityField.EntityLink)?.entity as? Supplier)

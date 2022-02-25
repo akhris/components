@@ -12,9 +12,8 @@ import ui.screens.patterns.ScreenWithFilterSheet
 
 @Composable
 fun EntitiesWithFilterUi(component: IEntityWithFilter) {
-
-
     ScreenWithFilterSheet(
+        isModal = true,
         content = {
             ListPane(component.listRouterState)
         },

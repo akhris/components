@@ -12,7 +12,6 @@ sealed class EntityField {
     abstract val fieldID: EntityFieldID
     abstract val description: String
 
-
     /**
      * Represents String value of entity field
      */

@@ -181,7 +181,7 @@ private fun RenderField(
     var showSelectEntitiesDialog by remember { mutableStateOf<KClass<out IEntity<*>>?>(null) }
 
 
-    if (onFieldChange == null) {
+    if (onFieldChange == null || field.fieldID.isReadOnly) {
         //render read-only mode
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)

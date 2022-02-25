@@ -42,7 +42,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                             fieldID = fieldID,
                             entity = entityField.value as? T,
                             entityClass = fieldID.entityClass,
-                            description = fieldParams.description,
+                            description = entityField.description,
                             count = entityField.count
                         )
 //                        mapEntity(entityID, entityField)

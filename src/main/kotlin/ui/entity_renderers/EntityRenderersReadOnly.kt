@@ -58,7 +58,12 @@ fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
                     text = field.getName()
                 )
             },
-            secondaryText = { Text(text = field.description) }
+            secondaryText = { Text(text = field.description) },
+            trailing = field.count?.let { c ->
+                {
+                    Text(text = "$c pcs")
+                }
+            }
         )
     }
 }

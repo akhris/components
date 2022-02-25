@@ -13,7 +13,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
             EntityFieldID.EntitiesListID(
                 tag = tag_parameters,
                 name = "parameters",
-                entitiesIDs = entity.parameters.mapIndexed { index, parameter ->
+                entitiesIDs = List(entity.parameters.size) { index ->
                     EntityFieldID.EntityID(
                         tag = "$tag_parameters$index",
                         name = "parameter ${index + 1}",

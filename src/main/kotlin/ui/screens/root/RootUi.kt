@@ -75,14 +75,14 @@ fun RootUi() {
     }
 
     addEntityNavItem?.let {
-        HandleAddButtonClicks(it)
+        HandleAddButtonClicks(it, onDismiss = { addEntityNavItem = null })
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun HandleAddButtonClicks(navItem: NavItem) {
+private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit) {
     var addEntity by remember { mutableStateOf<IEntity<*>?>(null) }
     var showPicker by remember { mutableStateOf(false) }
 
@@ -109,10 +109,10 @@ private fun HandleAddButtonClicks(navItem: NavItem) {
     }
 
     addEntity?.let {
-        AddEntityDialog(it, onDismiss = { addEntity = null })
+        AddEntityDialog(it, onDismiss)
     }
 
-    if(showPicker){
+    if (showPicker) {
         val types = ITypesSelector.Type.getAllTypes()
 
         PickerDialog(

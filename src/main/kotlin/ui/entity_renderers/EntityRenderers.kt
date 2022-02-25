@@ -1,21 +1,29 @@
 package ui.entity_renderers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.mouse.MouseScrollOrientation
+import androidx.compose.ui.input.mouse.MouseScrollUnit
+import androidx.compose.ui.input.mouse.mouseScrollFilter
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
 import kotlinx.coroutines.delay
+import kotlin.math.sign
 
 
 /**
@@ -82,7 +90,7 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun RenderEntityLink(
     field: EntityField.EntityLink,
@@ -106,51 +114,110 @@ fun RenderEntityLink(
                         imageVector = Icons.Rounded.Clear,
                         contentDescription = "clear entity"
                     )
+                },
+                icon = field.count?.let { c ->
+                    {
+
+                        var isHover by remember { mutableStateOf(false) }
+                        var count by remember { mutableStateOf<Long?>(c) }
+
+                        Box(modifier = Modifier
+                            .height(56.dp)
+                            .border(
+                                width = 2.dp,
+                                color = if (isHover) MaterialTheme.colors.primary else Color.Unspecified,
+                                shape = MaterialTheme.shapes.small
+                            )
+                            .onPointerEvent(PointerEventType.Enter) { isHover = true }
+                            .onPointerEvent(PointerEventType.Exit) { isHover = false }
+                            .mouseScrollFilter { event, bounds ->
+
+                                when (event.orientation) {
+                                    MouseScrollOrientation.Vertical -> {
+                                        when (val delta = event.delta) {
+                                            is MouseScrollUnit.Line -> {
+                                                count = count?.let {
+                                                    it - sign(delta.value).toLong()
+                                                }
+                                                true
+                                            }
+                                            is MouseScrollUnit.Page -> false
+                                        }
+                                    }
+                                    MouseScrollOrientation.Horizontal -> false
+                                }
+
+                            }) {
+                            BasicTextField(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .width(IntrinsicSize.Min)
+                                    .padding(8.dp),
+                                value = count?.toString() ?: "",
+                                onValueChange = {
+                                    count = it.toLongOrNull()
+                                }
+                            )
+                        }
+
+
+                        //debounce logic:
+                        LaunchedEffect(count) {
+                            if (count == field.count) {
+                                return@LaunchedEffect
+                            }
+                            //when count changes:
+                            delay(500L)
+                            count?.let {
+                                onCountChanged?.invoke(it)
+                            }
+                        }
+
+                    }
                 }
             )
 
 
+//            field.count?.let {
 
-            field.count?.let {
+//                var count by remember { mutableStateOf<Long?>(it) }
+//
+//                OutlinedTextField(
+//                    modifier = Modifier.align(Alignment.End),
+//                    value = count?.toString() ?: "",
+//                    onValueChange = { newValue ->
+//                        count = newValue.toLongOrNull()
+//                    },
+//                    label = { Text(text = "quantity") },
+//                    trailingIcon = {
+//                        Column {
+//                            Icon(modifier = Modifier.clickable {
+//                                count = count?.let { it + 1 } ?: 1L
+//                            }, imageVector = Icons.Rounded.Add, contentDescription = "count up")
+//                            Icon(
+//                                modifier = Modifier.clickable {
+//                                    count = count?.let { it - 1 } ?: 0L
+//                                },
+//                                painter = painterResource("vector/remove_black_24dp.svg"),
+//                                contentDescription = "count down"
+//                            )
+//                        }
+//                    }
+//                )
 
-                var count by remember { mutableStateOf<Long?>(it) }
+//                //debounce logic:
+//                LaunchedEffect(count) {
+//                    if (count == field.count) {
+//                        return@LaunchedEffect
+//                    }
+//                    //when count changes:
+//                    delay(500L)
+//                    count?.let {
+//                        onCountChanged?.invoke(it)
+//                    }
+//                }
 
-                OutlinedTextField(
-                    modifier = Modifier.align(Alignment.End),
-                    value = count?.toString() ?: "",
-                    onValueChange = { newValue ->
-                        count = newValue.toLongOrNull()
-                    },
-                    label = { Text(text = "quantity") },
-                    trailingIcon = {
-                        Column {
-                            Icon(modifier = Modifier.clickable {
-                                count = count?.let { it + 1 } ?: 1L
-                            }, imageVector = Icons.Rounded.Add, contentDescription = "count up")
-                            Icon(
-                                modifier = Modifier.clickable {
-                                    count = count?.let { it - 1 } ?: 0L
-                                },
-                                painter = painterResource("vector/remove_black_24dp.svg"),
-                                contentDescription = "count down"
-                            )
-                        }
-                    }
-                )
-
-                //debounce logic:
-                LaunchedEffect(count) {
-                    if (count == field.count) {
-                        return@LaunchedEffect
-                    }
-                    //when count changes:
-                    delay(500L)
-                    count?.let {
-                        onCountChanged?.invoke(it)
-                    }
-                }
-
-            }
+//            }
         }
     } else {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -171,8 +238,14 @@ fun RenderEntityLinksList(
 ) {
     Column {
         ListItem(
-            text = { Text(text = field.fieldID.name) },
-            secondaryText = { Text(text = field.description) }
+            text = {
+                Text(
+                    text = "${field.fieldID.name}:",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h6
+                )
+            },
+            secondaryText = { Text(text = field.description, textAlign = TextAlign.Center) }
         )
 
         field.entities.forEach { link ->

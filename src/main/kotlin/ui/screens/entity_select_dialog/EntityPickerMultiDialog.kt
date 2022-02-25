@@ -19,6 +19,7 @@ import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.unpack
 import domain.entities.fieldsmappers.*
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import kotlinx.coroutines.delay
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import persistence.repository.Specification
@@ -44,7 +45,7 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
 
     val useCase = remember(entityClass, getListUseCaseFactory) { getListUseCaseFactory.getListUseCase(entityClass) }
 
-    var spec by remember { mutableStateOf<Specification>(Specification.QueryAll) }
+    var searchString by remember { mutableStateOf("") }
     var entities by remember { mutableStateOf(listOf<T>()) }
 
     val state = rememberDialogState(
@@ -63,8 +64,9 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
                 entities = entities,
                 fieldsMapper = fieldsMapper,
                 initialSelection = initialSelection,
+                searchString = searchString,
                 onSearchStringChanged = {
-                    spec = Specification.Search(it)
+                   searchString = it
                 },
                 onCancelClicked = onDismiss,
                 onEntitiesSelected = {
@@ -74,9 +76,16 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
             )
         })
 
+    LaunchedEffect(searchString) {
+        if (searchString.isNotBlank())
+            delay(1000L)
 
-    LaunchedEffect(useCase, spec) {
-        entities = useCase(GetEntities.GetBySpecification(spec)).unpack()
+        val spec = when (searchString.isBlank()) {
+            true -> Specification.QueryAll
+            false -> Specification.Search(searchString)
+        }
+        entities = useCase(GetEntities.GetBySpecification(specification = spec)).unpack()
+
     }
 
 }
@@ -87,12 +96,12 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
     entities: List<T>,
     fieldsMapper: IFieldsMapper<T>,
     initialSelection: List<T> = listOf(),
+    searchString: String = "",
     onSearchStringChanged: (String) -> Unit,
     onCancelClicked: () -> Unit,
     onEntitiesSelected: (List<T>) -> Unit
 ) {
 
-    var searchString by remember { mutableStateOf("") }
 
     val checksMap = remember { initialSelection.map { it to true }.toMutableStateMap() }
 
@@ -106,7 +115,7 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
                         label = { Text(text = "search") },
                         modifier = Modifier.fillMaxWidth(),
                         value = searchString,
-                        onValueChange = { searchString = it },
+                        onValueChange = onSearchStringChanged,
                         trailingIcon = { Icon(Icons.Rounded.Search, "search field") }
                     )
                 }

@@ -12,8 +12,13 @@ class WarehouseItemFieldsMapper : BaseFieldsMapper<WarehouseItem>() {
 
     override fun getEntityIDs(entity: WarehouseItem): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
-            EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class)
+            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class, isReadOnly = true),
+            EntityFieldID.EntityID(
+                tag = tag_container,
+                name = "container",
+                entityClass = Container::class,
+                isReadOnly = true
+            )
         )
     }
 
