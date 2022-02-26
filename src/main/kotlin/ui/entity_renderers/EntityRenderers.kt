@@ -64,10 +64,8 @@ fun RenderFloatField(field: EntityField.FloatField, onValueChange: (Float) -> Un
             }
         },
         trailingIcon = {
-            Icon(
-                modifier = Modifier.clickable { onValueChange(0f) },
-                imageVector = Icons.Rounded.Clear,
-                contentDescription = "clear text"
+            ui.composable.Icons.ClearIcon(
+                modifier = Modifier.clickable { onValueChange(0f) }
             )
         }
     )
@@ -81,10 +79,8 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
         label = { Text(text = field.fieldID.name) },
         onValueChange = onValueChange,
         trailingIcon = {
-            Icon(
-                modifier = Modifier.clickable { onValueChange("") },
-                imageVector = Icons.Rounded.Clear,
-                contentDescription = "clear text"
+            ui.composable.Icons.ClearIcon(
+                modifier = Modifier.clickable {  onValueChange("")}
             )
         }
     )
@@ -107,12 +103,9 @@ fun RenderEntityLink(
                 text = { Text(text = field.getName()) },
                 secondaryText = { Text(text = field.description) },
                 trailing = {
-                    Icon(
-                        modifier = Modifier.clickable {
-                            onEntityLinkClear()
-                        },
-                        imageVector = Icons.Rounded.Clear,
-                        contentDescription = "clear entity"
+                    ui.composable.Icons.ClearIcon(modifier = Modifier.clickable {
+                        onEntityLinkClear()
+                    }
                     )
                 },
                 icon = field.count?.let { c ->

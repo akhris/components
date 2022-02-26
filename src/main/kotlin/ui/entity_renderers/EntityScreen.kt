@@ -205,7 +205,7 @@ private fun RenderField(
             }, onEntityLinkClear = {
                 onFieldChange(field.copy(entity = null))
             }, onCountChanged = {
-                println("on count changed: $it")
+                onFieldChange(field.copy(count = it))
             }
             )
             is EntityField.EntityLinksList -> RenderEntityLinksList(
