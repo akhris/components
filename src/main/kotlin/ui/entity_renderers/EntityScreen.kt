@@ -189,7 +189,7 @@ private fun RenderField(
             is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
             is EntityField.StringField -> RenderTextFieldReadOnly(field)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
-            is EntityField.DateTimeField -> {}
+            is EntityField.DateTimeField -> RenderDateTimeReadOnly(field)
             is EntityField.LongField -> {}
         }
     } else {
@@ -226,7 +226,9 @@ private fun RenderField(
             is EntityField.FloatField -> RenderFloatField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.DateTimeField -> {}
+            is EntityField.DateTimeField -> RenderDateTime(field, onDateChanged = { newDate ->
+                onFieldChange(field.copy(value = newDate))
+            })
             is EntityField.LongField -> {}
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
+import utils.DateTimeConverter
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -83,3 +84,11 @@ fun RenderEntityLinksListReadOnly(field: EntityField.EntityLinksList) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun RenderDateTimeReadOnly(field: EntityField.DateTimeField) {
+    ListItem(
+        text = { field.value?.let {dateTime-> Text(DateTimeConverter.dateTimeToString(dateTime)) } },
+        secondaryText = { Text(text = field.description) }
+    )
+}

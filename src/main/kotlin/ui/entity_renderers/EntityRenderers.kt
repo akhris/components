@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
 import kotlinx.coroutines.delay
+import ui.dialogs.DatePickerDialog
+import utils.DateTimeConverter
+import java.time.LocalDateTime
 import kotlin.math.sign
 
 
@@ -80,7 +83,7 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
         onValueChange = onValueChange,
         trailingIcon = {
             ui.composable.Icons.ClearIcon(
-                modifier = Modifier.clickable {  onValueChange("")}
+                modifier = Modifier.clickable { onValueChange("") }
             )
         }
     )
@@ -252,6 +255,25 @@ fun RenderEntityLinksList(
                 content = { Text("add ${field.fieldID.name}") })
         }
 
+    }
+
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun RenderDateTime(field: EntityField.DateTimeField, onDateChanged: (LocalDateTime?) -> Unit) {
+
+    var dateTimePickerShow by remember { mutableStateOf(false) }
+
+    ListItem(
+        modifier = Modifier.clickable { dateTimePickerShow = true },
+        text = { field.value?.let { dateTime -> Text(DateTimeConverter.dateTimeToString(dateTime)) } },
+        secondaryText = { Text(text = field.description) }
+    )
+
+    if (dateTimePickerShow) {
+        DatePickerDialog(onDismiss = { dateTimePickerShow = false })
     }
 
 }

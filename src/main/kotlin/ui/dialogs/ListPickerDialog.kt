@@ -15,7 +15,7 @@ import androidx.compose.ui.window.rememberDialogState
 import ui.theme.DialogSettings
 
 @Composable
-fun <T> PickerDialog(
+fun <T> ListPickerDialog(
     items: List<T>,
     title: String,
     mapper: @Composable BoxScope.(T) -> Unit,

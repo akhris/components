@@ -1,6 +1,7 @@
 package domain.entities.fieldsmappers
 
 import com.akhris.domain.core.entities.IEntity
+import utils.DateTimeConverter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -66,7 +67,7 @@ sealed class EntityField {
         override val description: String,
         val value: LocalDateTime?
     ) : EntityField() {
-        override fun toString(): String = value?.format(DateTimeFormatter.BASIC_ISO_DATE) ?: "no date"
+        override fun toString(): String = value?.let { DateTimeConverter.dateTimeToString(it) }?:"no date/time"
     }
 
     /**

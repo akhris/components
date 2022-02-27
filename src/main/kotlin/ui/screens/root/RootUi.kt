@@ -24,7 +24,7 @@ import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
-import ui.dialogs.PickerDialog
+import ui.dialogs.ListPickerDialog
 import ui.entity_renderers.AddEntityDialog
 import ui.screens.nav_host.NavHostComponent
 import ui.screens.nav_host.NavHostUi
@@ -56,7 +56,7 @@ fun RootUi() {
             )
         }
 
-    var addEntityNavItem by remember { mutableStateOf<NavItem?>(null) }
+    var addClickedNavItem by remember { mutableStateOf<NavItem?>(null) }
 
 
 
@@ -66,7 +66,7 @@ fun RootUi() {
         NavigationRailUi(NavigationRailComponent(onNavigateTo = {
             navHostComponent.setDestination(it.route)
         }, onAddButtonClicked = {
-            addEntityNavItem = it
+            addClickedNavItem = it
         }))
 
         Box(modifier = Modifier.fillMaxHeight().weight(1f)) {
@@ -74,8 +74,8 @@ fun RootUi() {
         }
     }
 
-    addEntityNavItem?.let {
-        HandleAddButtonClicks(it, onDismiss = { addEntityNavItem = null })
+    addClickedNavItem?.let { navItem ->
+        HandleAddButtonClicks(navItem, onDismiss = { addClickedNavItem = null })
     }
 }
 
@@ -84,29 +84,9 @@ fun RootUi() {
 @Composable
 private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit) {
     var addEntity by remember { mutableStateOf<IEntity<*>?>(null) }
-    var showPicker by remember { mutableStateOf(false) }
+    val showPicker = remember(navItem, addEntity) { navItem == NavItem.DataTypes && addEntity == null }
 
-    when (navItem) {
-        NavItem.DataTypes -> {
-            //choose what datatype to add? (containers/items/parameters/...)
-            showPicker = true
-        }
-        NavItem.Income -> {
-            addEntity = ItemIncome()
-        }
-        NavItem.Outcome -> {
-            addEntity = ItemOutcome()
-        }
-        NavItem.Projects -> {
-            addEntity = Project()
-        }
-        NavItem.Settings -> {
-            addEntity = null
-        }
-        NavItem.Warehouse -> {
-            addEntity = null
-        }
-    }
+
 
     addEntity?.let {
         AddEntityDialog(it, onDismiss)
@@ -115,7 +95,7 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
     if (showPicker) {
         val types = ITypesSelector.Type.getAllTypes()
 
-        PickerDialog(
+        ListPickerDialog(
             items = types,
             title = "pick data type",
             mapper = { type ->
@@ -138,12 +118,21 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
                     ITypesSelector.Type.Suppliers -> Supplier()
                     ITypesSelector.Type.Units -> Unit()
                 }
-                showPicker = false
             },
             onDismiss = {
-                showPicker = false
+                if (addEntity == null)
+                    onDismiss()
             }
         )
+    }
+
+    LaunchedEffect(navItem) {
+        addEntity = when (navItem) {
+            NavItem.Income -> ItemIncome()
+            NavItem.Outcome -> ItemOutcome()
+            NavItem.Projects -> Project()
+            else -> null
+        }
     }
 
 }

@@ -70,7 +70,7 @@ class EntitiesFilterComponent<T : IEntity<*>>(
                 val fieldIDs = it.entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
                 _state.reduce { m ->
                     m.copy(filters = fieldIDs.map { fId ->
-                        val fields = it.entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }
+                        val fields = it.entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }.toSet()
                         IEntitiesFilter.FilterSettings(
                             fieldID = fId,
                             fieldsList = fields.map { f->IEntitiesFilter.FilteredField(field = f, isFiltered = false) })

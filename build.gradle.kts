@@ -1,4 +1,3 @@
-
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -54,6 +53,7 @@ dependencies {
 
     //annotation processing:
 //    compileOnly("com.squareup:kotlinpoet:1.10.2")
+
 
 }
 
