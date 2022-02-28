@@ -20,6 +20,7 @@ import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
 import kotlinx.coroutines.delay
 import ui.dialogs.DatePickerDialog
+import ui.dialogs.TimePickerDialog
 import utils.DateTimeConverter
 import java.lang.Long.max
 import java.time.LocalDateTime
@@ -111,7 +112,6 @@ fun RenderEntityLink(
                 },
                 icon = field.count?.let { c ->
                     {
-
                         var isHover by remember { mutableStateOf(false) }
                         var count by remember { mutableStateOf<Long?>(c) }
 
@@ -138,24 +138,6 @@ fun RenderEntityLink(
                                     }
                                 }
                             }
-//                            .mouseScrollFilter { event, bounds ->
-//
-//                                when (event.orientation) {
-//                                    MouseScrollOrientation.Vertical -> {
-//                                        when (val delta = event.delta) {
-//                                            is MouseScrollUnit.Line -> {
-//                                                count = count?.let {
-//                                                    it - sign(delta.value).toLong()
-//                                                }
-//                                                true
-//                                            }
-//                                            is MouseScrollUnit.Page -> false
-//                                        }
-//                                    }
-//                                    MouseScrollOrientation.Horizontal -> false
-//                                }
-//
-//                            }
                         ) {
                             BasicTextField(
                                 modifier = Modifier
@@ -169,7 +151,6 @@ fun RenderEntityLink(
                             )
                         }
 
-
                         //debounce logic:
                         LaunchedEffect(count) {
                             if (count == field.count) {
@@ -181,52 +162,9 @@ fun RenderEntityLink(
                                 onCountChanged?.invoke(it)
                             }
                         }
-
                     }
                 }
             )
-
-
-//            field.count?.let {
-
-//                var count by remember { mutableStateOf<Long?>(it) }
-//
-//                OutlinedTextField(
-//                    modifier = Modifier.align(Alignment.End),
-//                    value = count?.toString() ?: "",
-//                    onValueChange = { newValue ->
-//                        count = newValue.toLongOrNull()
-//                    },
-//                    label = { Text(text = "quantity") },
-//                    trailingIcon = {
-//                        Column {
-//                            Icon(modifier = Modifier.clickable {
-//                                count = count?.let { it + 1 } ?: 1L
-//                            }, imageVector = Icons.Rounded.Add, contentDescription = "count up")
-//                            Icon(
-//                                modifier = Modifier.clickable {
-//                                    count = count?.let { it - 1 } ?: 0L
-//                                },
-//                                painter = painterResource("vector/remove_black_24dp.svg"),
-//                                contentDescription = "count down"
-//                            )
-//                        }
-//                    }
-//                )
-
-//                //debounce logic:
-//                LaunchedEffect(count) {
-//                    if (count == field.count) {
-//                        return@LaunchedEffect
-//                    }
-//                    //when count changes:
-//                    delay(500L)
-//                    count?.let {
-//                        onCountChanged?.invoke(it)
-//                    }
-//                }
-
-//            }
         }
     } else {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -277,24 +215,32 @@ fun RenderEntityLinksList(
 @Composable
 fun RenderDateTime(field: EntityField.DateTimeField, onDateChanged: (LocalDateTime?) -> Unit) {
 
-    var dateTimePickerShow by remember { mutableStateOf(false) }
+    var datePickerDialogShow by remember { mutableStateOf(false) }
+    var timePickerDialogShow by remember { mutableStateOf(false) }
 
     ListItem(
-        modifier = Modifier.clickable { dateTimePickerShow = true },
+        modifier = Modifier.clickable { datePickerDialogShow = true },
         text = { field.value?.let { dateTime -> Text(DateTimeConverter.dateTimeToString(dateTime)) } },
         secondaryText = { Text(text = field.description) }
     )
 
-    if (dateTimePickerShow) {
+    if (datePickerDialogShow) {
         DatePickerDialog(
             initialSelection = field.value?.toLocalDate(),
-            onDismiss = { dateTimePickerShow = false },
+            onDismiss = { datePickerDialogShow = false },
             onDateSelected = { newDate ->
                 onDateChanged(field.value?.with(TemporalAdjusters.ofDateAdjuster {
                     newDate
                 }))
+                timePickerDialogShow = true
             }
         )
+    }
+
+    if (timePickerDialogShow) {
+        TimePickerDialog(initialTime = field.value, onDismiss = { timePickerDialogShow = false }, onTimeSelected = {
+            onDateChanged(it)
+        })
     }
 
 }
