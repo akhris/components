@@ -6,18 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.mouse.MouseScrollOrientation
-import androidx.compose.ui.input.mouse.MouseScrollUnit
-import androidx.compose.ui.input.mouse.mouseScrollFilter
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import domain.entities.fieldsmappers.EntityField
@@ -25,7 +21,9 @@ import domain.entities.fieldsmappers.getName
 import kotlinx.coroutines.delay
 import ui.dialogs.DatePickerDialog
 import utils.DateTimeConverter
+import java.lang.Long.max
 import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters
 import kotlin.math.sign
 
 
@@ -126,24 +124,39 @@ fun RenderEntityLink(
                             )
                             .onPointerEvent(PointerEventType.Enter) { isHover = true }
                             .onPointerEvent(PointerEventType.Exit) { isHover = false }
-                            .mouseScrollFilter { event, bounds ->
-
-                                when (event.orientation) {
-                                    MouseScrollOrientation.Vertical -> {
-                                        when (val delta = event.delta) {
-                                            is MouseScrollUnit.Line -> {
-                                                count = count?.let {
-                                                    it - sign(delta.value).toLong()
-                                                }
-                                                true
-                                            }
-                                            is MouseScrollUnit.Page -> false
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        if (event.type == PointerEventType.Scroll) {
+                                            count = max(count?.let {
+                                                val delta = event.changes.first().scrollDelta
+                                                it - sign(delta.y).toLong()
+                                            } ?: 0L, 1L)
+                                            event.changes.first().consume()
                                         }
                                     }
-                                    MouseScrollOrientation.Horizontal -> false
                                 }
-
-                            }) {
+                            }
+//                            .mouseScrollFilter { event, bounds ->
+//
+//                                when (event.orientation) {
+//                                    MouseScrollOrientation.Vertical -> {
+//                                        when (val delta = event.delta) {
+//                                            is MouseScrollUnit.Line -> {
+//                                                count = count?.let {
+//                                                    it - sign(delta.value).toLong()
+//                                                }
+//                                                true
+//                                            }
+//                                            is MouseScrollUnit.Page -> false
+//                                        }
+//                                    }
+//                                    MouseScrollOrientation.Horizontal -> false
+//                                }
+//
+//                            }
+                        ) {
                             BasicTextField(
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -273,7 +286,15 @@ fun RenderDateTime(field: EntityField.DateTimeField, onDateChanged: (LocalDateTi
     )
 
     if (dateTimePickerShow) {
-        DatePickerDialog(onDismiss = { dateTimePickerShow = false })
+        DatePickerDialog(
+            initialSelection = field.value?.toLocalDate(),
+            onDismiss = { dateTimePickerShow = false },
+            onDateSelected = { newDate ->
+                onDateChanged(field.value?.with(TemporalAdjusters.ofDateAdjuster {
+                    newDate
+                }))
+            }
+        )
     }
 
 }

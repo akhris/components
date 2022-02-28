@@ -22,3 +22,8 @@ fun YearMonth.getDates(
     }
     return dates
 }
+
+val LocalDate.yearMonth: YearMonth
+    get() {
+        return YearMonth.of(year, month)
+    }

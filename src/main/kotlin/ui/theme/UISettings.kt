@@ -27,10 +27,25 @@ object DialogSettings {
     val defaultWideDialogHeight = 640.dp
     val defaultAlertDialogWidth = 280.dp
 
-    object DatePickerSettings{
+    object DatePickerSettings {
         val defaultPickerWidth = 328.dp
         val defaultPickerHeight = 512.dp
         val defaultPickerTitleHeight = 120.dp
+        val defaultHorizontalPadding = 12.dp
+        val defaultDateCellSize = 40.dp
+        val defaultDateCellSelectionSize = 36.dp
+        val defaultIconSize = 24.dp
+
+        val defaultYearCellWidth = 88.dp
+        val defaultYearCellHeight = 52.dp
+        val defaultYearCellSelectionWidth = 72.dp
+        val defaultYearCellSelectionHeight = 36.dp
+    }
+
+    object TimePickerSettings{
+        val defaultPickerWidth = 328.dp
+        val defaultPickerHeight = 512.dp
+        val defaultPickerInputModeHeight = 218.dp
     }
 }
 

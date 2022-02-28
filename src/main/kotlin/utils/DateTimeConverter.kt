@@ -8,8 +8,9 @@ object DateTimeConverter {
 
     private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.LL.yyyy HH:mm:ss")
     val dayOfWeekShort: DateTimeFormatter = DateTimeFormatter.ofPattern("EE")
-    var MMMMyyyy: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
-
+    val dayOfWeekShortest: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEEE")
+    val MMMMyyyy: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+    val shortFullDate: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, LLL dd")
     fun dateTimeToString(dateTime: LocalDateTime): String {
         return dateTime.format(formatter)
     }
