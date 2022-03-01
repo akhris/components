@@ -8,7 +8,6 @@ class ContainersTestRepository : BaseEntityTestRepository<String, Container>(), 
 class ItemsTestRepository : BaseEntityTestRepository<String, Item>(), IItemsRepository
 class ParametersTestRepository : BaseEntityTestRepository<String, Parameter>(), IParametersRepository
 class ObjectTypesTestRepository : BaseEntityTestRepository<String, ObjectType>(), ITypesRepository
-class UnitsTestRepository : BaseEntityTestRepository<String, Unit>(), IUnitsRepository
 class SuppliersTestRepository : BaseEntityTestRepository<String, Supplier>(), ISuppliersRepository
 class ItemIncomeTestRepository : BaseEntityTestRepository<String, ItemIncome>(), IItemIncomeRepository
 class ItemOutcomeTestRepository : BaseEntityTestRepository<String, ItemOutcome>(), IItemOutcomeRepository

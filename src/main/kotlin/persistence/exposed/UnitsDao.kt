@@ -67,4 +67,8 @@ class UnitsDao(private val mapper: Mapper<Unit, EntityUnit>) : IUnitsDao {
             unit.delete()
         }
     }
+
+    override suspend fun getItemsCount(): Long {
+        return 0L
+    }
 }
