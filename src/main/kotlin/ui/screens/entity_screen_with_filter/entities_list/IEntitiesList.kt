@@ -12,9 +12,20 @@ interface IEntitiesList<T : IEntity<*>> {
     //set entities list:
     fun setEntitiesList(entities: List<T>)
 
+    fun setTotalPages(totalPages: Int)
+    fun setCurrentPage(currentPage: Int)
+    fun setItemsPerPage(itemsPerPage: Int)
+
     //entities list model
     data class Model<T : IEntity<*>>(
         val entities: List<T> = listOf(),
+        val pagingParameters: PagingParameters = PagingParameters(),
         val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Table
+    )
+
+    data class PagingParameters(
+        val currentPage: Int = 0,
+        val totalPages: Int = 1,
+        val itemsPerPage: Int = 50
     )
 }

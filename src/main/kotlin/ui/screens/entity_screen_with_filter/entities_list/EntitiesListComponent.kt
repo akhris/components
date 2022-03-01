@@ -10,6 +10,7 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
+import domain.repository.IPagingRepository
 import kotlinx.coroutines.*
 import persistence.repository.Specification
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter
@@ -55,10 +56,6 @@ class EntitiesListComponent<T : IEntity<*>>(
             scope.coroutineContext.cancelChildren()
         })
 
-
-
-
-
         filterModel.subscribe { fm ->
             log("filter model changes: $fm in $this")
             //todo apply filtering to the list of entities here
@@ -67,8 +64,34 @@ class EntitiesListComponent<T : IEntity<*>>(
             }
 
         }
-
+        setupPagination()
         invalidateEntities()
+    }
+
+    //todo get paging initial parameters here:
+    private fun setupPagination() {
+        val repo = (getEntities.repo as? IPagingRepository) ?: return
+        scope.launch {
+            //todo use filterModel to make specification to query for paging parameters
+        }
+    }
+
+    override fun setTotalPages(totalPages: Int) {
+        _state.reduce {
+            it.copy(pagingParameters = it.pagingParameters.copy(totalPages = totalPages))
+        }
+    }
+
+    override fun setCurrentPage(currentPage: Int) {
+        _state.reduce {
+            it.copy(pagingParameters = it.pagingParameters.copy(currentPage = currentPage))
+        }
+    }
+
+    override fun setItemsPerPage(itemsPerPage: Int) {
+        _state.reduce {
+            it.copy(pagingParameters = it.pagingParameters.copy(itemsPerPage = itemsPerPage))
+        }
     }
 
 

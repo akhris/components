@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -22,7 +23,6 @@ import kotlinx.coroutines.delay
 import ui.dialogs.DatePickerDialog
 import ui.dialogs.TimePickerDialog
 import utils.DateTimeConverter
-import java.lang.Long.max
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters
 import kotlin.math.sign
@@ -97,74 +97,70 @@ fun RenderEntityLink(
     onCountChanged: ((Long) -> Unit)? = null
 ) {
     if (field.entity != null) {
-        Column {
+        Row(
+            modifier = Modifier.wrapContentHeight().clickable { onEntityLinkSelect() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            field.count?.let { c ->
+
+                var isHover by remember { mutableStateOf(false) }
+                var count by remember { mutableStateOf<Long?>(c) }
+                var multiplier by remember { mutableStateOf(1) }
+                Box(modifier = Modifier
+                    .height(40.dp)
+                    .widthIn(min = 40.dp)
+                    .padding(start = 16.dp)
+                    .border(
+                        width = if (multiplier == 1) 2.dp else 4.dp,
+                        color = if (isHover) MaterialTheme.colors.primary else Color.Unspecified,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .onFocusEvent {
+                        multiplier = if (it.isFocused) 5 else 1
+                    }
+                    .onPointerEvent(PointerEventType.Enter) { isHover = true }
+                    .onPointerEvent(PointerEventType.Exit) { isHover = false }
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                if (event.type == PointerEventType.Scroll) {
+                                    count = java.lang.Long.max(count?.let {
+                                        val delta = event.changes.first().scrollDelta
+                                        it - sign(delta.y).toLong() * multiplier
+                                    } ?: 0L, 1L)
+                                    event.changes.first().consume()
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    BasicTextField(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .width(IntrinsicSize.Min)
+                            .padding(horizontal = 4.dp, vertical = 4.dp),
+                        value = count?.toString() ?: "",
+                        onValueChange = { count = it.toLongOrNull() }
+                    )
+                }
+
+                //debounce logic:
+                LaunchedEffect(count) {
+                    if (count == field.count) {
+                        return@LaunchedEffect
+                    }
+                    //when count changes:
+                    delay(500L)
+                    count?.let { onCountChanged?.invoke(it) }
+                }
+            }
             ListItem(
-                modifier = Modifier.clickable {
-                    onEntityLinkSelect()
-                },
                 text = { Text(text = field.getName()) },
                 secondaryText = { Text(text = field.description) },
-                trailing = {
-                    ui.composable.Icons.ClearIcon(modifier = Modifier.clickable {
-                        onEntityLinkClear()
-                    }
-                    )
-                },
-                icon = field.count?.let { c ->
-                    {
-                        var isHover by remember { mutableStateOf(false) }
-                        var count by remember { mutableStateOf<Long?>(c) }
-
-                        Box(modifier = Modifier
-                            .height(56.dp)
-                            .border(
-                                width = 2.dp,
-                                color = if (isHover) MaterialTheme.colors.primary else Color.Unspecified,
-                                shape = MaterialTheme.shapes.small
-                            )
-                            .onPointerEvent(PointerEventType.Enter) { isHover = true }
-                            .onPointerEvent(PointerEventType.Exit) { isHover = false }
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        if (event.type == PointerEventType.Scroll) {
-                                            count = max(count?.let {
-                                                val delta = event.changes.first().scrollDelta
-                                                it - sign(delta.y).toLong()
-                                            } ?: 0L, 1L)
-                                            event.changes.first().consume()
-                                        }
-                                    }
-                                }
-                            }
-                        ) {
-                            BasicTextField(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .width(IntrinsicSize.Min)
-                                    .padding(8.dp),
-                                value = count?.toString() ?: "",
-                                onValueChange = {
-                                    count = it.toLongOrNull()
-                                }
-                            )
-                        }
-
-                        //debounce logic:
-                        LaunchedEffect(count) {
-                            if (count == field.count) {
-                                return@LaunchedEffect
-                            }
-                            //when count changes:
-                            delay(500L)
-                            count?.let {
-                                onCountChanged?.invoke(it)
-                            }
-                        }
-                    }
-                }
+                trailing = { ui.composable.Icons.ClearIcon(modifier = Modifier.clickable { onEntityLinkClear() }) }
             )
+
         }
     } else {
         Box(modifier = Modifier.fillMaxWidth()) {

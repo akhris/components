@@ -58,11 +58,7 @@ fun RootUi() {
 
     var addClickedNavItem by remember { mutableStateOf<NavItem?>(null) }
 
-
-
     Row(modifier = Modifier.background(MaterialTheme.colors.background)) {
-
-
         NavigationRailUi(NavigationRailComponent(onNavigateTo = {
             navHostComponent.setDestination(it.route)
         }, onAddButtonClicked = {

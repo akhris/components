@@ -1,48 +1,57 @@
 package di
 
+import com.akhris.domain.core.mappers.Mapper
+import domain.entities.Unit
+import org.kodein.di.bindSingleton
 import org.kodein.di.instance
+import persistence.dao.IUnitsDao
+import persistence.exposed.EntityUnit
+import persistence.exposed.UnitsDao
+import persistence.exposed.UnitsRepository
+import persistence.mappers.UnitMapper
 import persistence.repository.*
 
 val containersModule = getEntityModule(
     "containers module",
     getRepo = { ContainersTestRepository() },
-    getRepoCallbacks = { ContainersTestRepository() })
+//    getRepoCallbacks = { ContainersTestRepository() }
+)
 
 val itemIncomeModule = getEntityModule(
     "item income module",
-    getRepoCallbacks = { ItemIncomeTestRepository() },
+//    getRepoCallbacks = { ItemIncomeTestRepository() },
     getRepo = { ItemIncomeTestRepository() })
 
 val itemOutcomeModule =
     getEntityModule(
         "item outcome module",
-        getRepoCallbacks = { ItemOutcomeTestRepository() },
+//        getRepoCallbacks = { ItemOutcomeTestRepository() },
         getRepo = { ItemOutcomeTestRepository() })
 
 val itemsModule =
     getEntityModule(
         "items module",
-        getRepoCallbacks = { ItemsTestRepository() },
+//        getRepoCallbacks = { ItemsTestRepository() },
         getRepo = { ItemsTestRepository() })
 
 val parametersModule = getEntityModule(
     "parameters module",
-    getRepoCallbacks = { ParametersTestRepository() },
+//    getRepoCallbacks = { ParametersTestRepository() },
     getRepo = { ParametersTestRepository() })
 
 val projectModule = getEntityModule(
     "project module",
-    getRepoCallbacks = { ProjectTestRepository() },
+//    getRepoCallbacks = { ProjectTestRepository() },
     getRepo = { ProjectTestRepository() })
 
 val suppliersModule = getEntityModule(
     "suppliers module",
-    getRepoCallbacks = { SuppliersTestRepository() },
+//    getRepoCallbacks = { SuppliersTestRepository() },
     getRepo = { SuppliersTestRepository() })
 
 val objectTypesModule = getEntityModule(
     "type objects module",
-    getRepoCallbacks = { ObjectTypesTestRepository() },
+//    getRepoCallbacks = { ObjectTypesTestRepository() },
     getRepo = { ObjectTypesTestRepository() })
 
 val warehouseItemModule =
@@ -52,5 +61,9 @@ val warehouseItemModule =
 
 val unitsModule = getEntityModule(
     "units module",
-    getRepoCallbacks = { UnitsTestRepository() },
-    getRepo = { UnitsTestRepository() })
+//    getRepoCallbacks = { UnitsRepository() },
+    getRepo = { UnitsRepository(instance()) },
+    additionalBindings = {
+        bindSingleton<Mapper<Unit, EntityUnit>> { UnitMapper() }
+        bindSingleton<IUnitsDao> { UnitsDao(instance()) }
+    })

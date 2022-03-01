@@ -1,7 +1,4 @@
 // Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
-import androidx.compose.material.DrawerValue
-import androidx.compose.material.rememberDrawerState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
@@ -12,10 +9,10 @@ import di.di
 import domain.application.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import navigation.Screen
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import persistence.exposed.DbSettings
 import settings.AppSetting
 import settings.AppSettingsRepository
 import test.*
@@ -25,6 +22,7 @@ import ui.theme.AppTheme
 
 fun main() = application {
     LogUtils.isLogEnabled = true
+    DbSettings.db   //connect to database
     Window(
         onCloseRequest = ::exitApplication,
         title = AppSettings.appTitle,
@@ -37,7 +35,6 @@ fun main() = application {
 
 @Composable
 private fun mainWindow() = withDI(di) {
-    var route by remember { mutableStateOf<String?>(Screen.homeScreen.route) }
 
     val di = localDI()
     val settingsRepository: AppSettingsRepository by di.instance()
@@ -56,37 +53,7 @@ private fun mainWindow() = withDI(di) {
     }.collectAsState(true)
 
     AppTheme(darkTheme = !isLightTheme) {
-
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Open))
-
-
-//        Scaffold(scaffoldState = scaffoldState,
-//            topBar = {
-//                TopAppBar(title = { Text("components") })
-//            }, drawerContent = {
-//                NavigationPanel(route = route ?: "", onNavigateTo = {
-//                    route = it
-//                })
-//            },
-//            drawerShape = MaterialTheme.shapes.large,
-//            drawerGesturesEnabled = false, content = {
-//                Box(modifier = Modifier.fillMaxHeight().padding(it)) {
-//                    NavHost(route = route)
-//                }
-//            })
-
         RootUi()
-//        Row(modifier = Modifier.background(MaterialTheme.colors.background)) {
-
-//            NavigationPanel(route = route ?: "", onNavigateTo = {
-//                route = it
-//            })
-//            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-//
-//                RootUi(root)
-////                NavHost(route = route)
-//            }
-//        }
     }
 }
 
@@ -99,7 +66,7 @@ private fun PrepopulateDatabase() {
 
     val insertObjectType by di.instance<InsertObjectType>()
     val insertParameter by di.instance<InsertParameter>()
-    val insertUnit by di.instance<InsertUnit>()
+//    val insertUnit by di.instance<InsertUnit>()
     val insertItem by di.instance<InsertItem>()
     val insertContainer by di.instance<InsertContainer>()
     val insertSupplier by di.instance<InsertSupplier>()
@@ -137,20 +104,20 @@ private fun PrepopulateDatabase() {
 //                parameterRepo.insert(it)
                 insertParameter(InsertEntity.Insert(it))
             }
-            listOf(
-                Units.Electronic.amps,
-                Units.Electronic.volts,
-                Units.Electronic.farads,
-                Units.Electronic.ohm,
-                Units.Electronic.watt,
-                Units.Common.grams,
-                Units.Common.meters,
-                Units.Common.pcs,
-                Units.Common.percent
-            ).forEach {
-//                unitsRepository.insert(it)
-                insertUnit(InsertEntity.Insert(it))
-            }
+//            listOf(
+//                Units.Electronic.amps,
+//                Units.Electronic.volts,
+//                Units.Electronic.farads,
+//                Units.Electronic.ohm,
+//                Units.Electronic.watt,
+//                Units.Common.grams,
+//                Units.Common.meters,
+//                Units.Common.pcs,
+//                Units.Common.percent
+//            ).forEach {
+////                unitsRepository.insert(it)
+//                insertUnit(InsertEntity.Insert(it))
+//            }
 
             listOf(
                 Containers.room407,

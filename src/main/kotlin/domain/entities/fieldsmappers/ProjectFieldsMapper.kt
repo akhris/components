@@ -1,5 +1,6 @@
 package domain.entities.fieldsmappers
 
+import com.akhris.domain.core.utils.log
 import domain.entities.EntityCountable
 import domain.entities.Item
 import domain.entities.Project
@@ -15,7 +16,7 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
             EntityFieldID.EntitiesListID(
                 tag = tag_items,
                 name = "items",
-                entitiesIDs = entity.items.mapIndexed { index, item ->
+                entitiesIDs = List(entity.items.size) { index ->
                     EntityFieldID.EntityID(
                         tag = "$tag_items$index",
                         name = "item ${index + 1}",
@@ -29,11 +30,13 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
 
 
     override fun getFieldParamsByFieldID(entity: Project, fieldID: EntityFieldID): DescriptiveFieldValue {
+        log("get field params for id: $fieldID")
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 val index = fieldID.tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
                 val item = entity.items.getOrNull(index)
-                DescriptiveFieldValue(item, description = item?.entity?.name ?: "")
+                log("item: $item")
+                DescriptiveFieldValue(value = item?.entity, description = item?.entity?.name ?: "", count = item?.count)
             }
             is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
                 value = entity.items,

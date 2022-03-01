@@ -28,7 +28,7 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
                         entity.container,
                         description = "container where item was put"
                     )
-                    tag_supplier -> DescriptiveFieldValue(entity.supplier, description = "where items has come from")
+                    tag_supplier -> DescriptiveFieldValue(entity.supplier, description = "where items came from")
                     tag_item -> DescriptiveFieldValue(
                         entity.item?.entity,
                         description = "item that came",

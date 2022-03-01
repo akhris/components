@@ -1,5 +1,6 @@
 package ui.entity_renderers
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,6 +10,8 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.log
@@ -103,7 +106,9 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
         modifier = Modifier
             .align(Alignment.Center)
             .widthIn(min = ContentSettings.contentCardMinWidth, max = ContentSettings.contentCardMaxWidth)
-            .padding(8.dp)
+            .padding(8.dp),
+        elevation = 0.dp,
+        border = BorderStroke(Dp.Hairline, color = Color.LightGray)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             fields.forEach {

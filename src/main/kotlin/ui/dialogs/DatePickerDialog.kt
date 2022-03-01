@@ -403,7 +403,7 @@ fun DayCell(
 
         val bgColor = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.surface
 
-        if (isSelected) {
+        if (isSelected && date != null) {
             Surface(
                 modifier = Modifier
                     .align(Alignment.Center)
