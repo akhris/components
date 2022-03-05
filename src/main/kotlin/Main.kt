@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
-import persistence.exposed.DbSettings
+import persistence.ExposedDbSettings
 import settings.AppSetting
 import settings.AppSettingsRepository
 import test.*
@@ -22,7 +22,7 @@ import ui.theme.AppTheme
 
 fun main() = application {
     LogUtils.isLogEnabled = true
-    DbSettings.db   //connect to database
+    ExposedDbSettings.db   //connect to database
     Window(
         onCloseRequest = ::exitApplication,
         title = AppSettings.appTitle,

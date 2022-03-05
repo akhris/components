@@ -1,37 +1,36 @@
-package persistence.exposed
+package persistence.datasources.exposed
 
-import com.akhris.domain.core.mappers.Mapper
 import com.akhris.domain.core.utils.log
-import domain.entities.Unit
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.dao.IUnitsDao
+import persistence.datasources.IUnitsDao
+import persistence.dto.exposed.EntityUnit
 import java.util.*
 
-class UnitsDao(private val mapper: Mapper<Unit, EntityUnit>) : IUnitsDao {
-    override suspend fun getByID(id: String): Unit? {
+class UnitsDao : IUnitsDao {
+    override suspend fun getByID(id: String): EntityUnit? {
         return try {
-            mapper.mapFrom(newSuspendedTransaction {
+            newSuspendedTransaction {
                 addLogger(StdOutSqlLogger)
                 EntityUnit.get(id = UUID.fromString(id))
-            })
+            }
         } catch (e: Exception) {
             log(e)
             null
         }
     }
 
-    override suspend fun getAll(): List<Unit> {
+    override suspend fun getAll(): List<EntityUnit> {
         val all =
             newSuspendedTransaction {
                 EntityUnit.all().toList()
             }
         log("got units: ${all.size}")
-        return mapper.mapFrom(all).toList()
+        return all
     }
 
-    override suspend fun insert(entity: Unit) {
+    override suspend fun insert(entity: EntityUnit) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
 //            Tables.Units.insert { a ->
@@ -46,12 +45,12 @@ class UnitsDao(private val mapper: Mapper<Unit, EntityUnit>) : IUnitsDao {
         }
     }
 
-    override suspend fun update(entity: Unit) {
+    override suspend fun update(entity: EntityUnit) {
         log("update: $entity")
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             //1. get entity by id:
-            val unit = EntityUnit[mapper.mapTo(entity).id]
+            val unit = EntityUnit[entity.id]
             //2. update it:
             unit.unit = entity.unit
             unit.isMultipliable = entity.isMultipliable
@@ -68,7 +67,7 @@ class UnitsDao(private val mapper: Mapper<Unit, EntityUnit>) : IUnitsDao {
         }
     }
 
-    override suspend fun getItemsCount(): Long {
-        return 0L
-    }
+//    override suspend fun getItemsCount(): Long {
+//        return 0L
+//    }
 }

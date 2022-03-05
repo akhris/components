@@ -1,12 +1,13 @@
-package persistence.exposed
+package persistence
 
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import persistence.dto.exposed.Tables
 
-object DbSettings {
+object ExposedDbSettings {
     val db by lazy {
         Database.connect("jdbc:sqlite:/home/anatoly/.components_app/data.db", "org.sqlite.JDBC")
 //        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")

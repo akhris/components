@@ -3,6 +3,7 @@ package ui.screens.entity_screen_with_filter.entities_filter
 import com.arkivanov.decompose.value.Value
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
+import persistence.repository.Specification
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter.FilterSettings
 import ui.screens.types_of_data.types_selector.ItemRepresentationType
 
@@ -44,4 +45,9 @@ interface IEntitiesFilter {
     )
 
     data class FilteredField(val field: EntityField, val isFiltered: Boolean = false)
+}
+
+fun IEntitiesFilter.Model.getSpecification(): Specification {
+    //return Specification depending on filters
+    return Specification.QueryAll
 }

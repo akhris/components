@@ -10,14 +10,15 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
-import domain.repository.IPagingRepository
+import persistence.repository.IPagingRepository
 import kotlinx.coroutines.*
 import persistence.repository.Specification
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter
+import ui.screens.entity_screen_with_filter.entities_filter.getSpecification
 
 class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
-    filterModel: Value<IEntitiesFilter.Model>,
+    private val filterModel: Value<IEntitiesFilter.Model>,
     private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
     private val getEntities: GetEntities<*, out T>
 ) :
@@ -71,14 +72,16 @@ class EntitiesListComponent<T : IEntity<*>>(
     //todo get paging initial parameters here:
     private fun setupPagination() {
         val repo = (getEntities.repo as? IPagingRepository) ?: return
+
         scope.launch {
-            //todo use filterModel to make specification to query for paging parameters
+            val totalItems = repo.getItemsCount(filterModel.value.getSpecification())
+            setTotalItems(totalItems)
         }
     }
 
-    override fun setTotalPages(totalPages: Int) {
+    private fun setTotalItems(totalItems: Long) {
         _state.reduce {
-            it.copy(pagingParameters = it.pagingParameters.copy(totalPages = totalPages))
+            it.copy(pagingParameters = it.pagingParameters.copy(totalItems = totalItems))
         }
     }
 

@@ -6,9 +6,6 @@ import domain.entities.EntityCountable
 import domain.entities.ItemIncome
 import domain.entities.ItemOutcome
 import domain.entities.WarehouseItem
-import domain.repository.IItemIncomeRepository
-import domain.repository.IItemOutcomeRepository
-import domain.repository.IWarehouseItemRepository
 
 /**
  * repository that handles items in warehouse.

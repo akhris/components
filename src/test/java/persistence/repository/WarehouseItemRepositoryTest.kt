@@ -1,8 +1,5 @@
 package persistence.repository
 
-import domain.repository.IItemIncomeRepository
-import domain.repository.IItemOutcomeRepository
-import domain.repository.IWarehouseItemRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

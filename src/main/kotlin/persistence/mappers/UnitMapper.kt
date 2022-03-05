@@ -4,15 +4,16 @@ import com.akhris.domain.core.mappers.IMapper
 import com.akhris.domain.core.mappers.Mapper
 import domain.entities.Unit
 import org.jetbrains.exposed.dao.id.EntityID
-import persistence.exposed.EntityUnit
-import persistence.exposed.Tables
+import persistence.dto.exposed.EntityUnit
+import persistence.dto.exposed.Tables
 import java.util.*
 
 class UnitMapper :
     Mapper<Unit, EntityUnit>(toMapper = object : IMapper<Unit, EntityUnit> {
         override fun map(input: Unit): EntityUnit {
-            val entityUnit = EntityUnit(EntityID(UUID.fromString(input.id), Tables.Units))
-            entityUnit.apply {
+            val entityUnit = EntityUnit
+
+                entityUnit.apply {
                 unit = input.unit
                 isMultipliable = input.isMultipliable
             }
