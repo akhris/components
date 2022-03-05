@@ -1,22 +1,20 @@
 package persistence.repository
 
-import com.akhris.domain.core.mappers.Mapper
 import com.akhris.domain.core.repository.BaseCachedRepository
 import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
 import domain.entities.Unit
 import persistence.datasources.IUnitsDao
-import persistence.dto.exposed.EntityUnit
 
-class UnitsRepository(private val unitsDao: IUnitsDao, private val mapper: Mapper<Unit, EntityUnit>) :
+class UnitsRepository(private val unitsDao: IUnitsDao) :
     BaseCachedRepository<String, Unit>(), IUnitsRepository {
 
     override suspend fun fetchItemFromRepo(idToFetch: String): Unit? {
-        return unitsDao.getByID(idToFetch)?.let { mapper.mapFrom(it) }
+        return unitsDao.getByID(idToFetch)
     }
 
     override suspend fun insertInRepo(entity: Unit) {
-        unitsDao.insert(mapper.mapTo(entity))
+        unitsDao.insert(entity)
     }
 
     override suspend fun removeFromRepo(entity: Unit) {
@@ -24,7 +22,7 @@ class UnitsRepository(private val unitsDao: IUnitsDao, private val mapper: Mappe
     }
 
     override suspend fun updateInRepo(entity: Unit) {
-        unitsDao.update(mapper.mapTo(entity))
+        unitsDao.update(entity)
     }
 
     override suspend fun query(specification: ISpecification): List<Unit> {
@@ -38,9 +36,12 @@ class UnitsRepository(private val unitsDao: IUnitsDao, private val mapper: Mappe
                 listOf()
             }
             Specification.QueryAll -> {
-                mapper.mapFrom(unitsDao.getAll()).toList()
+                unitsDao.getAll()
             }
             is Specification.Search -> {
+                listOf()
+            }
+            is Specification.Paginated -> {
                 listOf()
             }
         }

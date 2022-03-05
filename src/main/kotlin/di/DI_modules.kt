@@ -1,14 +1,10 @@
 package di
 
-import com.akhris.domain.core.mappers.Mapper
-import domain.entities.Unit
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import persistence.datasources.IUnitsDao
-import persistence.dto.exposed.EntityUnit
 import persistence.datasources.exposed.UnitsDao
 import persistence.repository.UnitsRepository
-import persistence.mappers.UnitMapper
 import persistence.repository.*
 
 val containersModule = getEntityModule(
@@ -62,8 +58,7 @@ val warehouseItemModule =
 val unitsModule = getEntityModule(
     "units module",
 //    getRepoCallbacks = { UnitsRepository() },
-    getRepo = { UnitsRepository(instance(), instance()) },
+    getRepo = { UnitsRepository(instance()) },
     additionalBindings = {
-        bindSingleton<Mapper<Unit, EntityUnit>> { UnitMapper() }
         bindSingleton<IUnitsDao> { UnitsDao() }
     })

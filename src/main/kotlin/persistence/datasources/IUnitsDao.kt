@@ -1,12 +1,10 @@
 package persistence.datasources
 
-import persistence.dto.exposed.EntityUnit
-
 interface IUnitsDao {
-    suspend fun getByID(id: String): EntityUnit?
-    suspend fun getAll(): List<EntityUnit>
-    suspend fun insert(entity: EntityUnit)
-    suspend fun update(entity: EntityUnit)
+    suspend fun getByID(id: String): domain.entities.Unit?
+    suspend fun getAll(): List<domain.entities.Unit>
+    suspend fun insert(entity: domain.entities.Unit)
+    suspend fun update(entity: domain.entities.Unit)
     suspend fun removeById(id: String)
 //    suspend fun getItemsCount(): Long
 }
