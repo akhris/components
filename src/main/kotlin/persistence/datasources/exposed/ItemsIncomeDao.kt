@@ -5,18 +5,19 @@ import domain.entities.ItemIncome
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import persistence.datasources.IItemsDao
 import persistence.datasources.IItemsIncomeDao
-import persistence.dto.exposed.EntityItemIncome
-import persistence.dto.exposed.EntityUnit
+import persistence.dto.exposed.*
+import persistence.mappers.toItemIncome
 import persistence.mappers.toUnit
 import java.util.*
 
-class ItemsIncomeDao : IItemsIncomeDao {
+class ItemsIncomeDao(private val itemsDao: IItemsDao) : IItemsIncomeDao {
     override suspend fun getByID(id: String): ItemIncome? {
         return try {
             newSuspendedTransaction {
                 addLogger(StdOutSqlLogger)
-                EntityItemIncome.get(id = UUID.fromString(id))
+                EntityItemIncome.get(id = UUID.fromString(id)).toItemIncome()
             }
         } catch (e: Exception) {
             log(e)
@@ -29,7 +30,18 @@ class ItemsIncomeDao : IItemsIncomeDao {
     }
 
     override suspend fun insert(entity: ItemIncome) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            val item = entity.item?.entity?.id?.let { itemsDao.getByID(it) }?:
+            EntityItemIncome.new {
+                item = entity.item?.entity?.id?.let { EntityItem[UUID.fromString(it)] }
+                count = entity.item?.count
+                container = entity.container?.id?.let { EntityContainer[UUID.fromString(it)] }
+                dateTime = entity.dateTime
+                supplier = entity.supplier?.id?.let { EntitySupplier[UUID.fromString(it)] }
+            }
+            commit()
+        }
     }
 
     override suspend fun update(entity: ItemIncome) {

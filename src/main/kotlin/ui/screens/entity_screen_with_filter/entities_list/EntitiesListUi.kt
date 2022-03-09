@@ -69,14 +69,14 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>) {
 @Composable
 private fun PagingControl(
     modifier: Modifier = Modifier,
-    currentPage: Int = 1,
-    maxPages: Int,
-    onPageChanged: (Int) -> Unit
+    currentPage: Long = 1L,
+    maxPages: Long,
+    onPageChanged: (Long) -> Unit
 ) {
 
     var isPageControllerHover by remember { mutableStateOf(false) }
 
-    val pagesRange = remember(maxPages) { 1..maxPages }
+    val pagesRange = remember(maxPages) { 1L..maxPages }
 
     var page by remember { mutableStateOf(currentPage) }
 
@@ -137,7 +137,7 @@ private fun PagingControl(
                 value = page.toString(),
                 textStyle = TextStyle.Default.copy(textAlign = TextAlign.Center),
                 onValueChange = {
-                    it.toIntOrNull()?.let { v ->
+                    it.toLongOrNull()?.let { v ->
                         page = v.coerceIn(pagesRange)
                     }
                 },

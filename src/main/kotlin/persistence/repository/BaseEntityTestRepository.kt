@@ -32,6 +32,7 @@ open class BaseEntityTestRepository<ID : Any, T : IEntity<ID>> : BaseCachedRepos
             Specification.QueryAll -> repo.values.toList()
             is Specification.Search -> repo.values.toList()
             is Specification.ByItem -> TODO("Not yet implemented")
+            is Specification.Paginated -> TODO()
         }
     }
 

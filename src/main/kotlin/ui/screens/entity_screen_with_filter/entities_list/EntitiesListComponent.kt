@@ -85,13 +85,13 @@ class EntitiesListComponent<T : IEntity<*>>(
         }
     }
 
-    override fun setCurrentPage(currentPage: Int) {
+    override fun setCurrentPage(currentPage: Long) {
         _state.reduce {
             it.copy(pagingParameters = it.pagingParameters.copy(currentPage = currentPage))
         }
     }
 
-    override fun setItemsPerPage(itemsPerPage: Int) {
+    override fun setItemsPerPage(itemsPerPage: Long) {
         _state.reduce {
             it.copy(pagingParameters = it.pagingParameters.copy(itemsPerPage = itemsPerPage))
         }

@@ -2,7 +2,9 @@ package di
 
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
+import persistence.datasources.IItemsIncomeDao
 import persistence.datasources.IUnitsDao
+import persistence.datasources.exposed.ItemsIncomeDao
 import persistence.datasources.exposed.UnitsDao
 import persistence.repository.UnitsRepository
 import persistence.repository.*
@@ -16,7 +18,10 @@ val containersModule = getEntityModule(
 val itemIncomeModule = getEntityModule(
     "item income module",
 //    getRepoCallbacks = { ItemIncomeTestRepository() },
-    getRepo = { ItemIncomeTestRepository() })
+    getRepo = { ItemIncomeRepository(instance()) },
+additionalBindings = {
+    bindSingleton<IItemsIncomeDao> { ItemsIncomeDao() }
+})
 
 val itemOutcomeModule =
     getEntityModule(

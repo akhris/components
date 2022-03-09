@@ -13,8 +13,8 @@ interface IEntitiesList<T : IEntity<*>> {
     fun setEntitiesList(entities: List<T>)
 
     //    fun setTotalPages(totalPages: Int)
-    fun setCurrentPage(currentPage: Int)
-    fun setItemsPerPage(itemsPerPage: Int)
+    fun setCurrentPage(currentPage: Long)
+    fun setItemsPerPage(itemsPerPage: Long)
 
     //entities list model
     data class Model<T : IEntity<*>>(
@@ -24,9 +24,9 @@ interface IEntitiesList<T : IEntity<*>> {
     )
 
     data class PagingParameters(
-        val currentPage: Int = 1,
+        val currentPage: Long = 1L,
         val totalItems: Long = 0L,
-        val itemsPerPage: Int = 50
+        val itemsPerPage: Long = 50L
     ) {
         val totalPages = (totalItems / itemsPerPage) + 1
     }
