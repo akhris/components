@@ -69,7 +69,7 @@ class EntitySupplier(id: EntityID<UUID>) : UUIDEntity(id) {
 
 }
 
-
+// TODO: 3/9/22 use id's instead of objects
 class EntityItemIncome(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityItemIncome>(Tables.ItemIncomes)
 
