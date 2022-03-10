@@ -1,15 +1,15 @@
 package di
 
-import domain.entities.Container
-import domain.entities.ItemIncome
-import domain.entities.Parameter
-import domain.entities.Supplier
+import domain.entities.*
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import persistence.datasources.BaseDao
 import persistence.datasources.BasePagingDao
 import persistence.datasources.exposed.*
-import persistence.repository.*
+import persistence.repository.BaseRepository
+import persistence.repository.ItemOutcomeTestRepository
+import persistence.repository.ProjectTestRepository
+import persistence.repository.WarehouseItemRepository
 
 val containersModule = getEntityModule(
     "containers module",
@@ -35,7 +35,10 @@ val itemOutcomeModule =
 val itemsModule =
     getEntityModule(
         "items module",
-        getRepo = { ItemsTestRepository() })
+        getRepo = { BaseRepository<Item>(baseDao = instance()) },
+        additionalBindings = {
+            bindSingleton<BaseDao<Item>> { ItemsDao() }
+        })
 
 val parametersModule = getEntityModule(
     "parameters module",
@@ -57,7 +60,10 @@ val suppliersModule = getEntityModule(
 
 val objectTypesModule = getEntityModule(
     "type objects module",
-    getRepo = { ObjectTypesTestRepository() })
+    getRepo = { BaseRepository<ObjectType>(baseDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<ObjectType>> { ObjectTypesDao() }
+    })
 
 val warehouseItemModule =
     getEntityModule(
