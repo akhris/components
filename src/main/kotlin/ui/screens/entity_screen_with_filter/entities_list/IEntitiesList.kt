@@ -19,7 +19,7 @@ interface IEntitiesList<T : IEntity<*>> {
     //entities list model
     data class Model<T : IEntity<*>>(
         val entities: List<T> = listOf(),
-        val pagingParameters: PagingParameters = PagingParameters(),
+        val pagingParameters: PagingParameters? = null,
         val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Table
     )
 

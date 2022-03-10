@@ -1,11 +1,11 @@
 package ui.screens.types_of_data.data_types_list
 
 import com.akhris.domain.core.application.GetEntities
+import com.akhris.domain.core.application.Result
 import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.utils.log
-import com.akhris.domain.core.utils.unpack
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -74,10 +74,17 @@ class DataTypesListComponent(
 
     private fun loadEntities(useCase: GetEntities<*, *>) {
         scope.launch {
-            val entities = useCase(GetEntities.GetBySpecification(Specification.QueryAll)).unpack()
-            _state.reduce {
-                it.copy(entities = entities)
+            when (val entitiesResult = useCase(GetEntities.GetBySpecification(Specification.QueryAll))) {
+                is Result.Success -> {
+                    _state.reduce {
+                        it.copy(entities = entitiesResult.value)
+                    }
+                }
+                is Result.Failure -> {
+                    log(entitiesResult.throwable)
+                }
             }
+
         }
     }
 

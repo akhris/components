@@ -1,24 +1,24 @@
 package persistence.datasources.exposed
 
 import com.akhris.domain.core.utils.log
-import domain.entities.Unit
+import domain.entities.Supplier
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.IUnitsDao
-import persistence.dto.exposed.EntityUnit
+import persistence.datasources.BaseDao
+import persistence.dto.exposed.EntitySupplier
 import persistence.dto.exposed.Tables
-import persistence.mappers.toUnit
+import persistence.mappers.toSupplier
 import utils.toUUID
 import java.util.*
 
-class UnitsDao : IUnitsDao {
-    override suspend fun getByID(id: String): Unit? {
+class SuppliersDao : BaseDao<Supplier> {
+    override suspend fun getByID(id: String): Supplier? {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             try {
-                EntityUnit.get(id = UUID.fromString(id)).toUnit()
+                EntitySupplier.get(id = UUID.fromString(id)).toSupplier()
             } catch (e: Exception) {
                 log(e)
                 null
@@ -26,34 +26,37 @@ class UnitsDao : IUnitsDao {
         }
     }
 
-    override suspend fun getAll(): List<Unit> {
+    override suspend fun getAll(): List<Supplier> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            EntityUnit.all().map { it.toUnit() }
+            EntitySupplier.all().map { it.toSupplier() }
         }
     }
 
-    override suspend fun insert(entity: Unit) {
+    override suspend fun insert(entity: Supplier) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            Tables.Units.insert { statement ->
+            Tables.Suppliers.insert { statement ->
                 statement[id] = entity.id.toUUID()
-                statement[unit] = entity.unit
-                statement[isMultipliable] = entity.isMultipliable
+                statement[name] = entity.name
+                statement[url] = entity.url
+                statement[description] = entity.description
+                statement[isFavorite] = entity.isFavorite
             }
             commit()
         }
     }
 
-    override suspend fun update(entity: Unit) {
-        log("update: $entity")
+    override suspend fun update(entity: Supplier) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             //1. get entity by id:
-            val foundEntity = EntityUnit[UUID.fromString(entity.id)]
+            val foundEntity = EntitySupplier[UUID.fromString(entity.id)]
             //2. update it:
-            foundEntity.unit = foundEntity.unit
-            foundEntity.isMultipliable = foundEntity.isMultipliable
+            foundEntity.name = foundEntity.name
+            foundEntity.url = foundEntity.url
+            foundEntity.description = foundEntity.description
+            foundEntity.isFavorite = foundEntity.isFavorite
         }
     }
 
@@ -61,13 +64,9 @@ class UnitsDao : IUnitsDao {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             //1. get entity by id:
-            val entity = EntityUnit[UUID.fromString(id)]
+            val entity = EntitySupplier[UUID.fromString(id)]
             //2. delete it
             entity.delete()
         }
     }
-
-//    override suspend fun getItemsCount(): Long {
-//        return 0L
-//    }
 }

@@ -2,16 +2,16 @@ package ui.screens.entity_screen_with_filter.entities_list
 
 
 import com.akhris.domain.core.application.GetEntities
+import com.akhris.domain.core.application.Result
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.log
-import com.akhris.domain.core.utils.unpack
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
-import persistence.repository.IPagingRepository
 import kotlinx.coroutines.*
+import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter
 import ui.screens.entity_screen_with_filter.entities_filter.getSpecification
@@ -39,14 +39,27 @@ class EntitiesListComponent<T : IEntity<*>>(
         onListModelChanged(_state.value)
     }
 
-    private fun invalidateEntities() {
-        scope.launch {
-            val entities = getEntities(GetEntities.GetBySpecification(Specification.QueryAll)).unpack()
-            _state.reduce {
-                it.copy(entities = entities)
-            }
-            onListModelChanged(_state.value)
+    private suspend fun invalidateEntities() {
+        val pagingParams = _state.value.pagingParameters
+        val specification = if (pagingParams == null) {
+            Specification.QueryAll
+        } else {
+            Specification.Paginated(pageNumber = pagingParams.currentPage, itemsPerPage = pagingParams.itemsPerPage)
         }
+        val entitiesResult = getEntities(GetEntities.GetBySpecification(specification))
+        log("invalidating entities for spec: $specification, entitiesResult: $entitiesResult")
+        when(entitiesResult){
+            is Result.Success -> {
+                _state.reduce {
+                    it.copy(entities = entitiesResult.value)
+                }
+                onListModelChanged(_state.value)
+            }
+            is Result.Failure -> {
+                log(entitiesResult.throwable)
+            }
+        }
+
     }
 
     init {
@@ -65,35 +78,43 @@ class EntitiesListComponent<T : IEntity<*>>(
             }
 
         }
-        setupPagination()
-        invalidateEntities()
+        scope.launch {
+            setupPagination()
+            invalidateEntities()
+        }
     }
 
-    //todo get paging initial parameters here:
-    private fun setupPagination() {
+    private suspend fun setupPagination() {
         val repo = (getEntities.repo as? IPagingRepository) ?: return
-
-        scope.launch {
-            val totalItems = repo.getItemsCount(filterModel.value.getSpecification())
-            setTotalItems(totalItems)
-        }
+        val totalItems = repo.getItemsCount(filterModel.value.getSpecification())
+        setTotalItems(totalItems)
     }
 
     private fun setTotalItems(totalItems: Long) {
         _state.reduce {
-            it.copy(pagingParameters = it.pagingParameters.copy(totalItems = totalItems))
+            it.copy(
+                pagingParameters = it.pagingParameters?.copy(totalItems = totalItems) ?: IEntitiesList.PagingParameters(
+                    totalItems = totalItems
+                )
+            )
         }
     }
 
     override fun setCurrentPage(currentPage: Long) {
         _state.reduce {
-            it.copy(pagingParameters = it.pagingParameters.copy(currentPage = currentPage))
+            it.copy(
+                pagingParameters = it.pagingParameters?.copy(currentPage = currentPage)
+                    ?: IEntitiesList.PagingParameters(currentPage = currentPage)
+            )
         }
     }
 
     override fun setItemsPerPage(itemsPerPage: Long) {
         _state.reduce {
-            it.copy(pagingParameters = it.pagingParameters.copy(itemsPerPage = itemsPerPage))
+            it.copy(
+                pagingParameters = it.pagingParameters?.copy(itemsPerPage = itemsPerPage)
+                    ?: IEntitiesList.PagingParameters(itemsPerPage = itemsPerPage)
+            )
         }
     }
 

@@ -15,7 +15,10 @@ import org.kodein.di.instance
 import persistence.ExposedDbSettings
 import settings.AppSetting
 import settings.AppSettingsRepository
-import test.*
+import test.Items
+import test.Outcomes
+import test.Projects
+import test.Types
 import ui.screens.root.RootUi
 import ui.theme.AppSettings
 import ui.theme.AppTheme
@@ -66,7 +69,7 @@ private fun PrepopulateDatabase() {
 
     val insertObjectType by di.instance<InsertObjectType>()
     val insertParameter by di.instance<InsertParameter>()
-//    val insertUnit by di.instance<InsertUnit>()
+    val insertUnit by di.instance<InsertUnit>()
     val insertItem by di.instance<InsertItem>()
     val insertContainer by di.instance<InsertContainer>()
     val insertSupplier by di.instance<InsertSupplier>()
@@ -90,20 +93,20 @@ private fun PrepopulateDatabase() {
 //                objectTypesRepo.insert(it)
                 insertObjectType(InsertEntity.Insert(it))
             }
-            listOf(
-                Parameters.Electronic.dielectricType,
-                Parameters.Electronic.maxVoltage,
-                Parameters.Electronic.packg,
-                Parameters.Electronic.capacitance,
-                Parameters.Electronic.resistance,
-                Parameters.Electronic.dielectricType,
-                Parameters.Electronic.tolerance,
-                Parameters.Material.length,
-                Parameters.Material.weight
-            ).forEach {
-//                parameterRepo.insert(it)
-                insertParameter(InsertEntity.Insert(it))
-            }
+//            listOf(
+//                Parameters.Electronic.dielectricType,
+//                Parameters.Electronic.maxVoltage,
+//                Parameters.Electronic.packg,
+//                Parameters.Electronic.capacitance,
+//                Parameters.Electronic.resistance,
+//                Parameters.Electronic.dielectricType,
+//                Parameters.Electronic.tolerance,
+//                Parameters.Material.length,
+//                Parameters.Material.weight
+//            ).forEach {
+////                parameterRepo.insert(it)
+//                insertParameter(InsertEntity.Insert(it))
+//            }
 //            listOf(
 //                Units.Electronic.amps,
 //                Units.Electronic.volts,
@@ -119,25 +122,25 @@ private fun PrepopulateDatabase() {
 //                insertUnit(InsertEntity.Insert(it))
 //            }
 
-            listOf(
-                Containers.room407,
-                Containers.shelving1,
-                Containers.box1,
-                Containers.box2,
-                Containers.box3
-            ).forEach {
-//                containersRepository.insert(it)
-                insertContainer(InsertEntity.Insert(it))
-            }
+//            listOf(
+//                Containers.room407,
+//                Containers.shelving1,
+//                Containers.box1,
+//                Containers.box2,
+//                Containers.box3
+//            ).forEach {
+////                containersRepository.insert(it)
+//                insertContainer(InsertEntity.Insert(it))
+//            }
 
-            Suppliers.getAll().forEach {
+//            Suppliers.getAll().forEach {
 //                suppliersRepository.insert(it)
-                insertSupplier(InsertEntity.Insert(it))
-            }
+//                insertSupplier(InsertEntity.Insert(it))
+//            }
 
-            listOf(Incomes.income1, Incomes.income2, Incomes.income3).forEach {
-                insertItemIncome(InsertEntity.Insert(it))
-            }
+//            listOf(Incomes.income1, Incomes.income2, Incomes.income3).forEach {
+//                insertItemIncome(InsertEntity.Insert(it))
+//            }
 
             listOf(Outcomes.outcome1, Outcomes.outcome2).forEach {
                 insertItemOutcome(InsertEntity.Insert(it))

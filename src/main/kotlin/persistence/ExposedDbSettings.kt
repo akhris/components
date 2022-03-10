@@ -16,7 +16,20 @@ object ExposedDbSettings {
         transaction {
             addLogger(StdOutSqlLogger)
 
-            SchemaUtils.create(Tables.Units)
+            SchemaUtils.create(
+                Tables.Items,
+                Tables.Containers,
+                Tables.Suppliers,
+                Tables.Units,
+                Tables.ItemIncomes,
+                Tables.ItemOutcomes,
+                Tables.ObjectTypes,
+                Tables.Values,
+                Tables.Parameters,
+                Tables.ContainerToContainers,
+                Tables.ValuesToItem,
+                Tables.ParametersToObjectType
+            )
         }
     }
 }

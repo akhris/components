@@ -51,16 +51,19 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>) {
 //        onEntityUpdated = component::onEntityUpdated
         )
 
-        if (state.pagingParameters.totalPages > 1) {
-            //show paging control:
-            PagingControl(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                currentPage = state.pagingParameters.currentPage,
-                maxPages = state.pagingParameters.totalPages,
-                onPageChanged = {
-                    component.setCurrentPage(it)
-                })
+        state.pagingParameters?.let { pagingParams ->
+            if (pagingParams.totalPages > 1) {
+                //show paging control:
+                PagingControl(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    currentPage = pagingParams.currentPage,
+                    maxPages = pagingParams.totalPages,
+                    onPageChanged = {
+                        component.setCurrentPage(it)
+                    })
+            }
         }
+
     }
 
 }

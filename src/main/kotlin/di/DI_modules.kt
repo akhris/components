@@ -1,58 +1,62 @@
 package di
 
+import domain.entities.Container
+import domain.entities.ItemIncome
+import domain.entities.Parameter
+import domain.entities.Supplier
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
-import persistence.datasources.IItemsIncomeDao
-import persistence.datasources.IUnitsDao
-import persistence.datasources.exposed.ItemsIncomeDao
-import persistence.datasources.exposed.UnitsDao
-import persistence.repository.UnitsRepository
+import persistence.datasources.BaseDao
+import persistence.datasources.BasePagingDao
+import persistence.datasources.exposed.*
 import persistence.repository.*
 
 val containersModule = getEntityModule(
     "containers module",
-    getRepo = { ContainersTestRepository() },
-//    getRepoCallbacks = { ContainersTestRepository() }
+    getRepo = { BaseRepository<Container>(baseDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<Container>> { ContainersDao() }
+    }
 )
 
 val itemIncomeModule = getEntityModule(
     "item income module",
-//    getRepoCallbacks = { ItemIncomeTestRepository() },
-    getRepo = { ItemIncomeRepository(instance()) },
-additionalBindings = {
-    bindSingleton<IItemsIncomeDao> { ItemsIncomeDao() }
-})
+    getRepo = { BaseRepository<ItemIncome>(baseDao = instance(), basePagingDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<ItemIncome>> { ItemsIncomeDao() }
+        bindSingleton<BasePagingDao<ItemIncome>> { ItemsIncomeDao() }
+    })
 
 val itemOutcomeModule =
     getEntityModule(
         "item outcome module",
-//        getRepoCallbacks = { ItemOutcomeTestRepository() },
         getRepo = { ItemOutcomeTestRepository() })
 
 val itemsModule =
     getEntityModule(
         "items module",
-//        getRepoCallbacks = { ItemsTestRepository() },
         getRepo = { ItemsTestRepository() })
 
 val parametersModule = getEntityModule(
     "parameters module",
-//    getRepoCallbacks = { ParametersTestRepository() },
-    getRepo = { ParametersTestRepository() })
+    getRepo = { BaseRepository<Parameter>(baseDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<Parameter>> { ParametersDao() }
+    })
 
 val projectModule = getEntityModule(
     "project module",
-//    getRepoCallbacks = { ProjectTestRepository() },
     getRepo = { ProjectTestRepository() })
 
 val suppliersModule = getEntityModule(
     "suppliers module",
-//    getRepoCallbacks = { SuppliersTestRepository() },
-    getRepo = { SuppliersTestRepository() })
+    getRepo = { BaseRepository<Supplier>(baseDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<Supplier>> { SuppliersDao() }
+    })
 
 val objectTypesModule = getEntityModule(
     "type objects module",
-//    getRepoCallbacks = { ObjectTypesTestRepository() },
     getRepo = { ObjectTypesTestRepository() })
 
 val warehouseItemModule =
@@ -62,8 +66,7 @@ val warehouseItemModule =
 
 val unitsModule = getEntityModule(
     "units module",
-//    getRepoCallbacks = { UnitsRepository() },
-    getRepo = { UnitsRepository(instance()) },
+    getRepo = { BaseRepository<domain.entities.Unit>(baseDao = instance()) },
     additionalBindings = {
-        bindSingleton<IUnitsDao> { UnitsDao() }
+        bindSingleton<BaseDao<domain.entities.Unit>> { UnitsDao() }
     })
