@@ -4,6 +4,7 @@ import com.akhris.domain.core.utils.log
 import domain.entities.ObjectType
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.BaseDao
@@ -39,6 +40,10 @@ class ObjectTypesDao : BaseDao<ObjectType> {
             Tables.ObjectTypes.insert { statement ->
                 statement[id] = entity.id.toUUID()
                 statement[name] = entity.name
+            }
+            Tables.ParametersToObjectType.batchInsert(entity.parameters) { p ->
+                this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
+                this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
             }
             commit()
         }

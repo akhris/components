@@ -9,7 +9,7 @@ import persistence.dto.exposed.Tables
 
 object ExposedDbSettings {
     val db by lazy {
-        Database.connect("jdbc:sqlite:/home/anatoly/.components_app/data.db", "org.sqlite.JDBC")
+        val db = Database.connect("jdbc:sqlite:/home/anatoly/.components_app/data.db", "org.sqlite.JDBC")
 //        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")
 //        TransactionManager.manager.defaultIsolationLevel =
 //            TRANSACTION_READ_UNCOMMITTED
@@ -28,9 +28,12 @@ object ExposedDbSettings {
                 Tables.Parameters,
                 Tables.ContainerToContainers,
                 Tables.ValuesToItem,
-                Tables.ParametersToObjectType
+                Tables.ParametersToObjectType,
+                Tables.Projects,
+                Tables.ProjectItems
             )
         }
+        db
     }
 }
 

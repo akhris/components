@@ -57,6 +57,7 @@ class EntitiesListComponent<T : IEntity<*>>(
             }
             is Result.Failure -> {
                 log(entitiesResult.throwable)
+                log(entitiesResult.throwable.stackTraceToString())
             }
         }
 

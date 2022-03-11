@@ -18,6 +18,15 @@ fun EntityItemIncome.toItemIncome(): ItemIncome {
     )
 }
 
+fun EntityItemOutcome.toItemOutcome(): ItemOutcome {
+    return ItemOutcome(
+        id = id.value.toString(),
+        item = item?.let { EntityCountable(it.toItem(), count ?: 0L) },
+        container = container?.toContainer(),
+        dateTime = dateTime
+    )
+}
+
 fun EntityItem.toItem(): Item {
     return Item(
         id = id.value.toString(),
@@ -57,7 +66,7 @@ fun EntityObjectType.toObjectType(): ObjectType {
 fun EntityValue.toValue(): Value {
     return Value(
         id = id.value.toString(),
-        parameter = parameter.toParameter(),
+        parameter = parameter?.toParameter(),
         value = value,
         factor = factor
     )
@@ -69,5 +78,16 @@ fun EntityParameter.toParameter(): Parameter {
         name = name,
         description = description,
         unit = unit?.toUnit()
+    )
+}
+
+fun EntityProject.toProject(): Project {
+    return Project(
+        id = id.value.toString(),
+        name = name,
+        description = description,
+        items = items.map {
+            EntityCountable(entity = it.item.toItem(), count = it.count)
+        }
     )
 }

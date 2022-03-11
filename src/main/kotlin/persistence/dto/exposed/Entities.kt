@@ -1,5 +1,7 @@
 package persistence.dto.exposed
 
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -28,8 +30,7 @@ class EntityValue(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityValue>(Tables.Values)
 
 //    var parameter by Tables.Values.parameter
-
-        var parameter by EntityParameter referencedOn Tables.Values.parameter
+    var parameter by EntityParameter optionalReferencedOn Tables.Values.parameter
     var value by Tables.Values.value
     var factor by Tables.Values.factor
 }
@@ -39,7 +40,8 @@ class EntityParameter(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by Tables.Parameters.name
     var description by Tables.Parameters.description
-//    val unit by Tables.Parameters.unit
+
+    //    val unit by Tables.Parameters.unit
     val unit by EntityUnit optionalReferencedOn (Tables.Parameters.unit)
 }
 
@@ -74,7 +76,6 @@ class EntitySupplier(id: EntityID<UUID>) : UUIDEntity(id) {
 
 }
 
-// TODO: 3/9/22 use id's instead of objects
 class EntityItemIncome(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityItemIncome>(Tables.ItemIncomes)
 
@@ -104,4 +105,20 @@ class EntityItemOutcome(id: EntityID<UUID>) : UUIDEntity(id) {
     var container by EntityContainer optionalReferencedOn Tables.ItemOutcomes.container
     var dateTime by Tables.ItemOutcomes.dateTime
 
+}
+
+class EntityProject(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<EntityProject>(Tables.Projects)
+
+    var name by Tables.Projects.name
+    var description by Tables.Projects.description
+    val items by EntityProjectItem referrersOn Tables.ProjectItems.project
+}
+
+class EntityProjectItem(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<EntityProjectItem>(Tables.ProjectItems)
+
+    var project by EntityProject referencedOn Tables.ProjectItems.project
+    var item by EntityItem referencedOn Tables.ProjectItems.item
+    var count by Tables.ProjectItems.count
 }

@@ -1,5 +1,6 @@
 package persistence.dto.exposed
 
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
@@ -51,7 +52,7 @@ object Tables {
     }
 
     object Values : UUIDTable() {
-        val parameter = reference(name = "parameter", foreign = Parameters)
+        val parameter = reference(name = "parameter", foreign = Parameters).nullable()
         val value = text(name = "value")
         val factor = float(name = "factor").nullable()
     }
@@ -61,6 +62,11 @@ object Tables {
         val name = text(name = "name")
         val description = text(name = "description")
         val unit = reference(name = "unit", foreign = Units).nullable()
+    }
+
+    object Projects : UUIDTable() {
+        val name = text(name = "name")
+        val description = text(name = "description")
     }
 
     //Additional tables for relations:
@@ -78,11 +84,20 @@ object Tables {
     object ValuesToItem : Table() {
         val item = reference(name = "item", foreign = Items)
         val value = reference(name = "value", foreign = Values)
+        override val primaryKey: PrimaryKey = PrimaryKey(item, value)
     }
 
     object ParametersToObjectType : Table() {
         val parameter = reference(name = "parameter", foreign = Parameters)
         val objectType = reference(name = "type", foreign = ObjectTypes)
+        override val primaryKey: PrimaryKey = PrimaryKey(parameter, objectType)
+    }
+
+
+    object ProjectItems : IntIdTable() {
+        val project = reference(name = "project", foreign = Projects)
+        val item = reference(name = "item", foreign = Items)
+        val count = long("count")
     }
 
 }

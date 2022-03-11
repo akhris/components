@@ -5,20 +5,21 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.akhris.domain.core.application.InsertEntity
 import com.akhris.domain.core.utils.LogUtils
+import com.akhris.domain.core.utils.log
 import di.di
 import domain.application.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import org.kodein.di.DI
 import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
 import persistence.ExposedDbSettings
+import persistence.repository.IPagingRepository
+import persistence.repository.Specification
 import settings.AppSetting
 import settings.AppSettingsRepository
-import test.Items
-import test.Outcomes
-import test.Projects
-import test.Types
+import test.*
 import ui.screens.root.RootUi
 import ui.theme.AppSettings
 import ui.theme.AppTheme
@@ -65,97 +66,137 @@ private fun PrepopulateDatabase() {
     var wasInitialized by remember { mutableStateOf(false) }
 
     val di = localDI()
-
-
-    val insertObjectType by di.instance<InsertObjectType>()
-    val insertParameter by di.instance<InsertParameter>()
-    val insertUnit by di.instance<InsertUnit>()
-    val insertItem by di.instance<InsertItem>()
-    val insertContainer by di.instance<InsertContainer>()
-    val insertSupplier by di.instance<InsertSupplier>()
-    val insertItemIncome by di.instance<InsertItemIncome>()
-    val insertItemOutcome by di.instance<InsertItemOutcome>()
-    val insertProject by di.instance<InsertProject>()
+    val getItemIncomesList by di.instance<GetItemIncomesList>()
 
     LaunchedEffect(wasInitialized) {
+
+        val incomesCount = (getItemIncomesList.repo as? IPagingRepository)?.getItemsCount(Specification.QueryAll) ?: 0L
+        log("incomes count: $incomesCount")
+
+        if (incomesCount > 0) {
+            log("database is already populated")
+            return@LaunchedEffect
+        }
         if (!wasInitialized) {
-            listOf(
-                Items.Resistors.resistor1,
-                Items.Resistors.resistor2,
-                Items.Capacitors.capacitor1,
-                Items.Capacitors.capacitor2
-            ).forEach {
-
-                insertItem(InsertEntity.Insert(it))
-            }
-
-            listOf(Types.resistorsType, Types.capacitorsType).forEach {
-//                objectTypesRepo.insert(it)
-                insertObjectType(InsertEntity.Insert(it))
-            }
-//            listOf(
-//                Parameters.Electronic.dielectricType,
-//                Parameters.Electronic.maxVoltage,
-//                Parameters.Electronic.packg,
-//                Parameters.Electronic.capacitance,
-//                Parameters.Electronic.resistance,
-//                Parameters.Electronic.dielectricType,
-//                Parameters.Electronic.tolerance,
-//                Parameters.Material.length,
-//                Parameters.Material.weight
-//            ).forEach {
-////                parameterRepo.insert(it)
-//                insertParameter(InsertEntity.Insert(it))
-//            }
-//            listOf(
-//                Units.Electronic.amps,
-//                Units.Electronic.volts,
-//                Units.Electronic.farads,
-//                Units.Electronic.ohm,
-//                Units.Electronic.watt,
-//                Units.Common.grams,
-//                Units.Common.meters,
-//                Units.Common.pcs,
-//                Units.Common.percent
-//            ).forEach {
-////                unitsRepository.insert(it)
-//                insertUnit(InsertEntity.Insert(it))
-//            }
-
-//            listOf(
-//                Containers.room407,
-//                Containers.shelving1,
-//                Containers.box1,
-//                Containers.box2,
-//                Containers.box3
-//            ).forEach {
-////                containersRepository.insert(it)
-//                insertContainer(InsertEntity.Insert(it))
-//            }
-
-//            Suppliers.getAll().forEach {
-//                suppliersRepository.insert(it)
-//                insertSupplier(InsertEntity.Insert(it))
-//            }
-
-//            listOf(Incomes.income1, Incomes.income2, Incomes.income3).forEach {
-//                insertItemIncome(InsertEntity.Insert(it))
-//            }
-
-            listOf(Outcomes.outcome1, Outcomes.outcome2).forEach {
-                insertItemOutcome(InsertEntity.Insert(it))
-            }
-
-            listOf(Projects.project1, Projects.project2).forEach {
-                insertProject(InsertEntity.Insert(it))
-            }
-
+            prepopulateItems(di)
+            prepopulateObjectTypes(di)
+            prepopulateParameters(di)
+            prepopulateUnits(di)
+            prepopulateContainers(di)
+            prepopulateSuppliers(di)
+            prepopulateIncomes(di)
+            prepopulateOutcomes(di)
+            prepopulateProjects(di)
             wasInitialized = true
         }
     }
 
-
 }
+
+private suspend fun prepopulateItems(di: DI) {
+    log("prepopulating items...")
+    val insertItem by di.instance<InsertItem>()
+    listOf(
+        Items.Resistors.resistor1,
+        Items.Resistors.resistor2,
+        Items.Capacitors.capacitor1,
+        Items.Capacitors.capacitor2
+    ).forEach {
+        insertItem(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateObjectTypes(di: DI) {
+    log("prepopulating object types...")
+    val insertObjectType by di.instance<InsertObjectType>()
+    listOf(Types.resistorsType, Types.capacitorsType).forEach {
+        insertObjectType(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateParameters(di: DI) {
+    log("prepopulating parameters...")
+    val insertParameter by di.instance<InsertParameter>()
+    listOf(
+        Parameters.Electronic.dielectricType,
+        Parameters.Electronic.maxVoltage,
+        Parameters.Electronic.packg,
+        Parameters.Electronic.capacitance,
+        Parameters.Electronic.resistance,
+        Parameters.Electronic.wattage,
+        Parameters.Electronic.tolerance,
+        Parameters.Material.length,
+        Parameters.Material.weight
+    ).forEach {
+        insertParameter(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateUnits(di: DI) {
+    log("prepopulating units...")
+    val insertUnit by di.instance<InsertUnit>()
+    listOf(
+        Units.Electronic.amps,
+        Units.Electronic.volts,
+        Units.Electronic.farads,
+        Units.Electronic.ohm,
+        Units.Electronic.watt,
+        Units.Common.grams,
+        Units.Common.meters,
+        Units.Common.pcs,
+        Units.Common.percent
+    ).forEach {
+        insertUnit(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateContainers(di: DI) {
+    log("prepopulating containers...")
+    listOf(
+        Containers.room407,
+        Containers.shelving1,
+        Containers.box1,
+        Containers.box2,
+        Containers.box3
+    ).forEach {
+        val insertContainer by di.instance<InsertContainer>()
+        insertContainer(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateSuppliers(di: DI) {
+    log("prepopulating suppliers...")
+    val insertSupplier by di.instance<InsertSupplier>()
+    Suppliers.getAll().forEach {
+        insertSupplier(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateIncomes(di: DI) {
+    log("prepopulating incomes...")
+    val insertItemIncome by di.instance<InsertItemIncome>()
+    listOf(Incomes.income1, Incomes.income2, Incomes.income3).forEach {
+        insertItemIncome(InsertEntity.Insert(it))
+    }
+}
+
+
+private suspend fun prepopulateOutcomes(di: DI) {
+    log("prepopulating outcomes...")
+    val insertItemOutcome by di.instance<InsertItemOutcome>()
+    listOf(Outcomes.outcome1, Outcomes.outcome2).forEach {
+        insertItemOutcome(InsertEntity.Insert(it))
+    }
+}
+
+private suspend fun prepopulateProjects(di: DI) {
+    log("prepopulating projects...")
+    val insertProject by di.instance<InsertProject>()
+    listOf(Projects.project1, Projects.project2).forEach {
+        insertProject(InsertEntity.Insert(it))
+    }
+}
+
 
 private fun databaseConnect() {
 //    Database.connect()

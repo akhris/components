@@ -7,8 +7,6 @@ import persistence.datasources.BaseDao
 import persistence.datasources.BasePagingDao
 import persistence.datasources.exposed.*
 import persistence.repository.BaseRepository
-import persistence.repository.ItemOutcomeTestRepository
-import persistence.repository.ProjectTestRepository
 import persistence.repository.WarehouseItemRepository
 
 val containersModule = getEntityModule(
@@ -30,7 +28,11 @@ val itemIncomeModule = getEntityModule(
 val itemOutcomeModule =
     getEntityModule(
         "item outcome module",
-        getRepo = { ItemOutcomeTestRepository() })
+        getRepo = { BaseRepository<ItemOutcome>(baseDao = instance(), basePagingDao = instance()) },
+        additionalBindings = {
+            bindSingleton<BaseDao<ItemOutcome>> { ItemsOutcomeDao() }
+            bindSingleton<BasePagingDao<ItemOutcome>> { ItemsOutcomeDao() }
+        })
 
 val itemsModule =
     getEntityModule(
@@ -49,7 +51,10 @@ val parametersModule = getEntityModule(
 
 val projectModule = getEntityModule(
     "project module",
-    getRepo = { ProjectTestRepository() })
+    getRepo = { BaseRepository<Project>(baseDao = instance()) },
+    additionalBindings = {
+        bindSingleton<BaseDao<Project>> { ProjectsDao() }
+    })
 
 val suppliersModule = getEntityModule(
     "suppliers module",

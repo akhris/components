@@ -15,7 +15,7 @@ internal class WarehouseItemRepositoryTest {
     @BeforeEach
     fun setUp() {
 //        incomesRepo = ItemIncomeTestRepository()
-        outcomesRepo = ItemOutcomeTestRepository()
+//        outcomesRepo = ItemOutcomeTestRepository()
         warehouseRepo = WarehouseItemRepository(incomesRepo, outcomesRepo)
         runBlocking {
             incomesRepo.insert(Incomes.income1)

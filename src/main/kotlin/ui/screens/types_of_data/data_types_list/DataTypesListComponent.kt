@@ -82,6 +82,7 @@ class DataTypesListComponent(
                 }
                 is Result.Failure -> {
                     log(entitiesResult.throwable)
+                    log(entitiesResult.throwable.stackTraceToString())
                 }
             }
 

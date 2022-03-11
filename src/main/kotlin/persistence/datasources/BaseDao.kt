@@ -1,9 +1,7 @@
 package persistence.datasources
 
 import com.akhris.domain.core.entities.IEntity
-import domain.entities.Item
-import domain.entities.ItemIncome
-import domain.entities.Parameter
+import domain.entities.*
 import domain.entities.Unit
 
 interface BaseDao<T : IEntity<*>> {
@@ -21,6 +19,7 @@ interface BasePagingDao<T : IEntity<*>> {
 
 
 interface IItemsIncomeDao : BaseDao<ItemIncome>, BasePagingDao<ItemIncome>
+interface IItemsOutcomeDao : BaseDao<ItemOutcome>, BasePagingDao<ItemOutcome>
 interface IUnitsDao : BaseDao<Unit>
 interface IParametersDao: BaseDao<Parameter>
 interface IItemsDao : BaseDao<Item>, BasePagingDao<Item>

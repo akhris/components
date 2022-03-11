@@ -39,7 +39,7 @@ data class Parameter(
 
 data class Value(
     override val id: String = IDUtils.newID(),
-    val parameter: Parameter,
+    val parameter: Parameter?,
     val value: String,
     val factor: Float? = null
 ) : IEntity<String> {
