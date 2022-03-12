@@ -37,7 +37,7 @@ dependencies {
 //    implementation("com.github.akhris:domain-core:master-30588e0ac2")
 
     //dependency injection:
-    implementation("org.kodein.di:kodein-di-framework-compose:7.10.0")
+    implementation("org.kodein.di:kodein-di-framework-compose:7.11.0")
 
     //reflection:
 //    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")

@@ -6,9 +6,24 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.akhris.domain.core.utils.log
+import kotlin.io.path.pathString
 
 @Serializable
-data class AppSettings(val settings: List<AppSetting>)
+data class AppSettings(val settings: List<AppSetting>) {
+
+    companion object {
+        val default = AppSettings(
+            listOf(
+                AppSetting.BooleanSetting(AppSettingsRepository.key_is_dark_theme, true),
+                AppSetting.PathSetting(
+                    AppSettingsRepository.key_db_location,
+                    AppFoldersManager.getAppPath()
+                        .resolve(AppSettingsRepository.defaultComponentsDatabaseFilename).pathString
+                )
+            )
+        )
+    }
+}
 
 @Serializable
 sealed class AppSetting {

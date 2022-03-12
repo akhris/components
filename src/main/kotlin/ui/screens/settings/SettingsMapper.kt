@@ -8,17 +8,17 @@ class SettingsMapper {
         return object : ISetting {
             override val setting: AppSetting = setting
             override val name: String = when (setting.key) {
-                AppSettingsRepository.key_is_light_theme -> "Select mode"
+                AppSettingsRepository.key_is_dark_theme -> "Dark theme mode"
                 AppSettingsRepository.key_db_location -> "database location"
                 else -> ""
             }
 
             override val description: String? = when (setting.key) {
-                AppSettingsRepository.key_is_light_theme -> "Toggle theme colors to light/dark mode"
+                AppSettingsRepository.key_is_dark_theme -> "Toggle theme colors to light/dark mode"
                 else -> null
             }
             override val iconPath: String? = when (setting.key) {
-                AppSettingsRepository.key_is_light_theme -> "vector/dark_mode_black_24dp.svg"
+                AppSettingsRepository.key_is_dark_theme -> "vector/dark_mode_black_24dp.svg"
                 else -> null
             }
 

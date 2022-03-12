@@ -45,18 +45,18 @@ private fun mainWindow() = withDI(di) {
 
     PrepopulateDatabase()
 
-    val isLightTheme by remember(settingsRepository) {
+    val isDarkTheme by remember(settingsRepository) {
         settingsRepository
-            .observeSetting(AppSettingsRepository.key_is_light_theme)
+            .observeSetting(AppSettingsRepository.key_is_dark_theme)
             .distinctUntilChanged()
             .map {
                 if (it is AppSetting.BooleanSetting) {
                     it.value
                 } else false
             }
-    }.collectAsState(true)
+    }.collectAsState(false)
 
-    AppTheme(darkTheme = !isLightTheme) {
+    AppTheme(darkTheme = isDarkTheme) {
         RootUi()
     }
 }

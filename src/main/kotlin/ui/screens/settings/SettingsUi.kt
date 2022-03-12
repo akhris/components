@@ -3,6 +3,7 @@ package ui.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -62,6 +63,13 @@ fun SettingsUi(settingsComponent: ISettings) {
                 }
             }
         }
+        //app version label:
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 16.dp),
+            text = "version • 1.0.0b",
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+        )
     }
 }
 

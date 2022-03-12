@@ -6,10 +6,13 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import persistence.dto.exposed.Tables
+import settings.AppFoldersManager
+import kotlin.io.path.pathString
 
 object ExposedDbSettings {
     val db by lazy {
-        val db = Database.connect("jdbc:sqlite:/home/anatoly/.components_app/data.db", "org.sqlite.JDBC")
+
+        val db = Database.connect("jdbc:sqlite:${AppFoldersManager.getAppPath().pathString}/data.db", "org.sqlite.JDBC")
 //        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")
 //        TransactionManager.manager.defaultIsolationLevel =
 //            TRANSACTION_READ_UNCOMMITTED

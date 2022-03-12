@@ -15,47 +15,19 @@ import kotlin.io.path.*
 
 class AppSettingsRepository(private val scope: CoroutineScope) {
 
-    private val _settingsValue = MutableStateFlow(AppSettings(listOf()))
+
+    private val _settingsValue = MutableStateFlow(AppSettings.default)
 
     val settingsValue: StateFlow<AppSettings> = _settingsValue
+    val appSettingsFileName = "app_settings.json"
+    private val appSettingsFile = AppFoldersManager.getAppPath().resolve(appSettingsFileName)
+//        Path(currentUserPath, componentsSupPath, appSettingsFileName)
+//    private val defaultDBLocation = Path(currentUserPath, componentsSupPath, defaultComponentsDatabaseFilename)
 
-    private val currentUserPath = System.getProperty("user.home")       //"/home/user"
-    private val componentsSupPath = ".components_app"
-    private val appSettingsFileName = "app_settings.json"
-    private val defaultComponentsDatabaseFilename = "components.db"
-    private val appSettingsPath = Path(currentUserPath, componentsSupPath)
-    private val appSettingsFile = Path(currentUserPath, componentsSupPath, appSettingsFileName)
-    private val defaultDBLocation = Path(currentUserPath, componentsSupPath, defaultComponentsDatabaseFilename)
-
-
-//    val isLightTheme: Flow<Boolean?> =
-//        _settingsFlow
-//            .map { (it?.settings?.find { s -> s.key == key_is_light_theme } as? AppSetting.BooleanSetting)?.value }
-//            .distinctUntilChanged()
-//
-//    val dbLocation =
-//        _settingsFlow
-//            .map {
-//                ((it?.settings?.find { s -> s.key == key_db_location } as? AppSetting.StringSetting)?.value)
-//                    ?: defaultDBLocation.toString()
-//            }
-//            .distinctUntilChanged()
 
     fun setAppSetting(appSetting: AppSetting) {
         scope.launch {
             setSetting(appSetting)
-        }
-    }
-
-    fun setIsLightTheme(isLight: Boolean) {
-        scope.launch {
-            setSetting(AppSetting.BooleanSetting(key_is_light_theme, isLight))
-        }
-    }
-
-    fun setDBLocation(dbLocation: String) {
-        scope.launch {
-            setSetting(AppSetting.StringSetting(key_db_location, dbLocation))
         }
     }
 
@@ -96,15 +68,34 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             val settingsText = withContext(Dispatchers.IO) {
                 appSettingsFile.readText()
             }
-            val settings = settingsText.toAppSettings()
-            settings?.let {
-                _settingsValue.value = it
+            val settingsFromFile = settingsText.toAppSettings()
+            settingsFromFile?.let {
+                //change _settingsValue settings to settings loaded from file by key:
+                _settingsValue.value = _settingsValue.value.copy(
+                    settings = _settingsValue.value.settings.map { currentSetting ->
+                        when (val setting = settingsFromFile.settings.find { sff -> sff.key == currentSetting.key }) {
+                            is AppSetting.BooleanSetting -> {
+                                (currentSetting as? AppSetting.BooleanSetting)?.copy(value = setting.value)
+                            }
+                            is AppSetting.FloatSetting -> {
+                                (currentSetting as? AppSetting.FloatSetting)?.copy(value = setting.value)
+                            }
+                            is AppSetting.PathSetting -> {
+                                (currentSetting as? AppSetting.PathSetting)?.copy(value = setting.value)
+                            }
+                            is AppSetting.StringSetting -> {
+                                (currentSetting as? AppSetting.StringSetting)?.copy(value = setting.value)
+                            }
+                            null -> null
+                        } ?: currentSetting
+
+                    }
+                )
             }
-            log("loaded settings from file: $settings")
+            log("loaded settings from file: $settingsFromFile")
         } else {
             log("File $appSettingsFile does not exist, creating one:")
             val path = withContext(Dispatchers.IO) {
-                appSettingsPath.createDirectories()
                 appSettingsFile.createFile()
             }
             log("File $path created")
@@ -117,7 +108,10 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
 
 
     companion object {
-        const val key_is_light_theme = "key_is_light_theme"
+        const val key_is_dark_theme = "key_is_dark_theme"
         const val key_db_location = "key_db_location"
+
+
+        const val defaultComponentsDatabaseFilename = "components.db"
     }
 }
