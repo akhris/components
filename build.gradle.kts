@@ -30,7 +30,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
 //sqlite driver:
-    implementation("org.xerial:sqlite-jdbc:3.36.0.2")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     //domain core:
     implementation("com.github.akhris:domain-core:v0.1.2")
