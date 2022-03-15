@@ -7,9 +7,7 @@ import com.arkivanov.decompose.router.router
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
-import domain.entities.ItemIncome
-import domain.entities.ItemOutcome
-import domain.entities.WarehouseItem
+import domain.entities.*
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IGetUseCaseFactory
@@ -17,10 +15,10 @@ import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import navigation.NavItem
 import navigation.Screen
 import settings.AppSettingsRepository
+import ui.screens.entities_screen.EntitiesScreenComponent
 import ui.screens.entity_screen_with_filter.EntityWithFilterComponent
 import ui.screens.projects_screen_with_selector.ProjectWithSelector
 import ui.screens.settings.SettingsComponent
-import ui.screens.types_of_data.TypesOfDataComponent
 
 /**
  * Main navigation component that holds all destinations
@@ -87,12 +85,30 @@ class NavHostComponent(
                     getListUseCaseFactory = getListUseCaseFactory
                 )
             )
-            Screen.Types.route -> INavHost.Child.TypesOfData(
-                TypesOfDataComponent(
+//            Screen.Types.route -> INavHost.Child.TypesOfData(
+//                TypesOfDataComponent(
+//                    componentContext = componentContext,
+//                    updateUseCaseFactory = updateUseCaseFactory,
+//                    getListUseCaseFactory = getListUseCaseFactory
+//                )
+//            )
+            Screen.Types.route -> INavHost.Child.EntitiesListWithSidePanel(
+                component = EntitiesScreenComponent(
                     componentContext = componentContext,
-                    updateUseCaseFactory = updateUseCaseFactory,
+                    entityClasses = listOf(
+                        Item::class,
+                        ObjectType::class,
+                        domain.entities.Unit::class,
+                        Container::class,
+                        Project::class
+                    ),
                     getListUseCaseFactory = getListUseCaseFactory
                 )
+//                TypesOfDataComponent(
+//                    componentContext = componentContext,
+//                    updateUseCaseFactory = updateUseCaseFactory,
+//                    getListUseCaseFactory = getListUseCaseFactory
+//                )
             )
             Screen.Settings.route -> INavHost.Child.Settings(
                 SettingsComponent(
