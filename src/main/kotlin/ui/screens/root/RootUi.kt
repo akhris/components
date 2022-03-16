@@ -4,11 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.akhris.domain.core.entities.IEntity
@@ -24,14 +21,13 @@ import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
-import ui.dialogs.ListPickerDialog
+import ui.dialogs.Type
+import ui.dialogs.TypesPickerDialog
 import ui.entity_renderers.AddEntityDialog
 import ui.screens.nav_host.NavHostComponent
 import ui.screens.nav_host.NavHostUi
 import ui.screens.navigation_rail.NavigationRailComponent
 import ui.screens.navigation_rail.NavigationRailUi
-import ui.screens.types_of_data.types_selector.ITypesSelector
-import utils.toLocalizedString
 
 
 @Composable
@@ -89,37 +85,20 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
     }
 
     if (showPicker) {
-        val types = ITypesSelector.Type.getAllTypes()
-
-        ListPickerDialog(
-            items = types,
-            title = "pick data type",
-            mapper = { type ->
-                ListItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = {
-                        Text(text = type.name?.toLocalizedString() ?: "")
-                    }, secondaryText = {
-                        Text(text = type.description?.toLocalizedString() ?: "")
-                    }
-                )
-            },
-            onItemPicked = {
-                addEntity = when (it) {
-                    ITypesSelector.Type.Containers -> Container()
-                    ITypesSelector.Type.Items -> Item()
-                    ITypesSelector.Type.None -> null
-                    ITypesSelector.Type.ObjectType -> ObjectType()
-                    ITypesSelector.Type.Parameters -> Parameter()
-                    ITypesSelector.Type.Suppliers -> Supplier()
-                    ITypesSelector.Type.Units -> Unit()
-                }
-            },
-            onDismiss = {
-                if (addEntity == null)
-                    onDismiss()
+        TypesPickerDialog(onItemPicked = {
+            addEntity = when (it) {
+                Type.Containers -> Container()
+                Type.Items -> Item()
+                Type.None -> null
+                Type.ObjectType -> ObjectType()
+                Type.Parameters -> Parameter()
+                Type.Suppliers -> Supplier()
+                Type.Units -> Unit()
             }
-        )
+        }, onDismiss = {
+            if (addEntity == null)
+                onDismiss()
+        })
     }
 
     LaunchedEffect(navItem) {

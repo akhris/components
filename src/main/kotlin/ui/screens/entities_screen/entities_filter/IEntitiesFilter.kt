@@ -1,11 +1,9 @@
-package ui.screens.entity_screen_with_filter.entities_filter
+package ui.screens.entities_screen.entities_filter
 
 import com.arkivanov.decompose.value.Value
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
-import persistence.repository.Specification
-import ui.screens.entity_screen_with_filter.entities_filter.IEntitiesFilter.FilterSettings
-import ui.screens.types_of_data.types_selector.ItemRepresentationType
+import ui.screens.entities_screen.entities_filter.IEntitiesFilter.FilterSettings
 
 /**
  * Interface for Filter component of Entity-with-filter block.
@@ -19,7 +17,7 @@ interface IEntitiesFilter {
 
     //methods to change the state:
     //change representation (cards/ grid):
-    fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType)
+//    fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType)
 
     // add / update filter setting
     fun setFilter(filterSettings: FilterSettings)
@@ -30,7 +28,7 @@ interface IEntitiesFilter {
     //filter screen model:
     data class Model(
         //cards / grid
-        val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
+//        val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
 
         // filter settings for each entity field IDs from the data of main list screen
         val filters: List<FilterSettings> = listOf()
@@ -47,7 +45,3 @@ interface IEntitiesFilter {
     data class FilteredField(val field: EntityField, val isFiltered: Boolean = false)
 }
 
-fun IEntitiesFilter.Model.getSpecification(): Specification {
-    //return Specification depending on filters
-    return Specification.QueryAll
-}

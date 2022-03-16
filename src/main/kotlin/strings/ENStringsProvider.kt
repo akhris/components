@@ -24,6 +24,8 @@ class ENStringsProvider : IStringsProvider {
             Strings.TypesOfData.containers_description -> "Boxes, shelves, rooms, and other places that contains objects"
             Strings.TypesOfData.suppliers_description -> "Shops and other places where objects are got from"
             Strings.TypesOfData.suppliers_title -> "suppliers"
+            Strings.TypesOfData.projects_description -> "Sets of items"
+            Strings.TypesOfData.projects_title -> "projects"
         }
     }
 

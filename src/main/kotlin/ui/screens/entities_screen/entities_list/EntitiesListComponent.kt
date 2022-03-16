@@ -17,7 +17,8 @@ class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
 //    private val sidePanelModel: Value<IEntitiesSidePanel.Model>,
 //    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
-    private val getEntities: GetEntities<*, out T>?
+    private val getEntities: GetEntities<*, out T>?,
+    private val onEntitiesLoaded: (List<T>) -> Unit
 ) :
     IEntitiesList<T>,
     ComponentContext by componentContext {
@@ -71,7 +72,7 @@ class EntitiesListComponent<T : IEntity<*>>(
         } catch (e: Exception) {
             null
         }
-        totalItems?.let{setTotalItems(it)}
+        totalItems?.let { setTotalItems(it) }
     }
 
     private suspend fun invalidateEntities() {
@@ -89,6 +90,7 @@ class EntitiesListComponent<T : IEntity<*>>(
                     it.copy(entities = entitiesResult.value)
                 }
 //                onListModelChanged(_state.value)
+                onEntitiesLoaded(entitiesResult.value)
             }
             is Result.Failure -> {
                 log(entitiesResult.throwable)
@@ -104,7 +106,7 @@ class EntitiesListComponent<T : IEntity<*>>(
         })
         scope.launch {
             setupPagination()
-            invalidateEntities()
+            invalidateEntities()    //todo subscribe to pagination parameters change
         }
     }
 }

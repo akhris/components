@@ -16,8 +16,6 @@ import navigation.NavItem
 import navigation.Screen
 import settings.AppSettingsRepository
 import ui.screens.entities_screen.EntitiesScreenComponent
-import ui.screens.entity_screen_with_filter.EntityWithFilterComponent
-import ui.screens.projects_screen_with_selector.ProjectWithSelector
 import ui.screens.settings.SettingsComponent
 
 /**
@@ -60,72 +58,39 @@ class NavHostComponent(
      * Creates
      */
     private fun createChild(config: Config, componentContext: ComponentContext): INavHost.Child {
-        val screen = when (config.route) {
-            Screen.Warehouse.route -> INavHost.Child.EntitiesListWithFilter(
-                EntityWithFilterComponent(
-                    componentContext = componentContext,
-                    entityClass = WarehouseItem::class,
-                    fieldsMapperFactory = fieldsMapperFactory,
-                    getListUseCaseFactory = getListUseCaseFactory
-                )
-            )
-            Screen.Income.route -> INavHost.Child.EntitiesListWithFilter(
-                EntityWithFilterComponent(
-                    componentContext = componentContext,
-                    entityClass = ItemIncome::class,
-                    fieldsMapperFactory = fieldsMapperFactory,
-                    getListUseCaseFactory = getListUseCaseFactory
-                )
-            )
-            Screen.Outcome.route -> INavHost.Child.EntitiesListWithFilter(
-                EntityWithFilterComponent(
-                    componentContext = componentContext,
-                    entityClass = ItemOutcome::class,
-                    fieldsMapperFactory = fieldsMapperFactory,
-                    getListUseCaseFactory = getListUseCaseFactory
-                )
-            )
-//            Screen.Types.route -> INavHost.Child.TypesOfData(
-//                TypesOfDataComponent(
-//                    componentContext = componentContext,
-//                    updateUseCaseFactory = updateUseCaseFactory,
-//                    getListUseCaseFactory = getListUseCaseFactory
-//                )
-//            )
-            Screen.Types.route -> INavHost.Child.EntitiesListWithSidePanel(
-                component = EntitiesScreenComponent(
-                    componentContext = componentContext,
-                    entityClasses = listOf(
-                        Item::class,
-                        ObjectType::class,
-                        domain.entities.Unit::class,
-                        Container::class,
-                        Project::class
-                    ),
-                    getListUseCaseFactory = getListUseCaseFactory
-                )
-//                TypesOfDataComponent(
-//                    componentContext = componentContext,
-//                    updateUseCaseFactory = updateUseCaseFactory,
-//                    getListUseCaseFactory = getListUseCaseFactory
-//                )
-            )
+        return when (config.route) {
             Screen.Settings.route -> INavHost.Child.Settings(
                 SettingsComponent(
                     componentContext = componentContext,
                     appSettingsRepository = appSettingsRepository
                 )
             )
-            Screen.Projects.route -> INavHost.Child.Projects(
-                ProjectWithSelector(
-                    componentContext = componentContext,
-                    getListUseCaseFactory = getListUseCaseFactory,
-                    getUseCaseFactory = getUseCaseFactory
+            else -> {
+                val entities = when (config.route) {
+                    Screen.Warehouse.route -> listOf(WarehouseItem::class)
+                    Screen.Income.route -> listOf(ItemIncome::class)
+                    Screen.Outcome.route -> listOf(ItemOutcome::class)
+                    Screen.Types.route -> listOf(
+                        ObjectType::class,
+                        Parameter::class,
+                        domain.entities.Unit::class,
+                        Item::class,
+                        Container::class,
+                        Supplier::class,
+                        Project::class
+                    )
+                    else -> throw UnsupportedOperationException("unknown root: ${config.route}")
+                }
+                INavHost.Child.EntitiesListWithSidePanel(
+                    EntitiesScreenComponent(
+                        componentContext = componentContext,
+                        entityClasses = entities,
+                        fieldsMapperFactory = fieldsMapperFactory,
+                        getListUseCaseFactory = getListUseCaseFactory
+                    )
                 )
-            )
-            else -> null
+            }
         }
-        return screen ?: throw UnsupportedOperationException("unknown root: ${config.route}")
     }
 
 

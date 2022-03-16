@@ -1,41 +1,25 @@
-package ui.screens.entities_screen.entities_sidepanel
+package ui.screens.entities_screen.entities_filter
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.composable.ChipGroup
 import ui.composable.FilterChip
-import ui.screens.types_of_data.types_selector.RepresentationTypesSelector
 import utils.replace
-import kotlin.reflect.KClass
 
 @Composable
-fun SidePanelUi(component: IEntitiesSidePanel) {
+fun EntitiesFilterUi(component: IEntitiesFilter) {
     val state by component.state.subscribeAsState()
+
 
     Column {
 
-        RepresentationTypesSelector(
-            currentType = state.itemRepresentationType,
-            onTypeChanged = { component.changeItemRepresentationType(it) })
+//        RepresentationTypesSelector(
+//            currentType = state.itemRepresentationType,
+//            onTypeChanged = { component.changeItemRepresentationType(it) })
 
-        //entities selector:
-        state.entitiesSelector?.let {
-            EntitiesSelector(
-                entities = it.items,
-                selection = it.selection,
-                onSelectionChanged = { e -> component.selectEntity(e) }
-            )
-        }
-
-        //filtering
         ChipGroup {
             state.filters.forEach { fs ->
                 FilterChip(
@@ -72,26 +56,5 @@ fun SidePanelUi(component: IEntitiesSidePanel) {
             }
         }
     }
-}
 
-
-@Composable
-private fun EntitiesSelector(
-    entities: List<KClass<out IEntity<*>>>,
-    selection: KClass<out IEntity<*>>,
-    onSelectionChanged: (KClass<out IEntity<*>>) -> Unit
-) {
-    Column {
-        entities.forEach { entity ->
-            Text(
-                modifier = Modifier.clickable {
-                    onSelectionChanged(entity)
-                },
-                text = entity.simpleName ?: entity.toString(),
-                color = if (selection == entity) {
-                    MaterialTheme.colors.primary
-                } else Color.Unspecified
-            )
-        }
-    }
 }

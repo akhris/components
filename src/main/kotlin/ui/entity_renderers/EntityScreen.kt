@@ -20,9 +20,9 @@ import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
+import ui.composable.ItemRepresentationType
 import ui.screens.entity_select_dialog.EntityPickerMultiDialog
 import ui.screens.entity_select_dialog.EntityPickerSingleDialog
-import ui.screens.types_of_data.types_selector.ItemRepresentationType
 import ui.theme.ContentSettings
 import ui.theme.DialogSettings
 import kotlin.reflect.KClass

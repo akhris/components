@@ -24,5 +24,7 @@ sealed interface Strings {
         object containers_description : TypesOfData
         object suppliers_title : TypesOfData
         object suppliers_description : TypesOfData
+        object projects_title : TypesOfData
+        object projects_description : TypesOfData
     }
 }

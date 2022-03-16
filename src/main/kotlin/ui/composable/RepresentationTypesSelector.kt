@@ -1,66 +1,23 @@
-package ui.screens.types_of_data.types_selector
+package ui.composable
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import utils.toLocalizedString
-
-@Composable
-fun TypesSelectorUi(typesSelectorComponent: ITypesSelector) {
-
-    val selectorState by typesSelectorComponent.models.subscribeAsState()
-
-    val selectedType = remember(selectorState) { selectorState.selectedType }
-
-
-    Column(modifier = Modifier.fillMaxHeight().selectableGroup()) {
-        //representation type selector
-        RepresentationTypesSelector(
-            currentType = selectorState.itemRepresentationType,
-            onTypeChanged = {
-                typesSelectorComponent.onItemRepresentationTypeChanged(it)
-            })
-
-        selectorState.types.forEachIndexed { index, typeOfObjects ->
-
-
-            val background = when (selectedType == typeOfObjects) {
-                true -> MaterialTheme.colors.primary
-                false -> MaterialTheme.colors.surface
-            }
-
-            Text(
-                modifier = Modifier.fillMaxWidth()
-                    .selectable(
-                        selected = selectedType == typeOfObjects,
-                        onClick = { typesSelectorComponent.onTypeClicked(typeOfObjects) },
-                        role = Role.RadioButton
-                    )
-                    .background(color = background)
-                    .padding(8.dp),
-                text = typeOfObjects.name?.toLocalizedString() ?: "",
-                color = MaterialTheme.colors.contentColorFor(background)
-            )
-
-            if (index != selectorState.types.lastIndex) {
-                Divider(modifier = Modifier.fillMaxWidth().height(1.dp))
-            }
-        }
-    }
-}
+import com.arkivanov.essenty.parcelable.Parcelable
+import com.arkivanov.essenty.parcelable.Parcelize
 
 
 @Composable
@@ -140,4 +97,13 @@ fun RepresentationTypesSelector(
             }
         }
     }
+}
+
+@Parcelize
+sealed interface ItemRepresentationType : Parcelable {
+    @Parcelize
+    object Card : ItemRepresentationType
+
+    @Parcelize
+    object Table : ItemRepresentationType
 }

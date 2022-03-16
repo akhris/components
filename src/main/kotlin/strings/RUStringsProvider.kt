@@ -23,6 +23,8 @@ class RUStringsProvider : IStringsProvider {
             Strings.TypesOfData.containers_title -> "контейнеры"
             Strings.TypesOfData.suppliers_description -> "Магазины, физ.лица и прочие места, где можно получить компоненты"
             Strings.TypesOfData.suppliers_title -> "поставщики"
+            Strings.TypesOfData.projects_description -> "Наборы компонентов"
+            Strings.TypesOfData.projects_title -> "проекты"
         }
     }
 }

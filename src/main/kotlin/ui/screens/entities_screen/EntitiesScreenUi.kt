@@ -1,23 +1,45 @@
 package ui.screens.entities_screen
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
-import ui.screens.entities_screen.entities_sidepanel.SidePanelUi
+import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
+import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.patterns.ScreenWithFilterSheet
+import utils.toLocalizedString
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EntitiesScreenUi(component: IEntitiesScreen) {
+
+    val state by component.state.subscribeAsState()
+
     ScreenWithFilterSheet(
+        isOpened = true,
         isModal = true,
         content = {
             ListPane(component.listRouterState)
         },
         filterContent = {
-            SidePanel(component.sidePanelRouterState)
+            Column {
+                SelectorPanel(component.selectorRouterState)
+                FilterPanel(component.filterRouterState)
+            }
+        },
+        mainScreenTitle = {
+            ListItem(
+                text = { state.screenTitle?.toLocalizedString()?.let { Text(it) } },
+                secondaryText = { state.screenDescription?.toLocalizedString()?.let { Text(it) } }
+            )
         }
     )
 }
@@ -36,11 +58,22 @@ private fun ListPane(routerState: Value<RouterState<*, IEntitiesScreen.ListChild
 
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
-private fun SidePanel(routerState: Value<RouterState<*, IEntitiesScreen.SidePanelChild>>) {
+private fun SelectorPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>) {
     Children(routerState, animation = crossfade()) {
         when (val child = it.instance) {
-            is IEntitiesScreen.SidePanelChild.SidePanel -> {
-                SidePanelUi(component = child.component)
+            is IEntitiesScreen.EntitiesSelectorChild.EntitiesSelector -> {
+                EntitiesSelectorUi(component = child.component)
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>>) {
+    Children(routerState, animation = crossfade()) {
+        when (val child = it.instance) {
+            is IEntitiesScreen.EntitiesFilterChild.EntitiesFilter -> {
+                EntitiesFilterUi(component = child.component)
             }
         }
     }

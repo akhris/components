@@ -1,10 +1,8 @@
-package ui.screens.entities_screen.entities_sidepanel
+package ui.screens.entities_screen.entities_selector
 
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.value.Value
-import domain.entities.fieldsmappers.EntityField
-import domain.entities.fieldsmappers.EntityFieldID
-import ui.screens.types_of_data.types_selector.ItemRepresentationType
+import ui.composable.ItemRepresentationType
 import kotlin.reflect.KClass
 
 /**
@@ -13,7 +11,7 @@ import kotlin.reflect.KClass
  * Component contains of entities selector and grouping/filtering block.
  *
  */
-interface IEntitiesSidePanel {
+interface IEntitiesSelector {
     //current state of the screen
     val state: Value<Model>
 
@@ -23,11 +21,11 @@ interface IEntitiesSidePanel {
     //change representation (cards/ grid):
     fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType)
 
-    // add / update filter setting
-    fun setFilter(filterSettings: FilterSettings)
-
-    // remove filter setting
-    fun removeFilter(filterSettings: FilterSettings)
+//    // add / update filter setting
+//    fun setFilter(filterSettings: FilterSettings)
+//
+//    // remove filter setting
+//    fun removeFilter(filterSettings: FilterSettings)
 
     //filter screen model:
     data class Model(
@@ -37,18 +35,9 @@ interface IEntitiesSidePanel {
         val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
 
         // filter settings for each entity field IDs from the data of main list screen
-        val filters: List<FilterSettings> = listOf()
+//        val filters: List<FilterSettings> = listOf()
     )
 
-    data class FilterSettings(
-        val fieldID: EntityFieldID,
-        val from: Any? = null,
-        val to: Any? = null,
-        val fieldsList: List<FilteredField> = listOf(),
-        val isActive: Boolean = false
-    )
-
-    data class FilteredField(val field: EntityField, val isFiltered: Boolean = false)
 
     data class EntitiesSelector(val selection: KClass<out IEntity<*>>, val items: List<KClass<out IEntity<*>>>)
 }
