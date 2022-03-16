@@ -5,7 +5,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
-import ui.composable.ItemRepresentationType
 import kotlin.reflect.KClass
 
 class EntitiesSelectorComponent(
@@ -31,12 +30,6 @@ class EntitiesSelectorComponent(
             it.copy(entitiesSelector = it.entitiesSelector?.copy(selection = entityClass))
         }
         onEntitySelected?.invoke(entityClass)
-    }
-
-    override fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType) {
-        _state.reduce {
-            it.copy(itemRepresentationType = itemRepresentationType)
-        }
     }
 }
 

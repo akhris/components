@@ -20,7 +20,7 @@ import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
-import ui.composable.ItemRepresentationType
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.entity_select_dialog.EntityPickerMultiDialog
 import ui.screens.entity_select_dialog.EntityPickerSingleDialog
 import ui.theme.ContentSettings

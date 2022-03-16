@@ -2,7 +2,7 @@ package ui.screens.entities_screen.entities_list
 
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.value.Value
-import ui.composable.ItemRepresentationType
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 
 interface IEntitiesList<T : IEntity<*>> {
     //current state of the screen

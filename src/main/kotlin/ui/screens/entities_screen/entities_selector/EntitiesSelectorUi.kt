@@ -18,7 +18,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import ui.composable.RepresentationTypesSelector
 import ui.screens.entities_screen.title
 import utils.toLocalizedString
 import kotlin.reflect.KClass
@@ -29,11 +28,7 @@ fun EntitiesSelectorUi(component: IEntitiesSelector) {
 
     Column {
 
-        RepresentationTypesSelector(
-            currentType = state.itemRepresentationType,
-            onTypeChanged = { component.changeItemRepresentationType(it) })
-
-        //entities selector:
+       //entities selector:
         state.entitiesSelector?.let {
             EntitiesSelector(
                 entities = it.items,

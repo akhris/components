@@ -14,6 +14,7 @@ import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
+import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
 import ui.screens.patterns.ScreenWithFilterSheet
 import utils.toLocalizedString
 
@@ -31,6 +32,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen) {
         },
         filterContent = {
             Column {
+                RepresentationTypeSelector(component.viewSettingsRouterState)
                 SelectorPanel(component.selectorRouterState)
                 FilterPanel(component.filterRouterState)
             }
@@ -74,6 +76,17 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesFilterChild.EntitiesFilter -> {
                 EntitiesFilterUi(component = child.component)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RepresentationTypeSelector(routerState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>>) {
+    Children(routerState, animation = crossfade()) {
+        when (val child = it.instance) {
+            is IEntitiesScreen.ViewSettingsChild.ViewSettings -> {
+                EntitiesViewSettingsUi(component = child.component)
             }
         }
     }

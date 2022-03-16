@@ -1,6 +1,7 @@
 package ui.screens.entities_screen
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.router
@@ -16,6 +17,7 @@ import strings.Strings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
+import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsComponent
 import kotlin.reflect.KClass
 
 class EntitiesScreenComponent(
@@ -51,6 +53,12 @@ class EntitiesScreenComponent(
             childFactory = ::createFilterChild
         )
 
+    private val viewSettingsRouter =
+        router(
+            initialConfiguration = EntitiesViewSettingsConfig.ViewSettings,
+            key = "view_settings_router",
+            childFactory = ::createViewSettingsChild
+        )
 
     override val listRouterState: Value<RouterState<*, IEntitiesScreen.ListChild>> = listRouter.state
 
@@ -59,6 +67,9 @@ class EntitiesScreenComponent(
 
     override val filterRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>> =
         filterRouter.state
+
+    override val viewSettingsRouterState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>> =
+        viewSettingsRouter.state
 
     private fun createListChild(
         entitiesListConfig: EntitiesListConfig,
@@ -88,15 +99,16 @@ class EntitiesScreenComponent(
             EntitiesSelectorConfig.EntitiesSelector -> IEntitiesScreen.EntitiesSelectorChild.EntitiesSelector(
                 EntitiesSelectorComponent(
                     entityClasses = entityClasses,
-                    componentContext = componentContext
-                ) { newEntity ->
-                    listRouter.navigate { stack ->
-                        stack
-                            .dropLastWhile { it is EntitiesListConfig.EntitiesList }
-                            .plus(EntitiesListConfig.EntitiesList(entityClass = newEntity))
+                    componentContext = componentContext,
+                    onEntitySelected = { newEntity ->
+                        listRouter.navigate { stack ->
+                            stack
+                                .dropLastWhile { it is EntitiesListConfig.EntitiesList }
+                                .plus(EntitiesListConfig.EntitiesList(entityClass = newEntity))
+                        }
+                        updateTitleAndDescription(newEntity)
                     }
-                    updateTitleAndDescription(newEntity)
-                }
+                )
             )
         }
     }
@@ -111,6 +123,23 @@ class EntitiesScreenComponent(
                     componentContext = componentContext,
                     entities = entitiesFilterConfig.entities,
                     mapperFactory = fieldsMapperFactory
+                )
+            )
+        }
+    }
+
+    private fun createViewSettingsChild(
+        entitiesViewSettingsConfig: EntitiesViewSettingsConfig,
+        componentContext: ComponentContext
+    ): IEntitiesScreen.ViewSettingsChild {
+        return when (entitiesViewSettingsConfig) {
+            EntitiesViewSettingsConfig.ViewSettings -> IEntitiesScreen.ViewSettingsChild.ViewSettings(
+                EntitiesViewSettingsComponent(
+                    componentContext = componentContext,
+                    onTypeChanged = {
+                        //todo redraw entities list here
+                        log("type changed: $it")
+                    }
                 )
             )
         }
@@ -144,6 +173,11 @@ class EntitiesScreenComponent(
         data class EntitiesFilter(val entities: List<IEntity<*>>) : EntitiesFilterConfig()
     }
 
+    sealed class EntitiesViewSettingsConfig : Parcelable {
+        @Parcelize
+        object ViewSettings : EntitiesViewSettingsConfig()
+    }
+
 
 }
 
@@ -155,8 +189,8 @@ val KClass<out IEntity<*>>.title: Strings?
             domain.entities.Unit::class -> Strings.TypesOfData.units_title
             Item::class -> Strings.TypesOfData.items_title
             Container::class -> Strings.TypesOfData.containers_title
-            Supplier::class->Strings.TypesOfData.suppliers_title
-            Project::class->Strings.TypesOfData.projects_title
+            Supplier::class -> Strings.TypesOfData.suppliers_title
+            Project::class -> Strings.TypesOfData.projects_title
             else -> null
         }
     }
@@ -169,8 +203,8 @@ val KClass<out IEntity<*>>.description: Strings?
             domain.entities.Unit::class -> Strings.TypesOfData.units_description
             Item::class -> Strings.TypesOfData.items_description
             Container::class -> Strings.TypesOfData.containers_description
-            Supplier::class->Strings.TypesOfData.suppliers_description
-            Project::class->Strings.TypesOfData.projects_description
+            Supplier::class -> Strings.TypesOfData.suppliers_description
+            Project::class -> Strings.TypesOfData.projects_description
             else -> null
         }
     }

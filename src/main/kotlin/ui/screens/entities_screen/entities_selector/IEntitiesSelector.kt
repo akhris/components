@@ -2,7 +2,7 @@ package ui.screens.entities_screen.entities_selector
 
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.value.Value
-import ui.composable.ItemRepresentationType
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import kotlin.reflect.KClass
 
 /**
@@ -16,16 +16,6 @@ interface IEntitiesSelector {
     val state: Value<Model>
 
     fun selectEntity(entityClass: KClass<out IEntity<*>>)
-
-    //methods to change the state:
-    //change representation (cards/ grid):
-    fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType)
-
-//    // add / update filter setting
-//    fun setFilter(filterSettings: FilterSettings)
-//
-//    // remove filter setting
-//    fun removeFilter(filterSettings: FilterSettings)
 
     //filter screen model:
     data class Model(
