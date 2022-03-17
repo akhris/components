@@ -199,7 +199,7 @@ fun RenderEntityLinksList(
             OutlinedButton(
                 modifier = Modifier.align(Alignment.Center),
                 onClick = onEntityLinkAdd,
-                content = { Text("add ${field.fieldID.name}") })
+                content = { Text("edit ${field.fieldID.name}") })
         }
 
     }

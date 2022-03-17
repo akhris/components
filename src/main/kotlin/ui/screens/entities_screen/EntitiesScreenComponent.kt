@@ -1,7 +1,6 @@
 package ui.screens.entities_screen
 
 import com.akhris.domain.core.entities.IEntity
-import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.router
@@ -13,6 +12,7 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.*
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import strings.Strings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
@@ -24,7 +24,8 @@ class EntitiesScreenComponent(
     componentContext: ComponentContext,
     private val entityClasses: List<KClass<out IEntity<*>>>,
     private val fieldsMapperFactory: FieldsMapperFactory,
-    private val getListUseCaseFactory: IGetListUseCaseFactory
+    private val getListUseCaseFactory: IGetListUseCaseFactory,
+    private val updateUseCaseFactory: IUpdateUseCaseFactory
 ) : IEntitiesScreen, ComponentContext by componentContext {
 
     private val _state = MutableValue(IEntitiesScreen.Model())
@@ -75,19 +76,23 @@ class EntitiesScreenComponent(
         entitiesListConfig: EntitiesListConfig,
         componentContext: ComponentContext
     ): IEntitiesScreen.ListChild {
+
         return when (entitiesListConfig) {
-            is EntitiesListConfig.EntitiesList -> IEntitiesScreen.ListChild.List(
-                component = EntitiesListComponent(
-                    componentContext = componentContext,
-                    getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
-                    onEntitiesLoaded = { entities ->
-                        filterRouter.navigate { stack ->
-                            stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
-                                .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
+            is EntitiesListConfig.EntitiesList -> {
+                IEntitiesScreen.ListChild.List(
+                    component = EntitiesListComponent(
+                        componentContext = componentContext,
+                        getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
+                        updateEntity = entitiesListConfig.entityClass?.let { updateUseCaseFactory.getUpdateUseCase(it) },
+                        onEntitiesLoaded = { entities ->
+                            filterRouter.navigate { stack ->
+                                stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
+                                    .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
+                            }
                         }
-                    }
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -136,9 +141,10 @@ class EntitiesScreenComponent(
             EntitiesViewSettingsConfig.ViewSettings -> IEntitiesScreen.ViewSettingsChild.ViewSettings(
                 EntitiesViewSettingsComponent(
                     componentContext = componentContext,
-                    onTypeChanged = {
-                        //todo redraw entities list here
-                        log("type changed: $it")
+                    onTypeChanged = { newType ->
+                        _state.reduce {
+                            it.copy(itemRepresentationType = newType)
+                        }
                     }
                 )
             )

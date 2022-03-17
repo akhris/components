@@ -2,10 +2,7 @@ package persistence.datasources.exposed
 
 import com.akhris.domain.core.utils.log
 import domain.entities.Project
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.batchInsert
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.BaseDao
 import persistence.dto.exposed.EntityProject
@@ -55,10 +52,39 @@ class ProjectsDao : BaseDao<Project> {
     }
 
     override suspend fun update(entity: Project) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            //1. get entity by id:
+            val project = EntityProject[entity.id.toUUID()]
+
+            //2. update it:
+            project.name = entity.name
+            project.description = entity.description
+            //3. if items list changed - update it:
+            if (entity.items.map { it.entity.id to it.count } != project.items.map { it.id.value.toString() to it.count }) {
+                log("project items changed, updating...")
+                //remove all old parameters
+                Tables
+                    .ProjectItems
+                    .deleteWhere { Tables.ProjectItems.project eq entity.id.toUUID() }
+
+                //batch insert all new parameters
+                Tables
+                    .ProjectItems
+                    .batchInsert(entity.items) { i ->
+                        this[Tables.ProjectItems.project] = entity.id.toUUID()
+                        this[Tables.ProjectItems.item] = i.entity.id.toUUID()
+                        this[Tables.ProjectItems.count] = i.count
+                    }
+            }
+        }
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            val project = EntityProject[id.toUUID()]
+            project.delete()
+        }
     }
 }

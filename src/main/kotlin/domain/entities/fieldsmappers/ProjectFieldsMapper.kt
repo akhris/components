@@ -68,9 +68,7 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
             is EntityFieldID.EntitiesListID -> entity.copy(items = (field as EntityField.EntityLinksList).entities.mapNotNull {
                 (it.entity as? Item)?.let { i ->
-                    if (it.count != null) {
-                        EntityCountable(i, it.count)
-                    } else null
+                    EntityCountable(i, it.count ?: 1L)
                 }
             })
             else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")

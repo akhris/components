@@ -2,7 +2,9 @@ package ui.screens.entities_screen.entities_list
 
 import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.application.Result
+import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
@@ -18,6 +20,7 @@ class EntitiesListComponent<T : IEntity<*>>(
 //    private val sidePanelModel: Value<IEntitiesSidePanel.Model>,
 //    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
     private val getEntities: GetEntities<*, out T>?,
+    private val updateEntity: UpdateEntity<*, out T>?,
     private val onEntitiesLoaded: (List<T>) -> Unit
 ) :
     IEntitiesList<T>,
@@ -75,6 +78,14 @@ class EntitiesListComponent<T : IEntity<*>>(
         totalItems?.let { setTotalItems(it) }
     }
 
+    override fun onEntityUpdated(entity: T) {
+        scope.launch {
+            log("updating entity: $entity")
+            val result = updateEntity?.invoke(UpdateEntity.Update(entity))
+            log(result ?: "empty result")
+        }
+    }
+
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
         val specification = if (pagingParams == null) {
@@ -83,6 +94,7 @@ class EntitiesListComponent<T : IEntity<*>>(
             Specification.Paginated(pageNumber = pagingParams.currentPage, itemsPerPage = pagingParams.itemsPerPage)
         }
         val entitiesResult = getEntities?.invoke(GetEntities.GetBySpecification(specification))
+
         log("invalidating entities for spec: $specification, entitiesResult: $entitiesResult")
         when (entitiesResult) {
             is Result.Success -> {
@@ -104,9 +116,16 @@ class EntitiesListComponent<T : IEntity<*>>(
         lifecycle.subscribe(onDestroy = {
             scope.coroutineContext.cancelChildren()
         })
+
+        val repoCallback = (getEntities?.repo as? IRepositoryCallback<T>)
+
         scope.launch {
             setupPagination()
             invalidateEntities()    //todo subscribe to pagination parameters change
+            repoCallback?.updates?.collect {
+                log("entities updated: $it")
+                invalidateEntities()
+            }
         }
     }
 }

@@ -13,11 +13,9 @@ inline fun <reified ID, reified ENTITY : IEntity<ID>> getEntityModule(
     moduleName: String,
     crossinline getRepo: DirectDI.() -> IRepository<ID, ENTITY>,
     crossinline additionalBindings: DI.Builder.() -> Unit = {}
-//    crossinline getRepoCallbacks: (DirectDI.() -> IRepositoryCallback<ENTITY>?),
 ): DI.Module = DI.Module(moduleName) {
     bindSingleton<IRepository<ID, ENTITY>> { getRepo() }
 //    bindSingleton<IRepositoryCallback<ENTITY>> { getRepoCallbacks() }
-
     bindSingleton { GetEntity<ID, ENTITY>(instance(), ioDispatcher = Dispatchers.IO) }
     bindSingleton { UpdateEntity<ID, ENTITY>(instance(), ioDispatcher = Dispatchers.IO) }
     bindSingleton { RemoveEntity<ID, ENTITY>(instance(), ioDispatcher = Dispatchers.IO) }

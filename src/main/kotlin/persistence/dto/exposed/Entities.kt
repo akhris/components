@@ -42,7 +42,7 @@ class EntityParameter(id: EntityID<UUID>) : UUIDEntity(id) {
     var description by Tables.Parameters.description
 
     //    val unit by Tables.Parameters.unit
-    val unit by EntityUnit optionalReferencedOn (Tables.Parameters.unit)
+    var unit by EntityUnit optionalReferencedOn (Tables.Parameters.unit)
 }
 
 

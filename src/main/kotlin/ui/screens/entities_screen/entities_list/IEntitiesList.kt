@@ -16,6 +16,8 @@ interface IEntitiesList<T : IEntity<*>> {
     fun setCurrentPage(currentPage: Long)
     fun setItemsPerPage(itemsPerPage: Long)
 
+    fun onEntityUpdated(entity: T)
+
     //entities list model
     data class Model<T : IEntity<*>>(
         val entities: List<T> = listOf(),

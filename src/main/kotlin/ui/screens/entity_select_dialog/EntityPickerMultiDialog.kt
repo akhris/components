@@ -66,7 +66,7 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
                 initialSelection = initialSelection,
                 searchString = searchString,
                 onSearchStringChanged = {
-                   searchString = it
+                    searchString = it
                 },
                 onCancelClicked = onDismiss,
                 onEntitiesSelected = {
@@ -166,7 +166,7 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
             }
 
             Button(modifier = Modifier.padding(4.dp), onClick = {
-                onEntitiesSelected(checksMap.keys.toList())
+                onEntitiesSelected(checksMap.filterValues { it }.keys.toList()) //return only selected
             }) {
                 Text(text = "ok")
             }

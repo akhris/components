@@ -52,8 +52,8 @@ class UnitsDao : IUnitsDao {
             //1. get entity by id:
             val foundEntity = EntityUnit[UUID.fromString(entity.id)]
             //2. update it:
-            foundEntity.unit = foundEntity.unit
-            foundEntity.isMultipliable = foundEntity.isMultipliable
+            foundEntity.unit = entity.unit
+            foundEntity.isMultipliable = entity.isMultipliable
         }
     }
 
@@ -66,8 +66,4 @@ class UnitsDao : IUnitsDao {
             entity.delete()
         }
     }
-
-//    override suspend fun getItemsCount(): Long {
-//        return 0L
-//    }
 }

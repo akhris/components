@@ -8,6 +8,7 @@ import ui.screens.entities_screen.entities_filter.IEntitiesFilter
 import ui.screens.entities_screen.entities_list.IEntitiesList
 import ui.screens.entities_screen.entities_selector.IEntitiesSelector
 import ui.screens.entities_screen.entities_view_settings.IEntitiesViewSettings
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 
 
 /**
@@ -24,7 +25,8 @@ interface IEntitiesScreen {
 
     data class Model(
         val screenTitle: Strings? = null,
-        val screenDescription: Strings? = null
+        val screenDescription: Strings? = null,
+        val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.default
     )
 
     val listRouterState: Value<RouterState<*, ListChild>>

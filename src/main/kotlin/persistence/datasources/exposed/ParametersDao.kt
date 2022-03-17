@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IParametersDao
 import persistence.dto.exposed.EntityParameter
+import persistence.dto.exposed.EntityUnit
 import persistence.dto.exposed.Tables
 import persistence.mappers.toParameter
 import utils.toUUID
@@ -49,11 +50,31 @@ class ParametersDao : IParametersDao {
     }
 
     override suspend fun update(entity: Parameter) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+
+            //1. get entity by id:
+            val parameter = EntityParameter[entity.id.toUUID()]
+
+            //2. update it:
+            parameter.name = entity.name
+            parameter.description = entity.description
+            parameter.unit = entity.unit?.id?.let {
+                EntityUnit[it.toUUID()]
+            }
+        }
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+
+            //1. get entity by id:
+            val parameter = EntityParameter[id.toUUID()]
+
+            //2. remove it:
+            parameter.delete()
+        }
     }
 
 

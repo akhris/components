@@ -115,6 +115,13 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                 RenderField(
                     it,
                     onFieldChange = { changedField ->
+                        log("changedField: $changedField")
+                        if (changedField is EntityField.EntityLinksList) {
+                            log("changedField is EntityLinksList")
+                            changedField.entities.forEach {
+                                log("link: $it")
+                            }
+                        }
                         entity = mapper.mapIntoEntity(entity, changedField)
                         log("entity after mapping: $entity")
 //                    onEntityChanged(mapper.mapIntoEntity(initialEntity, changedField))
@@ -262,15 +269,14 @@ private fun RenderField(
                 fieldToChange?.let { ell ->
                     onFieldChange?.invoke(
                         ell.copy(
-                            entities =
-                            changedEntitiesList.map {
+                            entities = changedEntitiesList.mapIndexed { index, iEntity ->
                                 EntityField.EntityLink(
                                     fieldID = EntityFieldID.EntityID(
-                                        tag = "",
-                                        name = "",
+                                        tag = "${ell.fieldID.tag}$index",
+                                        name = "${iEntity::class.simpleName} ${index + 1}",
                                         entityClass = entityClass
                                     ),
-                                    entity = it,
+                                    entity = iEntity,
                                     entityClass = entityClass
                                 )
                             }

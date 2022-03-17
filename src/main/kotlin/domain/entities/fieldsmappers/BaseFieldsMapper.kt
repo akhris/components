@@ -39,7 +39,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                     entities = fieldID.entitiesIDs.map { entityID ->
                         val entityField = getFieldParamsByFieldID(entity, entityID)
                         EntityField.EntityLink(
-                            fieldID = fieldID,
+                            fieldID = entityID,
                             entity = entityField.value as? T,
                             entityClass = fieldID.entityClass,
                             description = entityField.description,

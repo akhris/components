@@ -53,7 +53,7 @@ class ContainersDao : BaseDao<Container> {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             //1. get entity by id:
-            val container = EntityContainer[UUID.fromString(entity.id)]
+            val container = EntityContainer[entity.id.toUUID()]
             //2. update it:
             container.name = entity.name
             container.description = entity.description
@@ -88,6 +88,10 @@ class ContainersDao : BaseDao<Container> {
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            val container = EntityContainer[id.toUUID()]
+            container.delete()
+        }
     }
 }

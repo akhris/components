@@ -21,8 +21,7 @@ class UpdateUseCaseFactory(
 ) : IUpdateUseCaseFactory {
 
 
-
-    override fun <ID, T : IEntity<ID>> getUpdateUseCase(entityClass: KClass<out T>): UpdateEntity<ID, out T> {
+    override fun <T : IEntity<*>> getUpdateUseCase(entityClass: KClass<out T>): UpdateEntity<*, out T> {
         val a = when (entityClass) {
             Item::class -> updateItem
             Parameter::class -> updateParameter
@@ -36,6 +35,6 @@ class UpdateUseCaseFactory(
             WarehouseItem::class -> updateWarehouseItem
             else -> throw IllegalArgumentException("not found update-use-case for entity class: $entityClass")
         }
-        return a as UpdateEntity<ID, out T>
+        return a as UpdateEntity<*, out T>
     }
 }

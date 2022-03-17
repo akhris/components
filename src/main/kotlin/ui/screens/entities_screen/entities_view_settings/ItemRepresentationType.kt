@@ -10,4 +10,8 @@ sealed interface ItemRepresentationType : Parcelable {
 
     @Parcelize
     object Table : ItemRepresentationType
+
+    companion object {
+        val default = Card
+    }
 }

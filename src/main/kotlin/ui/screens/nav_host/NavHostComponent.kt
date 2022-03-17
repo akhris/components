@@ -86,7 +86,8 @@ class NavHostComponent(
                         componentContext = componentContext,
                         entityClasses = entities,
                         fieldsMapperFactory = fieldsMapperFactory,
-                        getListUseCaseFactory = getListUseCaseFactory
+                        getListUseCaseFactory = getListUseCaseFactory,
+                        updateUseCaseFactory = updateUseCaseFactory
                     )
                 )
             }

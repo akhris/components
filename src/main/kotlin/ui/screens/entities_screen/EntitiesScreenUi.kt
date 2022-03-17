@@ -15,9 +15,18 @@ import com.arkivanov.decompose.value.Value
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.patterns.ScreenWithFilterSheet
 import utils.toLocalizedString
 
+/**
+ * Ui element: Screen of entities.
+ * Contains:
+ * - list of entities
+ * - view mode selector (cards/table)
+ * - entity selector panel
+ * - filter panel
+ */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EntitiesScreenUi(component: IEntitiesScreen) {
@@ -28,11 +37,11 @@ fun EntitiesScreenUi(component: IEntitiesScreen) {
         isOpened = true,
         isModal = true,
         content = {
-            ListPane(component.listRouterState)
+            ListPane(component.listRouterState, itemRepresentationType = state.itemRepresentationType)
         },
         filterContent = {
             Column {
-                RepresentationTypeSelector(component.viewSettingsRouterState)
+                ViewModeSelector(component.viewSettingsRouterState)
                 SelectorPanel(component.selectorRouterState)
                 FilterPanel(component.filterRouterState)
             }
@@ -48,11 +57,17 @@ fun EntitiesScreenUi(component: IEntitiesScreen) {
 
 
 @Composable
-private fun ListPane(routerState: Value<RouterState<*, IEntitiesScreen.ListChild>>) {
+private fun ListPane(
+    routerState: Value<RouterState<*, IEntitiesScreen.ListChild>>,
+    itemRepresentationType: ItemRepresentationType
+) {
     Children(routerState) {
         when (val child = it.instance) {
             is IEntitiesScreen.ListChild.List<*> -> {
-                ui.screens.entities_screen.entities_list.EntitiesListUi(component = child.component)
+                ui.screens.entities_screen.entities_list.EntitiesListUi(
+                    component = child.component,
+                    itemRepresentationType = itemRepresentationType
+                )
             }
         }
     }
@@ -70,6 +85,7 @@ private fun SelectorPanel(routerState: Value<RouterState<*, IEntitiesScreen.Enti
     }
 }
 
+@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>>) {
     Children(routerState, animation = crossfade()) {
@@ -81,8 +97,9 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
     }
 }
 
+@OptIn(ExperimentalDecomposeApi::class)
 @Composable
-private fun RepresentationTypeSelector(routerState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>>) {
+private fun ViewModeSelector(routerState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>>) {
     Children(routerState, animation = crossfade()) {
         when (val child = it.instance) {
             is IEntitiesScreen.ViewSettingsChild.ViewSettings -> {

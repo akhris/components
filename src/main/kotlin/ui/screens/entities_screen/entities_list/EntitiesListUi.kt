@@ -34,21 +34,21 @@ import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import kotlinx.coroutines.delay
 import ui.entity_renderers.EntityScreenContent
+import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import kotlin.math.sign
 
 @Composable
-fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>) {
+fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentationType: ItemRepresentationType) {
 
     val state by component.state.subscribeAsState()
 
-
     Box(modifier = Modifier.fillMaxHeight()) {
         EntityScreenContent(
-            itemRepresentationType = state.itemRepresentationType,
-            entities = state.entities
+            itemRepresentationType = itemRepresentationType,
+            entities = state.entities,
 //        ,
 //        onEntityRemoved = component::onEntityRemoved,
-//        onEntityUpdated = component::onEntityUpdated
+        onEntityUpdated = component::onEntityUpdated
         )
 
         state.pagingParameters?.let { pagingParams ->
