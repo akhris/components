@@ -26,6 +26,7 @@ val di = DI {
     import(itemOutcomeModule)
     import(projectModule)
     import(warehouseItemModule)
+//    import(valuesModule)
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }
@@ -43,6 +44,7 @@ val di = DI {
             instance(),
             instance(),
             instance()
+//            instance()
         )
     }
 
@@ -58,6 +60,7 @@ val di = DI {
             instance(),
             instance(),
             instance()
+//            instance()
         )
 
     }

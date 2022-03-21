@@ -24,7 +24,7 @@ internal class ItemFieldsMapperTest {
         fieldsIDs.forEachIndexed { index, fieldID ->
             println("fieldID $index. $fieldID")
             val value = mapper.getFieldParamsByFieldID(item, fieldID)
-            println("tag: ${fieldID.tag} name: ${fieldID.name} value: ${value.value} description: ${value.description}")
+            println("tag: ${fieldID.tag} name: ${fieldID.name} value: ${value.entity} description: ${value.description}")
             println()
         }
 

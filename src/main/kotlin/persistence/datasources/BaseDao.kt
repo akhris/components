@@ -21,5 +21,6 @@ interface BasePagingDao<T : IEntity<*>> {
 interface IItemsIncomeDao : BaseDao<ItemIncome>, BasePagingDao<ItemIncome>
 interface IItemsOutcomeDao : BaseDao<ItemOutcome>, BasePagingDao<ItemOutcome>
 interface IUnitsDao : BaseDao<Unit>
+//interface IValuesDao : BaseDao<Value>
 interface IParametersDao: BaseDao<Parameter>
 interface IItemsDao : BaseDao<Item>, BasePagingDao<Item>

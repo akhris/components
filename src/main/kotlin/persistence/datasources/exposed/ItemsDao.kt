@@ -45,20 +45,13 @@ class ItemsDao : BaseDao<Item> {
                 }
             }
 
-            Tables.Values.batchInsert(entity.values) { v ->
-                this[Tables.Values.id] = v.id.toUUID()
-                v.parameter?.id?.toUUID()?.let {
-                    this[Tables.Values.parameter] = it
-                }
-                this[Tables.Values.value] = v.value
-                this[Tables.Values.factor] = v.factor
+            Tables.ItemValues.batchInsert(entity.values) { v ->
+//                this[Tables.ItemValues.id] = v.id.toUUID()
+                this[Tables.ItemValues.item] = entity.id.toUUID()
+                this[Tables.ItemValues.parameter] = v.entity.id.toUUID()
+                this[Tables.ItemValues.value] = v.value
+                this[Tables.ItemValues.factor] = v.factor
             }
-
-            Tables.ValuesToItem.batchInsert(entity.values) { v ->
-                this[Tables.ValuesToItem.item] = entity.id.toUUID()
-                this[Tables.ValuesToItem.value] = v.id.toUUID()
-            }
-
             commit()
         }
     }

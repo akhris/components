@@ -36,17 +36,17 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 val index = fieldID.tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
                 val item = entity.items.getOrNull(index)
                 log("item: $item")
-                DescriptiveFieldValue(value = item?.entity, description = item?.entity?.name ?: "", count = item?.count)
+                DescriptiveFieldValue(entity = item?.entity, description = item?.entity?.name ?: "", count = item?.count)
             }
             is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
-                value = entity.items,
+                entity = entity.items,
                 description = "items"
             )
             is EntityFieldID.StringID ->
                 when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue(value = entity.name, description = "project's name")
+                    EntityFieldID.tag_name -> DescriptiveFieldValue(entity = entity.name, description = "project's name")
                     EntityFieldID.tag_description -> DescriptiveFieldValue(
-                        value = entity.description,
+                        entity = entity.description,
                         description = "project's description"
                     )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")

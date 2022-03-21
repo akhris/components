@@ -15,7 +15,16 @@ class EntityItem(id: EntityID<UUID>) : UUIDEntity(id) {
 //    var type by Tables.Items.type
 
     var type by EntityObjectType optionalReferencedOn (Tables.Items.type)
-    val values by EntityValue via Tables.ValuesToItem
+    val values by EntityItemValue referrersOn Tables.ItemValues.item
+}
+
+class EntityItemValue(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<EntityItemValue>(Tables.ItemValues)
+
+    var item by EntityItem referencedOn Tables.ItemValues.item
+    var parameter by EntityParameter referencedOn Tables.ItemValues.parameter
+    var value by Tables.ItemValues.value
+    var factor by Tables.ItemValues.factor
 }
 
 class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
@@ -26,14 +35,14 @@ class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
 }
 
 
-class EntityValue(id: EntityID<UUID>) : UUIDEntity(id) {
-    companion object : UUIDEntityClass<EntityValue>(Tables.Values)
-
-//    var parameter by Tables.Values.parameter
-    var parameter by EntityParameter optionalReferencedOn Tables.Values.parameter
-    var value by Tables.Values.value
-    var factor by Tables.Values.factor
-}
+//class EntityValue(id: EntityID<UUID>) : UUIDEntity(id) {
+//    companion object : UUIDEntityClass<EntityValue>(Tables.Values)
+//
+//    //    var parameter by Tables.Values.parameter
+//    var parameter by EntityParameter optionalReferencedOn Tables.Values.parameter
+//    var value by Tables.Values.value
+//    var factor by Tables.Values.factor
+//}
 
 class EntityParameter(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityParameter>(Tables.Parameters)
@@ -122,3 +131,4 @@ class EntityProjectItem(id: EntityID<Int>) : IntEntity(id) {
     var item by EntityItem referencedOn Tables.ProjectItems.item
     var count by Tables.ProjectItems.count
 }
+

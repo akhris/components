@@ -22,11 +22,11 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
             is EntityFieldID.StringID -> {
                 when (fieldID.tag) {
                     EntityFieldID.tag_name -> DescriptiveFieldValue(
-                        value = entity.name,
+                        entity = entity.name,
                         description = "parameter's name"
                     )
                     EntityFieldID.tag_description -> DescriptiveFieldValue(
-                        value = entity.description,
+                        entity = entity.description,
                         description = "parameter's description"
                     )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")

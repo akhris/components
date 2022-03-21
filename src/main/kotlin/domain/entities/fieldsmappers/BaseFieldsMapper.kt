@@ -14,21 +14,21 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
             is EntityFieldID.FloatID -> {
                 EntityField.FloatField(
                     fieldID = fieldID,
-                    value = (fieldParams.value as? Float) ?: 1f,
+                    value = (fieldParams.entity as? Float) ?: 1f,
                     description = fieldParams.description
                 )
             }
             is EntityFieldID.StringID -> {
                 EntityField.StringField(
                     fieldID = fieldID,
-                    value = (fieldParams.value as? String) ?: "",
+                    value = (fieldParams.entity as? String) ?: "",
                     description = fieldParams.description
                 )
             }
             is EntityFieldID.BooleanID -> {
                 EntityField.BooleanField(
                     fieldID = fieldID,
-                    value = (fieldParams.value as? Boolean) ?: false,
+                    value = (fieldParams.entity as? Boolean) ?: false,
                     description = fieldParams.description
                 )
             }
@@ -40,7 +40,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                         val entityField = getFieldParamsByFieldID(entity, entityID)
                         EntityField.EntityLink(
                             fieldID = entityID,
-                            entity = entityField.value as? T,
+                            entity = entityField.entity as? T,
                             entityClass = fieldID.entityClass,
                             description = entityField.description,
                             count = entityField.count
@@ -54,12 +54,12 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
             is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
                 fieldID = fieldID,
                 description = fieldParams.description,
-                value = fieldParams.value as? LocalDateTime
+                value = fieldParams.entity as? LocalDateTime
             )
             is EntityFieldID.LongID -> EntityField.LongField(
                 fieldID = fieldID,
                 description = fieldParams.description,
-                value = fieldParams.value as? Long ?: 0L
+                value = fieldParams.entity as? Long ?: 0L
             )
         }
     }
@@ -69,7 +69,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         fieldParams: DescriptiveFieldValue
     ): EntityField.EntityLink {
 
-        val entity: T? = fieldParams.value as? T
+        val entity: T? = fieldParams.entity as? T
         val count: Long? = fieldParams.count
 
 //        when (val e = fieldParams.value) {
@@ -101,8 +101,28 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 }
 
 
-data class DescriptiveFieldValue constructor(
-    val value: Any? = null,
-    val description: String = "",
-    val count: Long? = null
-)
+
+sealed class DescriptiveFieldValue {
+    abstract val entity: Any?
+    abstract val description: String
+
+    data class CommonField(override val entity: Any? = null, override val description: String = "") :
+        DescriptiveFieldValue()
+
+    data class CountableField(
+        override val entity: Any? = null,
+        override val description: String = "",
+        val count: Long? = null
+    ) :
+        DescriptiveFieldValue()
+
+    data class ValuableField(
+        override val entity: Any? = null,
+        override val description: String = "",
+        val value: String? = null,
+        val factor: Float? = null
+    ) :
+        DescriptiveFieldValue()
+
+
+}

@@ -1,8 +1,9 @@
 package domain.entities.fieldsmappers
 
+import domain.entities.EntityValuable
 import domain.entities.Item
 import domain.entities.ObjectType
-import domain.entities.Value
+import domain.entities.Parameter
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
@@ -21,10 +22,10 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
                     EntityFieldID.EntityID(
                         tag = "${tag_values}${index}",
                         name = "value ${index + 1}",
-                        entityClass = Value::class
+                        entityClass = Parameter::class
                     )
                 },
-                entityClass = Value::class
+                entityClass = Parameter::class
             )
         )
     }
@@ -32,18 +33,23 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
     override fun getFieldParamsByFieldID(entity: Item, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
             is EntityFieldID.EntityID -> when (fieldID.tag) {
-                tag_type -> DescriptiveFieldValue(value = entity.type, description = "type of the object")
+                tag_type -> DescriptiveFieldValue(entity = entity.type, description = "type of the object")
                 else -> {
                     val valueParameterIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
-                    val value = entity.values.getOrNull(valueParameterIndex)
-                    DescriptiveFieldValue(value, description = value?.parameter?.description ?: "")
+                    val item = entity.values.getOrNull(valueParameterIndex)
+                    DescriptiveFieldValue(
+                        entity = item?.entity,
+                        description = item?.entity?.description ?: "",
+                        value = item?.value,
+                        factor = item?.factor
+                    )
                 }
             }
             is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
-                value = entity.values,
+                entity = entity.values,
                 description = "values"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.name, description = "name")
+            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.name, description = "name")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
@@ -55,23 +61,42 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
                     "tag_type" -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
-                    else -> setValue(entity, field)
+                    else -> setItem(entity, field)
+                        ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
                 }
             }
-            is EntityFieldID.EntitiesListID -> entity.copy(values = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity } as List<Value>)
+            is EntityFieldID.EntitiesListID -> entity.copy(values = (field as EntityField.EntityLinksList).entities.mapNotNull {
+                if (it is EntityField.EntityLink.EntityLinkValuable) {
+                    (it.entity as? Parameter)?.let { p ->
+                        EntityValuable(entity = p, value = it.value, factor = it.factor)
+                    }
+                } else null
+            })
             else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
         }
     }
 
-    private fun setValue(item: Item, field: EntityField): Item {
+    private fun setItem(item: Item, field: EntityField): Item? {
         val fieldID = field.fieldID
-        val valueParameterIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
-        return item.copy(values = item.values.mapIndexed { index, v ->
-            if (index == valueParameterIndex) {
-                ((field as? EntityField.EntityLink)?.entity as? Value) ?: v
-            } else v
-        })
+        val valueIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: return null
+        if (item.values.getOrNull(valueIndex) == null) {
+            return null
+        }
+        return item.copy(
+            values = item.values.mapIndexedNotNull { index, itemValuable ->
+                if (index == valueIndex) {
+                    val valuableField =
+                        (field as? EntityField.EntityLink.EntityLinkValuable) ?: return@mapIndexedNotNull null
+                    EntityValuable(
+                        valuableField.entity as Parameter,
+                        valuableField.value,
+                        factor = valuableField.factor
+                    )
+                } else itemValuable
+            }
+        )
     }
+
 
 }
 

@@ -81,3 +81,10 @@ val unitsModule = getEntityModule(
     additionalBindings = {
         bindSingleton<BaseDao<domain.entities.Unit>> { UnitsDao() }
     })
+
+//val valuesModule = getEntityModule(
+//    "values module",
+//    getRepo = { BaseRepository<domain.entities.Value>(baseDao = instance()) },
+//    additionalBindings = {
+//        bindSingleton<BaseDao<domain.entities.Value>> { ValuesDao() }
+//    })

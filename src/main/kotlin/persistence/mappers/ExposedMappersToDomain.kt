@@ -63,14 +63,14 @@ fun EntityObjectType.toObjectType(): ObjectType {
     )
 }
 
-fun EntityValue.toValue(): Value {
-    return Value(
-        id = id.value.toString(),
-        parameter = parameter?.toParameter(),
-        value = value,
-        factor = factor
-    )
-}
+//fun EntityValue.toValue(): Value {
+//    return Value(
+//        id = id.value.toString(),
+//        parameter = parameter?.toParameter(),
+//        value = value,
+//        factor = factor
+//    )
+//}
 
 fun EntityParameter.toParameter(): Parameter {
     return Parameter(
@@ -89,5 +89,13 @@ fun EntityProject.toProject(): Project {
         items = items.map {
             EntityCountable(entity = it.item.toItem(), count = it.count)
         }
+    )
+}
+
+fun EntityItemValue.toValue(): EntityValuable<Parameter> {
+    return EntityValuable(
+        entity = this.parameter.toParameter(),
+        factor = this.factor,
+        value = this.value
     )
 }

@@ -48,7 +48,7 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
                 when (fieldID.tag) {
                     tag_item -> {
                         val item = (field as? EntityField.EntityLink)?.entity as? Item
-                        val count = (field as? EntityField.EntityLink)?.count ?: 0L
+                        val count = (field as? EntityField.EntityLink.EntityLinkCountable)?.count ?: 0L
                         entity.copy(item = item?.let { EntityCountable(it, count) })
                     }
                     tag_container -> entity.copy(container = (field as? EntityField.EntityLink)?.entity as? Container)

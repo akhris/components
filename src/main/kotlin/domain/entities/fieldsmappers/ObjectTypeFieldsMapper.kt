@@ -34,10 +34,10 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                 DescriptiveFieldValue(parameter, description = parameter?.name ?: "")
             }
             is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
-                value = entity.parameters,
+                entity = entity.parameters,
                 description = "parameters"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.name, description = "type's name")
+            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.name, description = "type's name")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

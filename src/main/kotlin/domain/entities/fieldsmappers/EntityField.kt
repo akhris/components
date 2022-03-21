@@ -3,7 +3,6 @@ package domain.entities.fieldsmappers
 import com.akhris.domain.core.entities.IEntity
 import utils.DateTimeConverter
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
 /**
@@ -67,20 +66,51 @@ sealed class EntityField {
         override val description: String,
         val value: LocalDateTime?
     ) : EntityField() {
-        override fun toString(): String = value?.let { DateTimeConverter.dateTimeToString(it) }?:"no date/time"
+        override fun toString(): String = value?.let { DateTimeConverter.dateTimeToString(it) } ?: "no date/time"
     }
 
     /**
      * Represents EntityLink value of entity field
      */
-    data class EntityLink constructor(
-        override val fieldID: EntityFieldID,
-        override val description: String = "",
-        val entity: IEntity<*>?,
-        val entityClass: KClass<out IEntity<*>>,
-        val count: Long? = null
-    ) : EntityField() {
-        override fun toString(): String = entity?.toString() ?: description
+//    data class EntityLink constructor(
+//        override val fieldID: EntityFieldID,
+//        override val description: String = "",
+//        val entity: IEntity<*>?,
+//        val entityClass: KClass<out IEntity<*>>,
+//        val count: Long? = null,        //if it's countable
+//        val value: String? = null,      //if it's valuable
+//        val factor: Float? = null       //if it's valuable
+//    ) : EntityField() {
+//        override fun toString(): String = entity?.toString() ?: description
+//    }
+
+    sealed class EntityLink : EntityField() {
+        abstract val entity: IEntity<*>?
+        abstract val entityClass: KClass<out IEntity<*>>
+
+        data class EntityLinkSimple(
+            override val fieldID: EntityFieldID,
+            override val description: String = "",
+            override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>
+        ) : EntityLink()
+
+        data class EntityLinkCountable(
+            override val fieldID: EntityFieldID,
+            override val description: String = "",
+            override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
+            val count: Long? = null
+        ) : EntityLink()
+
+        data class EntityLinkValuable(
+            override val fieldID: EntityFieldID,
+            override val description: String = "",
+            override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
+            val value: String? = null,
+            val factor: Float? = null
+        ) : EntityLink()
     }
 
     /**

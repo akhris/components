@@ -16,13 +16,13 @@ class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
     override fun getFieldParamsByFieldID(entity: Container, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
             is EntityFieldID.EntityID -> DescriptiveFieldValue(
-                value = entity.parentContainer,
+                entity = entity.parentContainer,
                 description = "parent container"
             )
             is EntityFieldID.StringID -> when (fieldID.tag) {
-                EntityFieldID.tag_name -> DescriptiveFieldValue(value = entity.name, description = "item's name")
+                EntityFieldID.tag_name -> DescriptiveFieldValue(entity = entity.name, description = "item's name")
                 EntityFieldID.tag_description -> DescriptiveFieldValue(
-                    value = entity.description,
+                    entity = entity.description,
                     description = "item's description"
                 )
                 else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")

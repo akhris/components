@@ -97,12 +97,21 @@ fun RenderEntityLink(
     onCountChanged: ((Long) -> Unit)? = null
 ) {
     if (field.entity != null) {
+
+        if (field.count != null) {
+            //render countable
+            RenderCountableEntityLink(field, onEntityLinkSelect, onEntityLinkClear, onCountChanged)
+        } else if (field.value != null) {
+            //render valuable
+
+        }
+
         Row(
             modifier = Modifier.wrapContentHeight().clickable { onEntityLinkSelect() },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            field.count?.let { c ->
 
+            field.count?.let { c ->
                 var isHover by remember { mutableStateOf(false) }
                 var count by remember { mutableStateOf<Long?>(c) }
                 var multiplier by remember { mutableStateOf(1) }
@@ -170,6 +179,16 @@ fun RenderEntityLink(
                 content = { Text("add ${field.fieldID.name}") })
         }
     }
+}
+
+@Composable
+private fun RenderCountableEntityLink(
+    field: EntityField.EntityLink,
+    onEntityLinkSelect: () -> Unit,
+    onEntityLinkClear: () -> Unit,
+    onCountChanged: ((Long) -> Unit)? = null
+) {
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)

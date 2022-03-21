@@ -8,7 +8,7 @@ data class Item(
     override val id: String = IDUtils.newID(),
     val name: String = "",
     val type: ObjectType? = null,
-    val values: List<Value> = listOf()
+    val values: List<EntityValuable<Parameter>> = listOf()
 ) : IEntity<String> {
     override fun toString(): String = name
 }
@@ -114,4 +114,10 @@ data class Project(
 data class EntityCountable<T : IEntity<*>> constructor(
     val entity: T,
     val count: Long
+)
+
+data class EntityValuable<T : IEntity<*>> constructor(
+    val entity: T,
+    val value: String?,
+    val factor: Float? = null
 )

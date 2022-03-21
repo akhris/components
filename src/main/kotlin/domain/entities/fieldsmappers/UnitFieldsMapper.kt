@@ -18,9 +18,9 @@ class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
     override fun getFieldParamsByFieldID(entity: Unit, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.unit, description = "unit")
+            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.unit, description = "unit")
             is EntityFieldID.BooleanID -> DescriptiveFieldValue(
-                value = entity.isMultipliable,
+                entity = entity.isMultipliable,
                 description = "can be prefixed with k-, m-, u-, ..."
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

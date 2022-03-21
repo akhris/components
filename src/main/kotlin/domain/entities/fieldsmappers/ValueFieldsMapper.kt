@@ -19,13 +19,13 @@ class ValueFieldsMapper : BaseFieldsMapper<Value>() {
 
     override fun getFieldParamsByFieldID(entity: Value, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.StringID -> DescriptiveFieldValue(value = entity.value, description = "value")
+            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.value, description = "value")
             is EntityFieldID.FloatID -> DescriptiveFieldValue(
-                value = entity.factor,
+                entity = entity.factor,
                 description = "factor of the value"
             )
             is EntityFieldID.EntityID -> DescriptiveFieldValue(
-                value = entity.parameter,
+                entity = entity.parameter,
                 description = "parameter of the value"
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

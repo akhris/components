@@ -27,10 +27,11 @@ object ExposedDbSettings {
                 Tables.ItemIncomes,
                 Tables.ItemOutcomes,
                 Tables.ObjectTypes,
-                Tables.Values,
+//                Tables.Values,
                 Tables.Parameters,
                 Tables.ContainerToContainers,
-                Tables.ValuesToItem,
+//                Tables.ValuesToItem,
+                Tables.ItemValues,
                 Tables.ParametersToObjectType,
                 Tables.Projects,
                 Tables.ProjectItems

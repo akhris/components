@@ -18,6 +18,7 @@ class UpdateUseCaseFactory(
     private val updateItemOutcome: UpdateItemIncome,
     private val updateProject: UpdateProject,
     private val updateWarehouseItem: UpdateWarehouseItem
+//    private val updateValue: UpdateValue
 ) : IUpdateUseCaseFactory {
 
 
@@ -33,6 +34,7 @@ class UpdateUseCaseFactory(
             ItemOutcome::class -> updateItemOutcome
             Project::class -> updateProject
             WarehouseItem::class -> updateWarehouseItem
+//            Value::class -> updateValue
             else -> throw IllegalArgumentException("not found update-use-case for entity class: $entityClass")
         }
         return a as UpdateEntity<*, out T>

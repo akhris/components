@@ -51,11 +51,11 @@ object Tables {
         val name = text(name = "name")
     }
 
-    object Values : UUIDTable() {
-        val parameter = reference(name = "parameter", foreign = Parameters).nullable()
-        val value = text(name = "value")
-        val factor = float(name = "factor").nullable()
-    }
+//    object Values : UUIDTable() {
+//        val parameter = reference(name = "parameter", foreign = Parameters).nullable()
+//        val value = text(name = "value")
+//        val factor = float(name = "factor").nullable()
+//    }
 
 
     object Parameters : UUIDTable() {
@@ -81,11 +81,11 @@ object Tables {
         val child = reference(name = "child", foreign = Containers)
     }
 
-    object ValuesToItem : Table() {
-        val item = reference(name = "item", foreign = Items)
-        val value = reference(name = "value", foreign = Values)
-        override val primaryKey: PrimaryKey = PrimaryKey(item, value)
-    }
+//    object ValuesToItem : Table() {
+//        val item = reference(name = "item", foreign = Items)
+//        val value = reference(name = "value", foreign = Values)
+//        override val primaryKey: PrimaryKey = PrimaryKey(item, value)
+//    }
 
     object ParametersToObjectType : Table() {
         val parameter = reference(name = "parameter", foreign = Parameters)
@@ -98,6 +98,13 @@ object Tables {
         val project = reference(name = "project", foreign = Projects)
         val item = reference(name = "item", foreign = Items)
         val count = long("count")
+    }
+
+    object ItemValues : IntIdTable() {
+        val item = reference(name = "item", foreign = Items)
+        val parameter = reference(name = "parameter", foreign = Parameters)
+        val value = text(name = "value").nullable()
+        val factor = float(name = "factor").nullable()
     }
 
 }
