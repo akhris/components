@@ -103,13 +103,14 @@ sealed class EntityField {
             val count: Long? = null
         ) : EntityLink()
 
-        data class EntityLinkValuable(
+        data class EntityLinkValuable constructor(
             override val fieldID: EntityFieldID,
             override val description: String = "",
             override val entity: IEntity<*>?,
             override val entityClass: KClass<out IEntity<*>>,
             val value: String? = null,
-            val factor: Float? = null
+            val factor: Int? = null,
+            val unit: String? = null
         ) : EntityLink()
     }
 

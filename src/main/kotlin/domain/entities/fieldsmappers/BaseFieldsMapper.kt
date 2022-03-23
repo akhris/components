@@ -38,13 +38,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                     fieldID = fieldID,
                     entities = fieldID.entitiesIDs.map { entityID ->
                         val entityField = getFieldParamsByFieldID(entity, entityID)
-                        EntityField.EntityLink(
-                            fieldID = entityID,
-                            entity = entityField.entity as? T,
-                            entityClass = fieldID.entityClass,
-                            description = entityField.description,
-                            count = entityField.count
-                        )
+                        mapEntity(entityID, entityField)
 //                        mapEntity(entityID, entityField)
                     },
                     description = fieldParams.description,
@@ -69,8 +63,6 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         fieldParams: DescriptiveFieldValue
     ): EntityField.EntityLink {
 
-        val entity: T? = fieldParams.entity as? T
-        val count: Long? = fieldParams.count
 
 //        when (val e = fieldParams.value) {
 //            is IEntity<*> -> {
@@ -87,19 +79,33 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 //            }
 //        }
 
-
-        return EntityField.EntityLink(
-            fieldID = fieldID,
-            entity = entity,
-            entityClass = fieldID.entityClass,
-            description = fieldParams.description,
-            count = count
-        )
-
+        return when (fieldParams) {
+            is DescriptiveFieldValue.CommonField -> EntityField.EntityLink.EntityLinkSimple(
+                fieldID = fieldID,
+                description = fieldParams.description,
+                entity = fieldParams.entity as? T,
+                entityClass = fieldID.entityClass   //fixme maybe passing fieldID is sufficient?
+            )
+            is DescriptiveFieldValue.CountableField -> EntityField.EntityLink.EntityLinkCountable(
+                fieldID = fieldID,
+                description = fieldParams.description,
+                entity = fieldParams.entity as? T,
+                entityClass = fieldID.entityClass,
+                count = fieldParams.count
+            )
+            is DescriptiveFieldValue.ValuableField -> EntityField.EntityLink.EntityLinkValuable(
+                fieldID = fieldID,
+                description = fieldParams.description,
+                entity = fieldParams.entity as? T,
+                entityClass = fieldID.entityClass,
+                value = fieldParams.value,
+                factor = fieldParams.factor,
+                unit = fieldParams.unit
+            )
+        }
     }
 
 }
-
 
 
 sealed class DescriptiveFieldValue {
@@ -116,11 +122,12 @@ sealed class DescriptiveFieldValue {
     ) :
         DescriptiveFieldValue()
 
-    data class ValuableField(
+    data class ValuableField constructor(
         override val entity: Any? = null,
         override val description: String = "",
         val value: String? = null,
-        val factor: Float? = null
+        val factor: Int? = null,
+        val unit: String? = null
     ) :
         DescriptiveFieldValue()
 

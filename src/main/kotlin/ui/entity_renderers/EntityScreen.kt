@@ -209,16 +209,23 @@ private fun RenderField(
             is EntityField.BooleanField -> RenderBooleanField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
-            is EntityField.EntityLink -> RenderEntityLink(field, onEntityLinkSelect = {
-                //on entity select clicked
-                println("going to select entity of type:")
-                println(field.entityClass)
-                showSelectEntityDialog = field.entityClass
-            }, onEntityLinkClear = {
-                onFieldChange(field.copy(entity = null))
-            }, onCountChanged = {
-                onFieldChange(field.copy(count = it))
-            }
+            is EntityField.EntityLink -> RenderEntityLink(
+                field,
+                onEntityLinkSelect = {
+                    //on entity select clicked
+                    println("going to select entity of type:")
+                    println(field.entityClass)
+                    showSelectEntityDialog = field.entityClass
+                }, onEntityLinkChanged = onFieldChange,
+                onEntityLinkClear = {
+                    onFieldChange(
+                        when (field) {
+                            is EntityField.EntityLink.EntityLinkCountable -> field.copy(entity = null)
+                            is EntityField.EntityLink.EntityLinkSimple -> field.copy(entity = null)
+                            is EntityField.EntityLink.EntityLinkValuable -> field.copy(entity = null)
+                        }
+                    )
+                }
             )
             is EntityField.EntityLinksList -> RenderEntityLinksList(
                 field,
@@ -230,7 +237,8 @@ private fun RenderField(
                 },
                 onEntityLinkClear = {
                     onFieldChange(field.copy(entities = field.entities.minus(it)))
-                }
+                },
+                onEntityLinkChanged = onFieldChange
             )
             is EntityField.StringField -> RenderTextField(
                 field,
@@ -250,7 +258,7 @@ private fun RenderField(
             entityClass,
             onDismiss = { showSelectEntityDialog = null },
             onEntitySelected = { changedEntity ->
-                val changedField = (field as? EntityField.EntityLink)?.copy(entity = changedEntity)
+                val changedField = (field as? EntityField.EntityLink.EntityLinkSimple)?.copy(entity = changedEntity)
                 changedField?.let { cf ->
                     onFieldChange?.invoke(cf)
                 }
@@ -270,7 +278,7 @@ private fun RenderField(
                     onFieldChange?.invoke(
                         ell.copy(
                             entities = changedEntitiesList.mapIndexed { index, iEntity ->
-                                EntityField.EntityLink(
+                                EntityField.EntityLink.EntityLinkSimple(
                                     fieldID = EntityFieldID.EntityID(
                                         tag = "${ell.fieldID.tag}$index",
                                         name = "${iEntity::class.simpleName} ${index + 1}",

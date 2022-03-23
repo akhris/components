@@ -52,21 +52,59 @@ fun RenderTextFieldReadOnly(field: EntityField.StringField) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderEntityLinkReadOnly(field: EntityField.EntityLink) {
-    if (field.entity != null) {
-        ListItem(
-            text = {
-                Text(
-                    text = field.getName()
-                )
-            },
-            secondaryText = { Text(text = field.description) },
-            trailing = field.count?.let { c ->
-                {
-                    Text(text = "$c pcs")
-                }
-            }
-        )
+    when(field){
+        is EntityField.EntityLink.EntityLinkCountable -> RenderEntityLinkCountable(field)
+        is EntityField.EntityLink.EntityLinkSimple -> RenderEntityLinkCommon(field)
+        is EntityField.EntityLink.EntityLinkValuable -> RenderEntityLinkValuable(field)
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun RenderEntityLinkCountable(field: EntityField.EntityLink.EntityLinkCountable){
+    ListItem(
+        text = {
+            Text(
+                text = field.getName()
+            )
+        },
+        secondaryText = { Text(text = field.description) },
+        trailing = field.count?.let { c ->
+            {
+                Text(text = "$c pcs")
+            }
+        }
+    )
+}
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun RenderEntityLinkValuable(field: EntityField.EntityLink.EntityLinkValuable){
+    ListItem(
+        text = {
+            Text(
+                text = field.getName()
+            )
+        },
+        secondaryText = { Text(text = field.description) },
+        trailing = field.value?.let { v ->
+            {
+                Text(text = v)
+            }
+        }
+    )
+}
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun RenderEntityLinkCommon(field: EntityField.EntityLink.EntityLinkSimple){
+    ListItem(
+        text = {
+            Text(
+                text = field.getName()
+            )
+        },
+        secondaryText = { Text(text = field.description) }
+
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)

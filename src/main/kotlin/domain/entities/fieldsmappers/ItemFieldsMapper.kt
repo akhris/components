@@ -33,23 +33,30 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
     override fun getFieldParamsByFieldID(entity: Item, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
             is EntityFieldID.EntityID -> when (fieldID.tag) {
-                tag_type -> DescriptiveFieldValue(entity = entity.type, description = "type of the object")
+                tag_type -> DescriptiveFieldValue.CommonField(entity = entity.type, description = "type of the object")
                 else -> {
                     val valueParameterIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
                     val item = entity.values.getOrNull(valueParameterIndex)
-                    DescriptiveFieldValue(
+
+                    DescriptiveFieldValue.ValuableField(
                         entity = item?.entity,
                         description = item?.entity?.description ?: "",
                         value = item?.value,
-                        factor = item?.factor
+                        factor = if (item?.entity?.unit?.isMultipliable == true) {
+                            item.factor ?: 1
+                        } else {
+                            null
+                        },
+                        unit = item?.entity?.unit?.unit
                     )
+
                 }
             }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
+            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
                 entity = entity.values,
                 description = "values"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.name, description = "name")
+            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "name")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

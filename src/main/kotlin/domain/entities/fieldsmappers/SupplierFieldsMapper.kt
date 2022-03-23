@@ -21,19 +21,19 @@ class SupplierFieldsMapper : BaseFieldsMapper<Supplier>() {
         return when (fieldID) {
             is EntityFieldID.StringID -> {
                 when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue(
+                    EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
                         entity = entity.name,
                         description = "supplier's name"
                     )
-                    EntityFieldID.tag_description -> DescriptiveFieldValue(
+                    EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
                         entity = entity.description,
                         description = "description"
                     )
-                    tag_url -> DescriptiveFieldValue(entity = entity.url, description = "supplier's url")
+                    tag_url -> DescriptiveFieldValue.CommonField(entity = entity.url, description = "supplier's url")
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-            is EntityFieldID.BooleanID -> DescriptiveFieldValue(entity = entity.isFavorite, "marked as favorite")
+            is EntityFieldID.BooleanID -> DescriptiveFieldValue.CommonField(entity = entity.isFavorite, "marked as favorite")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

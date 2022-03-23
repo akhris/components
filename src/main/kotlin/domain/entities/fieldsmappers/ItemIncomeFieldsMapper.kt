@@ -24,12 +24,12 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_container -> DescriptiveFieldValue(
+                    tag_container -> DescriptiveFieldValue.CommonField(
                         entity.container,
                         description = "container where item was put"
                     )
-                    tag_supplier -> DescriptiveFieldValue(entity.supplier, description = "where items came from")
-                    tag_item -> DescriptiveFieldValue(
+                    tag_supplier -> DescriptiveFieldValue.CommonField(entity.supplier, description = "where items came from")
+                    tag_item -> DescriptiveFieldValue.CountableField(
                         entity.item?.entity,
                         description = "item that came",
                         count = entity.item?.count
@@ -37,7 +37,7 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue(entity.dateTime, description = "when items came")
+            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(entity.dateTime, description = "when items came")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

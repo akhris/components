@@ -104,7 +104,7 @@ object Tables {
         val item = reference(name = "item", foreign = Items)
         val parameter = reference(name = "parameter", foreign = Parameters)
         val value = text(name = "value").nullable()
-        val factor = float(name = "factor").nullable()
+        val factor = integer(name = "factor").nullable()
     }
 
 }

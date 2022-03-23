@@ -25,12 +25,12 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_item -> DescriptiveFieldValue(
+                    tag_item -> DescriptiveFieldValue.CountableField(
                         entity.item?.entity,
                         description = "item that came",
                         count = entity.item?.count
                     )
-                    tag_container -> DescriptiveFieldValue(
+                    tag_container -> DescriptiveFieldValue.CommonField(
                         entity.container,
                         description = "container where item was put"
                     )
@@ -38,7 +38,7 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
                 }
             }
 //            is EntityFieldID.LongID -> DescriptiveFieldValue(entity.quantity, description = "quantity of items")
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue(entity.dateTime, description = "when items came")
+            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(entity.dateTime, description = "when items came")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
@@ -48,8 +48,8 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
                     tag_item -> {
-                        val item = (field as? EntityField.EntityLink)?.entity as? Item
-                        val count = (field as? EntityField.EntityLink)?.count ?: 0L
+                        val item = (field as? EntityField.EntityLink.EntityLinkCountable)?.entity as? Item
+                        val count = (field as? EntityField.EntityLink.EntityLinkCountable)?.count ?: 0L
                         entity.copy(item = item?.let { EntityCountable(it, count) })
                     }
                     tag_container -> entity.copy(container = (field as? EntityField.EntityLink)?.entity as? Container)

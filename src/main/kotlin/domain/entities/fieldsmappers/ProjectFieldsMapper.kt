@@ -36,16 +36,23 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 val index = fieldID.tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
                 val item = entity.items.getOrNull(index)
                 log("item: $item")
-                DescriptiveFieldValue(entity = item?.entity, description = item?.entity?.name ?: "", count = item?.count)
+                DescriptiveFieldValue.CountableField(
+                    entity = item?.entity,
+                    description = item?.entity?.name ?: "",
+                    count = item?.count
+                )
             }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
+            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
                 entity = entity.items,
                 description = "items"
             )
             is EntityFieldID.StringID ->
                 when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue(entity = entity.name, description = "project's name")
-                    EntityFieldID.tag_description -> DescriptiveFieldValue(
+                    EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
+                        entity = entity.name,
+                        description = "project's name"
+                    )
+                    EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
                         entity = entity.description,
                         description = "project's description"
                     )
@@ -66,9 +73,11 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 }
             is EntityFieldID.EntityID -> setItem(entity, field)
                 ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
-            is EntityFieldID.EntitiesListID -> entity.copy(items = (field as EntityField.EntityLinksList).entities.mapNotNull {
-                (it.entity as? Item)?.let { i ->
-                    EntityCountable(i, it.count ?: 1L)
+            is EntityFieldID.EntitiesListID -> entity.copy(items = (field as EntityField.EntityLinksList).entities.mapNotNull { link ->
+                (link as? EntityField.EntityLink.EntityLinkCountable)?.let {
+                    (it.entity as? Item)?.let { i ->
+                        EntityCountable(i, it.count ?: 1L)
+                    }
                 }
             })
             else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
@@ -82,10 +91,12 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
             return null
         }
         return project.copy(
-            items = project.items.mapIndexed { index, itemCountable ->
+            items = project.items.mapIndexedNotNull { index, itemCountable ->
                 if (index == itemIndex) {
-                    val countableField = field as EntityField.EntityLink
-                    EntityCountable(countableField.entity as Item, countableField.count ?: 0L)
+                    val countableField = field as? EntityField.EntityLink.EntityLinkCountable
+                    countableField?.let {
+                        EntityCountable(it.entity as Item, it.count ?: 0L)
+                    }
                 } else itemCountable
             }
         )

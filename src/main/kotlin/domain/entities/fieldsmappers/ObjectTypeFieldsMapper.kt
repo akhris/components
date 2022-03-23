@@ -31,13 +31,13 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
             is EntityFieldID.EntityID -> {
                 val index = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
                 val parameter = entity.parameters.getOrNull(index)
-                DescriptiveFieldValue(parameter, description = parameter?.name ?: "")
+                DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
             }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue(
+            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
                 entity = entity.parameters,
                 description = "parameters"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.name, description = "type's name")
+            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "type's name")
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

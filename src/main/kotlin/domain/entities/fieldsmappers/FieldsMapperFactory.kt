@@ -14,7 +14,6 @@ class FieldsMapperFactory {
             Parameter::class -> ParameterFieldsMapper()
             ObjectType::class -> ObjectTypeFieldsMapper()
             Item::class -> ItemFieldsMapper()
-            Value::class -> ValueFieldsMapper()
             Container::class -> ContainerFieldsMapper()
             Supplier::class -> SupplierFieldsMapper()
             ItemIncome::class -> ItemIncomeFieldsMapper()

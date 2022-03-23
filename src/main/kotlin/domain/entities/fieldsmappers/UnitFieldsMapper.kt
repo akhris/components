@@ -18,8 +18,8 @@ class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
     override fun getFieldParamsByFieldID(entity: Unit, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.StringID -> DescriptiveFieldValue(entity = entity.unit, description = "unit")
-            is EntityFieldID.BooleanID -> DescriptiveFieldValue(
+            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.unit, description = "unit")
+            is EntityFieldID.BooleanID -> DescriptiveFieldValue.CommonField(
                 entity = entity.isMultipliable,
                 description = "can be prefixed with k-, m-, u-, ..."
             )

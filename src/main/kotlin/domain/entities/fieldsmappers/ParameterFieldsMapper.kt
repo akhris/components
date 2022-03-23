@@ -18,14 +18,14 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
 
     override fun getFieldParamsByFieldID(entity: Parameter, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> DescriptiveFieldValue(entity.unit, description = "parameter's unit")
+            is EntityFieldID.EntityID -> DescriptiveFieldValue.CommonField(entity.unit, description = "parameter's unit")
             is EntityFieldID.StringID -> {
                 when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue(
+                    EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
                         entity = entity.name,
                         description = "parameter's name"
                     )
-                    EntityFieldID.tag_description -> DescriptiveFieldValue(
+                    EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
                         entity = entity.description,
                         description = "parameter's description"
                     )

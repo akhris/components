@@ -115,7 +115,11 @@ private fun RowScope.RenderEntityFieldCell(
         }
         is EntityField.EntityLink -> {
             RenderEntityLinkFieldCell(modifier = modifier, field, onValueChange = {
-                onFieldChange?.invoke(field.copy(entity = it))
+                onFieldChange?.invoke(when(field){
+                    is EntityField.EntityLink.EntityLinkCountable -> field.copy(entity = it)
+                    is EntityField.EntityLink.EntityLinkSimple -> field.copy(entity = it)
+                    is EntityField.EntityLink.EntityLinkValuable -> field.copy(entity = it)
+                })
             })
         }
         is EntityField.EntityLinksList -> {

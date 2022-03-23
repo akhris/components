@@ -15,13 +15,13 @@ class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
 
     override fun getFieldParamsByFieldID(entity: Container, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> DescriptiveFieldValue(
+            is EntityFieldID.EntityID -> DescriptiveFieldValue.CommonField(
                 entity = entity.parentContainer,
                 description = "parent container"
             )
             is EntityFieldID.StringID -> when (fieldID.tag) {
-                EntityFieldID.tag_name -> DescriptiveFieldValue(entity = entity.name, description = "item's name")
-                EntityFieldID.tag_description -> DescriptiveFieldValue(
+                EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "item's name")
+                EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
                     entity = entity.description,
                     description = "item's description"
                 )
