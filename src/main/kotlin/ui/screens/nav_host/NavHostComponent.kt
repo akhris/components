@@ -11,6 +11,7 @@ import domain.entities.*
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IGetUseCaseFactory
+import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import navigation.NavItem
 import navigation.Screen
@@ -27,7 +28,8 @@ class NavHostComponent(
     private val appSettingsRepository: AppSettingsRepository,
     private val getUseCaseFactory: IGetUseCaseFactory,
     private val updateUseCaseFactory: IUpdateUseCaseFactory,
-    private val getListUseCaseFactory: IGetListUseCaseFactory
+    private val getListUseCaseFactory: IGetListUseCaseFactory,
+    private val removeUseCaseFactory: IRemoveUseCaseFactory
 ) :
     INavHost, ComponentContext by componentContext {
 
@@ -87,7 +89,8 @@ class NavHostComponent(
                         entityClasses = entities,
                         fieldsMapperFactory = fieldsMapperFactory,
                         getListUseCaseFactory = getListUseCaseFactory,
-                        updateUseCaseFactory = updateUseCaseFactory
+                        updateUseCaseFactory = updateUseCaseFactory,
+                        removeUseCaseFactory = removeUseCaseFactory
                     )
                 )
             }

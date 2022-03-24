@@ -15,7 +15,7 @@ class InsertUseCaseFactory(
     private val insertContainer: InsertContainer,
     private val insertSupplier: InsertSupplier,
     private val insertItemIncome: InsertItemIncome,
-    private val insertItemOutcome: InsertItemIncome,
+    private val insertItemOutcome: InsertItemOutcome,
     private val insertProject: InsertProject,
     private val insertWarehouseItem: InsertWarehouseItem
 ) : IInsertUseCaseFactory {

@@ -67,17 +67,21 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
             is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    "tag_type" -> entity.copy(type = ((field as EntityField.EntityLink).entity as ObjectType))
+                    "tag_type" -> {
+                        entity.copy(type = ((field as EntityField.EntityLink).entity as? ObjectType))
+                    }
                     else -> setItem(entity, field)
                         ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
                 }
             }
             is EntityFieldID.EntitiesListID -> entity.copy(values = (field as EntityField.EntityLinksList).entities.mapNotNull {
-                if (it is EntityField.EntityLink.EntityLinkValuable) {
-                    (it.entity as? Parameter)?.let { p ->
-                        EntityValuable(entity = p, value = it.value, factor = it.factor)
-                    }
-                } else null
+                (it.entity as? Parameter)?.let { p ->
+                    EntityValuable(
+                        entity = p,
+                        value = (it as? EntityField.EntityLink.EntityLinkValuable)?.value,
+                        factor = (it as? EntityField.EntityLink.EntityLinkValuable)?.factor
+                    )
+                }
             })
             else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
         }

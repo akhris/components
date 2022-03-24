@@ -1,9 +1,6 @@
 package domain.entities.usecase_factories
 
-import com.akhris.domain.core.application.GetEntities
-import com.akhris.domain.core.application.GetEntity
-import com.akhris.domain.core.application.InsertEntity
-import com.akhris.domain.core.application.UpdateEntity
+import com.akhris.domain.core.application.*
 import com.akhris.domain.core.entities.IEntity
 import kotlin.reflect.KClass
 
@@ -21,4 +18,8 @@ interface IUpdateUseCaseFactory {
 
 interface IInsertUseCaseFactory {
     fun <T : IEntity<*>> getInsertUseCase(entityClass: KClass<out T>): InsertEntity<*, T>
+}
+
+interface IRemoveUseCaseFactory {
+    fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T>
 }

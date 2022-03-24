@@ -118,6 +118,6 @@ data class EntityCountable<T : IEntity<*>> constructor(
 
 data class EntityValuable<T : IEntity<*>> constructor(
     val entity: T,
-    val value: String?,
+    val value: String? = null,
     val factor: Int? = null
 )

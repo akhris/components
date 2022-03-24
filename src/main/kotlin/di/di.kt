@@ -80,6 +80,7 @@ val di = DI {
         )
 
     }
+
     bindSingleton<IInsertUseCaseFactory> {
         InsertUseCaseFactory(
             instance(),
@@ -93,8 +94,23 @@ val di = DI {
             instance(),
             instance()
         )
-
     }
+
+    bindSingleton<IRemoveUseCaseFactory> {
+        RemoveUseCaseFactory(
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance(),
+            instance()
+        )
+    }
+
 
     bindSingleton { FieldsMapperFactory() }
 

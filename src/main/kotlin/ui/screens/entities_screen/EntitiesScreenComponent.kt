@@ -12,6 +12,7 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.*
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
+import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import strings.Strings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
@@ -25,7 +26,8 @@ class EntitiesScreenComponent(
     private val entityClasses: List<KClass<out IEntity<*>>>,
     private val fieldsMapperFactory: FieldsMapperFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory,
-    private val updateUseCaseFactory: IUpdateUseCaseFactory
+    private val updateUseCaseFactory: IUpdateUseCaseFactory,
+    private val removeUseCaseFactory: IRemoveUseCaseFactory
 ) : IEntitiesScreen, ComponentContext by componentContext {
 
     private val _state = MutableValue(IEntitiesScreen.Model())
@@ -84,6 +86,7 @@ class EntitiesScreenComponent(
                         componentContext = componentContext,
                         getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                         updateEntity = entitiesListConfig.entityClass?.let { updateUseCaseFactory.getUpdateUseCase(it) },
+                        removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
                         onEntitiesLoaded = { entities ->
                             filterRouter.navigate { stack ->
                                 stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }

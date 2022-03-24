@@ -16,6 +16,7 @@ import domain.entities.Unit
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IGetUseCaseFactory
+import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import navigation.NavItem
 import org.kodein.di.compose.localDI
@@ -40,6 +41,7 @@ fun RootUi() {
     val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
     val fieldsMapperFactory: FieldsMapperFactory by di.instance()
     val getUseCaseFactory: IGetUseCaseFactory by di.instance()
+    val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
     val navHostComponent =
         remember {
             NavHostComponent(
@@ -48,7 +50,8 @@ fun RootUi() {
                 appSettingsRepository = appSettingsRepository,
                 updateUseCaseFactory = updateUseCaseFactory,
                 getListUseCaseFactory = listUseCaseFactory,
-                getUseCaseFactory = getUseCaseFactory
+                getUseCaseFactory = getUseCaseFactory,
+                removeUseCaseFactory = removeUseCaseFactory
             )
         }
 

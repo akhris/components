@@ -166,7 +166,7 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
             }
 
             Button(modifier = Modifier.padding(4.dp), onClick = {
-                onEntitiesSelected(checksMap.filterValues { it }.keys.toList()) //return only selected
+                onEntitiesSelected(checksMap.filterValues { it }.keys.toList()) //return only selected fixme initial order not preserved!
             }) {
                 Text(text = "ok")
             }

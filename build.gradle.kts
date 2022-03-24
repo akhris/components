@@ -33,7 +33,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.36.0.3")
 
     //domain core:
-    implementation("com.github.akhris:domain-core:v0.1.3")
+    implementation("com.github.akhris:domain-core:v0.1.4")
 //    implementation("com.github.akhris:domain-core:master-30588e0ac2")
 
     //dependency injection:

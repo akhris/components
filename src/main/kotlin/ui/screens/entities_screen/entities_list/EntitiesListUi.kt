@@ -47,7 +47,7 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
             itemRepresentationType = itemRepresentationType,
             entities = state.entities,
 //        ,
-//        onEntityRemoved = component::onEntityRemoved,
+        onEntityRemoved = component::onEntityRemoved,
         onEntityUpdated = component::onEntityUpdated
         )
 

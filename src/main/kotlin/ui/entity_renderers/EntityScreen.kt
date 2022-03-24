@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.log
+import domain.entities.EntityValuable
+import domain.entities.Item
+import domain.entities.ObjectType
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
@@ -93,14 +96,13 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     val factory: FieldsMapperFactory by di.instance()
     val mapper = remember(factory) { factory.getFieldsMapper(initialEntity::class) }
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
-
+    var objectTypeField by remember { mutableStateOf<EntityField.EntityLink?>(null) }
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
 
     val fields =
         remember(mapper, entity) {
             mapper.getEntityIDs(entity = entity).mapNotNull { mapper.getFieldByID(entity, it) }
         }
-
 
     Card(
         modifier = Modifier
@@ -110,23 +112,22 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
         elevation = 0.dp,
         border = BorderStroke(Dp.Hairline, color = Color.LightGray)
     ) {
-        Column(modifier = Modifier.padding(8.dp)) {
+
+        Column{
             fields.forEach {
                 RenderField(
                     it,
                     onFieldChange = { changedField ->
-                        log("changedField: $changedField")
-                        if (changedField is EntityField.EntityLinksList) {
-                            log("changedField is EntityLinksList")
-                            changedField.entities.forEach {
-                                log("link: $it")
-                            }
+                        //todo check if this is object type and item, and add new parameters if necessary
+                        val entityField = changedField as? EntityField.EntityLink
+                        val objectType = entityField?.entity as? ObjectType
+                        if (objectType == null) {
+                            entity = mapper.mapIntoEntity(entity, changedField)
+                        } else {
+                            objectTypeField = entityField
                         }
-                        entity = mapper.mapIntoEntity(entity, changedField)
-                        log("entity after mapping: $entity")
-//                    onEntityChanged(mapper.mapIntoEntity(initialEntity, changedField))
-                    }
-                )
+                    })
+
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 onEntityRemoved?.let { onRemoveCallback ->
@@ -149,6 +150,24 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                 }
             }
         }
+
+
+    }
+
+
+
+    objectTypeField?.let { objectField ->
+        val item = entity as? Item
+        val objectType = objectField.entity as? ObjectType
+        if (item != null && objectType != null)
+            CheckItemObjectType(item, objectType, onItemChanged = {
+                entity = mapper.mapIntoEntity(it as T, objectField)
+
+            }, onDismiss = {
+                objectTypeField = null
+            })
+
+//        entity = mapper.mapIntoEntity(entity, fieldToCheck)
     }
 
     showDeletePrompt?.let { e ->
@@ -177,6 +196,44 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                 }
             }
         }, modifier = Modifier.width(DialogSettings.defaultAlertDialogWidth))
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun CheckItemObjectType(
+    item: Item,
+    objectType: ObjectType,
+    withAlert: Boolean = true,
+    onItemChanged: (Item) -> Unit,
+    onDismiss: () -> Unit
+) {
+
+    //entity is item and changed field is ObjectType.
+    var showAlert by remember { mutableStateOf(false) }
+
+    if (item.type?.id != objectType.id) {
+        showAlert = true
+    }
+    //new object type is different from entity's object type
+    //ask for adding new parameters to entity:
+
+    if (showAlert) {
+        AlertDialog(
+            onDismissRequest = {
+                showAlert = false
+                onDismiss()
+            },
+            text = { Text("Add parameters for ${objectType.name}?") },
+            confirmButton = {
+                Button(content = { Text("Yes") }, onClick = {
+                    //add parameters to entity
+                    onItemChanged(
+                        item.copy(values = objectType.parameters.map { p -> EntityValuable(p) })
+                    )
+                    onDismiss()
+                })
+            })
     }
 }
 
@@ -258,7 +315,14 @@ private fun RenderField(
             entityClass,
             onDismiss = { showSelectEntityDialog = null },
             onEntitySelected = { changedEntity ->
-                val changedField = (field as? EntityField.EntityLink.EntityLinkSimple)?.copy(entity = changedEntity)
+                val changedField =
+                    (field as? EntityField.EntityLink)?.let {
+                        when (it) {
+                            is EntityField.EntityLink.EntityLinkCountable -> it.copy(entity = changedEntity)
+                            is EntityField.EntityLink.EntityLinkSimple -> it.copy(entity = changedEntity)
+                            is EntityField.EntityLink.EntityLinkValuable -> it.copy(entity = changedEntity)
+                        }
+                    }
                 changedField?.let { cf ->
                     onFieldChange?.invoke(cf)
                 }
@@ -275,19 +339,30 @@ private fun RenderField(
             onDismiss = { showSelectEntitiesDialog = null },
             onEntitiesSelected = { changedEntitiesList ->
                 fieldToChange?.let { ell ->
+                    val newEntitiesList = changedEntitiesList
+                        .mapIndexed { index, iEntity ->
+                            val entityFieldID = EntityFieldID.EntityID(
+                                tag = "${ell.fieldID.tag}$index",
+                                name = "${iEntity::class.simpleName} ${index + 1}",
+                                entityClass = entityClass
+                            )
+                            val fromOldList = ell.entities.find { it.entity?.id == iEntity.id }
+                            fromOldList?.let {
+                                when (it) {
+                                    is EntityField.EntityLink.EntityLinkCountable -> it.copy(fieldID = entityFieldID)
+                                    is EntityField.EntityLink.EntityLinkSimple -> it.copy(fieldID = entityFieldID)
+                                    is EntityField.EntityLink.EntityLinkValuable -> it.copy(fieldID = entityFieldID)
+                                }
+                            } ?: EntityField.EntityLink.EntityLinkSimple(
+                                fieldID = entityFieldID,
+                                entity = iEntity,
+                                entityClass = entityClass
+                            )
+                        }
+
                     onFieldChange?.invoke(
                         ell.copy(
-                            entities = changedEntitiesList.mapIndexed { index, iEntity ->
-                                EntityField.EntityLink.EntityLinkSimple(
-                                    fieldID = EntityFieldID.EntityID(
-                                        tag = "${ell.fieldID.tag}$index",
-                                        name = "${iEntity::class.simpleName} ${index + 1}",
-                                        entityClass = entityClass
-                                    ),
-                                    entity = iEntity,
-                                    entityClass = entityClass
-                                )
-                            }
+                            entities = newEntitiesList
                         )
                     )
                 }

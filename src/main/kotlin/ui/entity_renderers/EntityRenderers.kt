@@ -120,9 +120,8 @@ fun RenderEntityLink(
                 field = field,
                 onEntityLinkSelect = onEntityLinkSelect,
                 onEntityLinkClear = { onEntityLinkClear?.invoke(field) },
-                onFieldChanged = {
-                    onEntityLinkChanged?.invoke(it)
-                }
+                onFieldChanged = onEntityLinkChanged
+
             )
         }
 

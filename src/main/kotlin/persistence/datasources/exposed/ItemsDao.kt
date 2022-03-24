@@ -82,6 +82,13 @@ class ItemsDao : BaseDao<Item> {
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            //1. get entity by id:
+            val item = EntityItem[id.toUUID()]
+
+            //2. delete entity:
+            item.delete()
+        }
     }
 }

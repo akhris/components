@@ -1,6 +1,7 @@
 package ui.screens.entities_screen.entities_list
 
 import com.akhris.domain.core.application.GetEntities
+import com.akhris.domain.core.application.RemoveEntity
 import com.akhris.domain.core.application.Result
 import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
@@ -21,6 +22,7 @@ class EntitiesListComponent<T : IEntity<*>>(
 //    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
+    private val removeEntity: RemoveEntity<*, out T>?,
     private val onEntitiesLoaded: (List<T>) -> Unit
 ) :
     IEntitiesList<T>,
@@ -82,6 +84,14 @@ class EntitiesListComponent<T : IEntity<*>>(
         scope.launch {
             log("updating entity: $entity")
             val result = updateEntity?.invoke(UpdateEntity.Update(entity))
+            log(result ?: "empty result")
+        }
+    }
+
+    override fun onEntityRemoved(entity: T) {
+        scope.launch {
+            log("removing entity: $entity")
+            val result = removeEntity?.invoke(params = RemoveEntity.Remove(entity))
             log(result ?: "empty result")
         }
     }

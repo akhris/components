@@ -17,6 +17,7 @@ interface IEntitiesList<T : IEntity<*>> {
     fun setItemsPerPage(itemsPerPage: Long)
 
     fun onEntityUpdated(entity: T)
+    fun onEntityRemoved(entity: T)
 
     //entities list model
     data class Model<T : IEntity<*>>(
