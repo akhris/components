@@ -21,23 +21,35 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                     )
                 },
                 entityClass = Parameter::class
-            )
+            ),
+            EntityFieldID.EntityID(tag = "parent_object_type", name = "parent type", entityClass = ObjectType::class)
         )
     }
 
 
     override fun getFieldParamsByFieldID(entity: ObjectType, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> {
-                val index = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
-                val parameter = entity.parameters.getOrNull(index)
-                DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
+            is EntityFieldID.EntityID -> when (fieldID.tag) {
+                "parent_object_type" -> {
+                    DescriptiveFieldValue.CommonField(
+                        entity = entity.parentObjectType,
+                        description = "parent type"
+                    )
+                }
+                else -> {
+                    val index = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
+                    val parameter = entity.parameters.getOrNull(index)
+                    DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
+                }
             }
             is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
                 entity = entity.parameters,
                 description = "parameters"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "type's name")
+            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(
+                entity = entity.name,
+                description = "type's name"
+            )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
@@ -45,8 +57,16 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
     override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
         return when (val fieldID = field.fieldID) {
             is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
-            is EntityFieldID.EntityID -> setParameter(entity, field)
-                ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+            is EntityFieldID.EntityID -> when (fieldID.tag) {
+                "parent_object_type" -> {
+                    entity.copy(parentObjectType = (field as EntityField.EntityLink).entity as? ObjectType)
+                }
+                else -> {
+                    setParameter(entity, field)
+                        ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+                }
+            }
+
             is EntityFieldID.EntitiesListID -> entity.copy(parameters = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity as? Parameter })
             else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }

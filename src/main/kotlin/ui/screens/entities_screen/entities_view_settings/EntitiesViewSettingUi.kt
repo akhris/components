@@ -1,10 +1,7 @@
 package ui.screens.entities_screen.entities_view_settings
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -43,6 +40,7 @@ private fun RepresentationTypesSelector(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(48.dp)
             .padding(8.dp),
         horizontalArrangement = Arrangement.Center
     ) {

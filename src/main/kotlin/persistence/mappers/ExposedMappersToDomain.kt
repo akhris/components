@@ -59,7 +59,8 @@ fun EntityObjectType.toObjectType(): ObjectType {
     return ObjectType(
         id = id.value.toString(),
         name = name,
-        parameters = parameters.map { it.toParameter() }
+        parameters = parameters.map { it.toParameter() },
+        parentObjectType = parents.firstOrNull()?.toObjectType()
     )
 }
 

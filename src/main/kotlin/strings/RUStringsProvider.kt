@@ -25,6 +25,12 @@ class RUStringsProvider : IStringsProvider {
             Strings.TypesOfData.suppliers_title -> "поставщики"
             Strings.TypesOfData.projects_description -> "Наборы компонентов"
             Strings.TypesOfData.projects_title -> "проекты"
+            Strings.TypesOfData.itemIncome_description -> "когда были получены компоненты, от какого поставщика, и в какой контейнер помещены"
+            Strings.TypesOfData.itemIncome_title -> "Пополнение"
+            Strings.TypesOfData.itemOutcome_description -> "когда и из какого контейнера были изъяты компоненты"
+            Strings.TypesOfData.itemOutcome_title -> "Изъятие"
+            Strings.TypesOfData.warehouseItem_description -> "текущее состояние компонентов на складе"
+            Strings.TypesOfData.warehouseItem_title -> "Склад"
         }
     }
 }

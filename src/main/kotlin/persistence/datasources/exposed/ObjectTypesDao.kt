@@ -42,6 +42,12 @@ class ObjectTypesDao : BaseDao<ObjectType> {
                 this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
                 this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
             }
+            entity.parentObjectType?.let { pot ->
+                Tables.ObjectTypeToObjectTypes.insert { statement ->
+                    statement[parent] = pot.id.toUUID()
+                    statement[child] = entity.id.toUUID()
+                }
+            }
             commit()
         }
     }
@@ -68,6 +74,33 @@ class ObjectTypesDao : BaseDao<ObjectType> {
                     this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
                 }
             }
+
+            //3. update children-parent reference:
+            if (entity.parentObjectType == null) {
+                //delete reference:
+                Tables
+                    .ObjectTypeToObjectTypes
+                    .deleteWhere { Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }
+            } else {
+                //update reference
+                val rowsUpdated = Tables
+                    .ObjectTypeToObjectTypes
+                    .update({ Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }) {
+                        it[parent] = entity.parentObjectType.id.toUUID()
+                    }
+                //if nothing was updated - insert new row
+                if (rowsUpdated == 0) {
+                    Tables
+                        .ObjectTypeToObjectTypes
+                        .insert { statement ->
+                            statement[child] = entity.id.toUUID()
+                            statement[parent] = entity.parentObjectType.id.toUUID()
+                        }
+                } else {
+                    //do nothing
+                }
+            }
+
             commit()
         }
     }

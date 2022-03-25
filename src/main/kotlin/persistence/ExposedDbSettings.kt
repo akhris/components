@@ -30,6 +30,7 @@ object ExposedDbSettings {
 //                Tables.Values,
                 Tables.Parameters,
                 Tables.ContainerToContainers,
+                Tables.ObjectTypeToObjectTypes,
 //                Tables.ValuesToItem,
                 Tables.ItemValues,
                 Tables.ParametersToObjectType,

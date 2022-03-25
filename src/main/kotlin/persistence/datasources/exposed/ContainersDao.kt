@@ -82,7 +82,7 @@ class ContainersDao : BaseDao<Container> {
                     //do nothing
                 }
             }
-
+        commit()
 
         }
     }

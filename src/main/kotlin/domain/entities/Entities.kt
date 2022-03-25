@@ -17,10 +17,11 @@ data class Item(
  * e.g. name = resistors,
  * parameters = [resistance, tolerance, package]
  */
-data class ObjectType(
+data class ObjectType constructor(
     override val id: String = IDUtils.newID(),
     val name: String = "",
-    val parameters: List<Parameter> = listOf()
+    val parameters: List<Parameter> = listOf(),
+    val parentObjectType: ObjectType? = null
 ) : IEntity<String> {
     override fun toString(): String = name
 }

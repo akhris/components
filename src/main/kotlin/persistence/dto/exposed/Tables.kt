@@ -82,6 +82,11 @@ object Tables {
         val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
     }
 
+    object ObjectTypeToObjectTypes : Table(){
+        val parent = reference(name = "parent", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
+        val child = reference(name = "child", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
+    }
+
 //    object ValuesToItem : Table() {
 //        val item = reference(name = "item", foreign = Items)
 //        val value = reference(name = "value", foreign = Values)

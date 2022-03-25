@@ -26,6 +26,12 @@ class ENStringsProvider : IStringsProvider {
             Strings.TypesOfData.suppliers_title -> "suppliers"
             Strings.TypesOfData.projects_description -> "Sets of items"
             Strings.TypesOfData.projects_title -> "projects"
+            Strings.TypesOfData.itemIncome_description -> "when items came in, from what supplier and what container was put in"
+            Strings.TypesOfData.itemIncome_title -> "Items income"
+            Strings.TypesOfData.itemOutcome_description -> "when items came out and from what container"
+            Strings.TypesOfData.itemOutcome_title -> "Items outcome"
+            Strings.TypesOfData.warehouseItem_description -> "current state of warehouse"
+            Strings.TypesOfData.warehouseItem_title -> "Warehouse items"
         }
     }
 

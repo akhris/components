@@ -1,11 +1,15 @@
 package ui.screens.entities_screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
@@ -40,7 +44,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen) {
             ListPane(component.listRouterState, itemRepresentationType = state.itemRepresentationType)
         },
         filterContent = {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
                 ViewModeSelector(component.viewSettingsRouterState)
                 SelectorPanel(component.selectorRouterState)
                 FilterPanel(component.filterRouterState)

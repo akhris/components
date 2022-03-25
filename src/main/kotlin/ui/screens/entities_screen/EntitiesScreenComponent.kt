@@ -193,6 +193,9 @@ class EntitiesScreenComponent(
 val KClass<out IEntity<*>>.title: Strings?
     get() {
         return when (this) {
+            ItemIncome::class->Strings.TypesOfData.itemIncome_title
+            ItemOutcome::class->Strings.TypesOfData.itemOutcome_title
+            WarehouseItem::class->Strings.TypesOfData.warehouseItem_title
             ObjectType::class -> Strings.TypesOfData.types_title
             Parameter::class -> Strings.TypesOfData.parameters_title
             domain.entities.Unit::class -> Strings.TypesOfData.units_title
@@ -207,6 +210,9 @@ val KClass<out IEntity<*>>.title: Strings?
 val KClass<out IEntity<*>>.description: Strings?
     get() {
         return when (this) {
+            ItemIncome::class->Strings.TypesOfData.itemIncome_description
+            ItemOutcome::class->Strings.TypesOfData.itemOutcome_description
+            WarehouseItem::class->Strings.TypesOfData.warehouseItem_description
             ObjectType::class -> Strings.TypesOfData.types_description
             Parameter::class -> Strings.TypesOfData.parameters_description
             domain.entities.Unit::class -> Strings.TypesOfData.units_description

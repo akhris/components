@@ -26,5 +26,11 @@ sealed interface Strings {
         object suppliers_description : TypesOfData
         object projects_title : TypesOfData
         object projects_description : TypesOfData
+        object itemIncome_title : TypesOfData
+        object itemIncome_description : TypesOfData
+        object itemOutcome_title : TypesOfData
+        object itemOutcome_description : TypesOfData
+        object warehouseItem_title : TypesOfData
+        object warehouseItem_description : TypesOfData
     }
 }

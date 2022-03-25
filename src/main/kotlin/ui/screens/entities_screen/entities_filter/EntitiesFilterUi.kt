@@ -1,9 +1,13 @@
 package ui.screens.entities_screen.entities_filter
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import ui.composable.ChipGroup
 import ui.composable.FilterChip
@@ -16,9 +20,7 @@ fun EntitiesFilterUi(component: IEntitiesFilter) {
 
     Column {
 
-//        RepresentationTypesSelector(
-//            currentType = state.itemRepresentationType,
-//            onTypeChanged = { component.changeItemRepresentationType(it) })
+        Text(modifier = Modifier.padding(8.dp),text = "filter", style = MaterialTheme.typography.subtitle2)
 
         ChipGroup {
             state.filters.forEach { fs ->

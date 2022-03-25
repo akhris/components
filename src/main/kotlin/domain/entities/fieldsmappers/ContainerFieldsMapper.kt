@@ -42,7 +42,7 @@ class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
                 }
 
             }
-            is EntityFieldID.EntityID -> entity.copy(parentContainer = (field as EntityField.EntityLink).entity as Container?)
+            is EntityFieldID.EntityID -> entity.copy(parentContainer = (field as EntityField.EntityLink).entity as? Container)
             else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }
     }
