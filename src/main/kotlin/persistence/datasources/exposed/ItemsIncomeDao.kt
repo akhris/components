@@ -2,14 +2,13 @@ package persistence.datasources.exposed
 
 import com.akhris.domain.core.utils.log
 import domain.entities.ItemIncome
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IItemsIncomeDao
 import persistence.dto.exposed.EntityItemIncome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemIncome
+import utils.set
 import utils.toUUID
 import java.util.*
 
@@ -56,11 +55,29 @@ class ItemsIncomeDao : IItemsIncomeDao {
     }
 
     override suspend fun update(entity: ItemIncome) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            Tables
+                .ItemIncomes
+                .update({ Tables.ItemIncomes.id eq entity.id.toUUID() }) { statement ->
+                    statement[Tables.ItemIncomes.dateTime] = entity.dateTime
+                    statement[Tables.ItemIncomes.container] = entity.container?.id?.toUUID()
+                    statement[Tables.ItemIncomes.item] = entity.item?.entity?.id?.toUUID()
+                    statement[Tables.ItemIncomes.count] = entity.item?.count
+                    statement[Tables.ItemIncomes.supplier] = entity.supplier?.id?.toUUID()
+                }
+            commit()
+        }
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+//            val entity = EntityItemIncome[id.toUUID()]
+//            entity.delete()
+            Tables.ItemIncomes.deleteWhere { Tables.ItemIncomes.id eq id.toUUID() }
+            commit()
+        }
     }
 
     override suspend fun getAll(): List<ItemIncome> {

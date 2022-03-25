@@ -6,9 +6,9 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.BaseDao
 import persistence.dto.exposed.EntityItem
-import persistence.dto.exposed.EntityObjectType
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItem
+import utils.set
 import utils.toUUID
 import java.util.*
 
@@ -56,12 +56,13 @@ class ItemsDao : BaseDao<Item> {
     override suspend fun update(entity: Item) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            //1. get entity by id:
-            val item = EntityItem[entity.id.toUUID()]
 
-            //2. update it:
-            item.name = entity.name
-            item.type = entity.type?.let { EntityObjectType[it.id.toUUID()] }
+            Tables
+                .Items
+                .update({ Tables.Items.id eq entity.id.toUUID() }) { statement ->
+                    statement[Tables.Items.name] = entity.name
+                    statement[Tables.Items.type] = entity.type?.id?.toUUID()
+                }
 
             //3. update values list:
             //remove all old values
@@ -78,17 +79,15 @@ class ItemsDao : BaseDao<Item> {
                     this[Tables.ItemValues.factor] = v.factor
                     this[Tables.ItemValues.parameter] = v.entity.id.toUUID()
                 }
+            commit()
         }
     }
 
     override suspend fun removeById(id: String) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            //1. get entity by id:
-            val item = EntityItem[id.toUUID()]
-
-            //2. delete entity:
-            item.delete()
+            EntityItem[id.toUUID()].delete()
+            commit()
         }
     }
 }

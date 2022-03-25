@@ -15,7 +15,7 @@ class UpdateUseCaseFactory(
     private val updateContainer: UpdateContainer,
     private val updateSupplier: UpdateSupplier,
     private val updateItemIncome: UpdateItemIncome,
-    private val updateItemOutcome: UpdateItemIncome,
+    private val updateItemOutcome: UpdateItemOutcome,
     private val updateProject: UpdateProject,
     private val updateWarehouseItem: UpdateWarehouseItem
 //    private val updateValue: UpdateValue

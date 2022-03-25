@@ -21,5 +21,5 @@ interface IInsertUseCaseFactory {
 }
 
 interface IRemoveUseCaseFactory {
-    fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T>
+    fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T>?
 }

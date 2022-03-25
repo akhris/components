@@ -90,7 +90,6 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntitySaveClicked: (T) -> Unit,
     onEntityRemoved: ((T) -> Unit)? = null
-//    onAddEntityClicked: (() -> Unit)? = null
 ) {
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()

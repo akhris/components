@@ -78,12 +78,12 @@ private fun PrepopulateDatabase() {
             return@LaunchedEffect
         }
         if (!wasInitialized) {
-            prepopulateItems(di)
-            prepopulateObjectTypes(di)
-            prepopulateParameters(di)
             prepopulateUnits(di)
+            prepopulateParameters(di)
             prepopulateContainers(di)
+            prepopulateObjectTypes(di)
             prepopulateSuppliers(di)
+            prepopulateItems(di)
             prepopulateIncomes(di)
             prepopulateOutcomes(di)
             prepopulateProjects(di)

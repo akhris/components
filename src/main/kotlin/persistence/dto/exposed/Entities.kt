@@ -90,7 +90,7 @@ class EntityItemIncome(id: EntityID<UUID>) : UUIDEntity(id) {
 
 //    var item by Tables.ItemIncomes.item
 
-    var item by EntityItem optionalReferencedOn (Tables.ItemIncomes.item)
+    var item by EntityItem referencedOn Tables.ItemIncomes.item
     var count by Tables.ItemIncomes.count
 //    var container by Tables.ItemIncomes.container
 
@@ -107,7 +107,7 @@ class EntityItemOutcome(id: EntityID<UUID>) : UUIDEntity(id) {
 
 //    var item by Tables.ItemOutcomes.item
 
-    var item by EntityItem optionalReferencedOn (Tables.ItemOutcomes.item)
+    var item by EntityItem referencedOn  (Tables.ItemOutcomes.item)
     var count by Tables.ItemOutcomes.count
 //    var container by Tables.ItemOutcomes.container
 

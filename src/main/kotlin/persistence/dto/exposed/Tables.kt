@@ -2,6 +2,7 @@ package persistence.dto.exposed
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 
@@ -20,7 +21,7 @@ object Tables {
     }
 
     object ItemIncomes : UUIDTable() {
-        val item = reference(name = "item", foreign = Items).nullable()
+        val item = reference(name = "item", foreign = Items, onDelete = ReferenceOption.CASCADE)
         val count = long(name = "count").nullable()
         val container = reference(name = "container", foreign = Containers).nullable()
         val dateTime = datetime(name = "dateTime").nullable()
@@ -28,7 +29,7 @@ object Tables {
     }
 
     object ItemOutcomes : UUIDTable() {
-        val item = reference(name = "item", foreign = Items).nullable()
+        val item = reference(name = "item", foreign = Items, onDelete = ReferenceOption.CASCADE)
         val count = long(name = "count").nullable()
         val container = reference(name = "container", foreign = Containers).nullable()
         val dateTime = datetime(name = "dateTime").nullable()
@@ -77,8 +78,8 @@ object Tables {
      * https://github.com/JetBrains/Exposed/wiki/DAO#parent-child-reference
      */
     object ContainerToContainers : Table() {
-        val parent = reference(name = "parent", foreign = Containers)
-        val child = reference(name = "child", foreign = Containers)
+        val parent = reference(name = "parent", foreign = Containers, onDelete = ReferenceOption.CASCADE)
+        val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
     }
 
 //    object ValuesToItem : Table() {
@@ -88,21 +89,21 @@ object Tables {
 //    }
 
     object ParametersToObjectType : Table() {
-        val parameter = reference(name = "parameter", foreign = Parameters)
-        val objectType = reference(name = "type", foreign = ObjectTypes)
+        val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)
+        val objectType = reference(name = "type", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
         override val primaryKey: PrimaryKey = PrimaryKey(parameter, objectType)
     }
 
 
     object ProjectItems : IntIdTable() {
-        val project = reference(name = "project", foreign = Projects)
-        val item = reference(name = "item", foreign = Items)
+        val project = reference(name = "project", foreign = Projects, onDelete = ReferenceOption.CASCADE)
+        val item = reference(name = "item", foreign = Items, onDelete = ReferenceOption.CASCADE)
         val count = long("count")
     }
 
     object ItemValues : IntIdTable() {
-        val item = reference(name = "item", foreign = Items)
-        val parameter = reference(name = "parameter", foreign = Parameters)
+        val item = reference(name = "item", foreign = Items, onDelete = ReferenceOption.CASCADE)
+        val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)
         val value = text(name = "value").nullable()
         val factor = integer(name = "factor").nullable()
     }

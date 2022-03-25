@@ -57,6 +57,7 @@ class SuppliersDao : BaseDao<Supplier> {
             foundEntity.url = foundEntity.url
             foundEntity.description = foundEntity.description
             foundEntity.isFavorite = foundEntity.isFavorite
+            commit()
         }
     }
 
@@ -67,6 +68,7 @@ class SuppliersDao : BaseDao<Supplier> {
             val entity = EntitySupplier[UUID.fromString(id)]
             //2. delete it
             entity.delete()
+            commit()
         }
     }
 }

@@ -12,7 +12,7 @@ import kotlin.io.path.pathString
 object ExposedDbSettings {
     val db by lazy {
 
-        val db = Database.connect("jdbc:sqlite:${AppFoldersManager.getAppPath().pathString}/data.db", "org.sqlite.JDBC")
+        val db = Database.connect("jdbc:sqlite:${AppFoldersManager.getAppPath().pathString}/data.db?foreign_keys=on", "org.sqlite.JDBC")
 //        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")
 //        TransactionManager.manager.defaultIsolationLevel =
 //            TRANSACTION_READ_UNCOMMITTED
@@ -42,7 +42,8 @@ object ExposedDbSettings {
 }
 
 /*
-
+foreign_keys=on
+https://github.com/JetBrains/Exposed/issues/822
 // In file
 Database.connect("jdbc:sqlite:/data/data.db", "org.sqlite.JDBC")
 // In memory

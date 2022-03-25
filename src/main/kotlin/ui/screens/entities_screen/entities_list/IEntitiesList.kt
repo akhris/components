@@ -17,7 +17,7 @@ interface IEntitiesList<T : IEntity<*>> {
     fun setItemsPerPage(itemsPerPage: Long)
 
     fun onEntityUpdated(entity: T)
-    fun onEntityRemoved(entity: T)
+    val onEntityRemovedCallback: ((T) -> Unit)?
 
     //entities list model
     data class Model<T : IEntity<*>>(

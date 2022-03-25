@@ -20,8 +20,7 @@ class RemoveUseCaseFactory(
     private val removeWarehouseItem: RemoveWarehouseItem
 ) : IRemoveUseCaseFactory {
 
-    override fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T> {
-
+    override fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T>? {
         val a = when (entityClass) {
             Item::class -> removeItem
             Parameter::class -> removeParameter
@@ -32,9 +31,9 @@ class RemoveUseCaseFactory(
             ItemIncome::class -> removeItemIncome
             ItemOutcome::class -> removeItemOutcome
             Project::class -> removeProject
-            WarehouseItem::class -> removeWarehouseItem
-            else -> throw IllegalArgumentException("not found remove-use-case for entity class: $entityClass")
+//            WarehouseItem::class -> removeWarehouseItem
+            else -> null
         }
-        return a as RemoveEntity<*, T>
+        return a as? RemoveEntity<*, T>
     }
 }

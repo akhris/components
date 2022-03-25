@@ -62,6 +62,7 @@ class ParametersDao : IParametersDao {
             parameter.unit = entity.unit?.id?.let {
                 EntityUnit[it.toUUID()]
             }
+            commit()
         }
     }
 
@@ -74,6 +75,7 @@ class ParametersDao : IParametersDao {
 
             //2. remove it:
             parameter.delete()
+            commit()
         }
     }
 

@@ -6,10 +6,12 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.update
 import persistence.datasources.IItemsOutcomeDao
 import persistence.dto.exposed.EntityItemOutcome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemOutcome
+import utils.set
 import utils.toUUID
 import java.util.*
 
@@ -47,11 +49,27 @@ class ItemsOutcomeDao : IItemsOutcomeDao {
     }
 
     override suspend fun update(entity: ItemOutcome) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            Tables
+                .ItemOutcomes
+                .update({ Tables.ItemOutcomes.id eq entity.id.toUUID() })  { statement ->
+                    statement[Tables.ItemOutcomes.dateTime] = entity.dateTime
+                    statement[Tables.ItemOutcomes.container] = entity.container?.id?.toUUID()
+                    statement[Tables.ItemOutcomes.item] = entity.item?.entity?.id?.toUUID()
+                    statement[Tables.ItemOutcomes.count] = entity.item?.count
+                }
+            commit()
+        }
     }
 
     override suspend fun removeById(id: String) {
-        TODO("Not yet implemented")
+        newSuspendedTransaction {
+            addLogger(StdOutSqlLogger)
+            val entity = EntityItemOutcome[id.toUUID()]
+            entity.delete()
+            commit()
+        }
     }
 
     override suspend fun getAll(): List<ItemOutcome> {

@@ -46,7 +46,6 @@ class UnitsDao : IUnitsDao {
     }
 
     override suspend fun update(entity: Unit) {
-        log("update: $entity")
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             //1. get entity by id:
@@ -54,6 +53,7 @@ class UnitsDao : IUnitsDao {
             //2. update it:
             foundEntity.unit = entity.unit
             foundEntity.isMultipliable = entity.isMultipliable
+            commit()
         }
     }
 
@@ -64,6 +64,7 @@ class UnitsDao : IUnitsDao {
             val entity = EntityUnit[UUID.fromString(id)]
             //2. delete it
             entity.delete()
+            commit()
         }
     }
 }

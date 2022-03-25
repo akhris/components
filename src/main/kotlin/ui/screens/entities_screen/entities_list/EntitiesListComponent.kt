@@ -88,13 +88,21 @@ class EntitiesListComponent<T : IEntity<*>>(
         }
     }
 
-    override fun onEntityRemoved(entity: T) {
-        scope.launch {
-            log("removing entity: $entity")
-            val result = removeEntity?.invoke(params = RemoveEntity.Remove(entity))
-            log(result ?: "empty result")
+    override val onEntityRemovedCallback: ((T) -> Unit)? = removeEntity?.let { re ->
+        {
+            scope.launch {
+                re(params = RemoveEntity.Remove(it))
+            }
         }
     }
+
+//    override fun onEntityRemoved(entity: T) {
+//        scope.launch {
+//            log("removing entity: $entity")
+//            val result = removeEntity?.invoke(params = RemoveEntity.Remove(entity))
+//            log(result ?: "empty result")
+//        }
+//    }
 
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters

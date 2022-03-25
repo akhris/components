@@ -68,6 +68,7 @@ class ObjectTypesDao : BaseDao<ObjectType> {
                     this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
                 }
             }
+            commit()
         }
     }
 
@@ -76,6 +77,7 @@ class ObjectTypesDao : BaseDao<ObjectType> {
             addLogger(StdOutSqlLogger)
             val objectType = EntityObjectType[UUID.fromString(id)]
             objectType.delete()
+            commit()
         }
     }
 }

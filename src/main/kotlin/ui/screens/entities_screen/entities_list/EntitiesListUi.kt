@@ -47,8 +47,8 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
             itemRepresentationType = itemRepresentationType,
             entities = state.entities,
 //        ,
-        onEntityRemoved = component::onEntityRemoved,
-        onEntityUpdated = component::onEntityUpdated
+            onEntityRemoved = component.onEntityRemovedCallback?.let { rc -> { rc.invoke(it) } },
+            onEntityUpdated = component::onEntityUpdated
         )
 
         state.pagingParameters?.let { pagingParams ->

@@ -77,6 +77,7 @@ class ProjectsDao : BaseDao<Project> {
                         this[Tables.ProjectItems.count] = i.count
                     }
             }
+            commit()
         }
     }
 
@@ -85,6 +86,7 @@ class ProjectsDao : BaseDao<Project> {
             addLogger(StdOutSqlLogger)
             val project = EntityProject[id.toUUID()]
             project.delete()
+            commit()
         }
     }
 }
