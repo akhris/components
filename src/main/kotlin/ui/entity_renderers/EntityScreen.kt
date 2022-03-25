@@ -270,8 +270,8 @@ private fun RenderField(
                 onEntityLinkSelect = {
                     //on entity select clicked
                     println("going to select entity of type:")
-                    println(field.entityClass)
-                    showSelectEntityDialog = field.entityClass
+                    println(field.fieldID.entityClass)
+                    showSelectEntityDialog = field.fieldID.entityClass
                 }, onEntityLinkChanged = onFieldChange,
                 onEntityLinkClear = {
                     onFieldChange(
@@ -354,8 +354,8 @@ private fun RenderField(
                                 }
                             } ?: EntityField.EntityLink.EntityLinkSimple(
                                 fieldID = entityFieldID,
-                                entity = iEntity,
-                                entityClass = entityClass
+                                entity = iEntity
+//                                entityClass = entityClass
                             )
                         }
 

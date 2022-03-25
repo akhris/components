@@ -83,21 +83,18 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
             is DescriptiveFieldValue.CommonField -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
                 description = fieldParams.description,
-                entity = fieldParams.entity as? T,
-                entityClass = fieldID.entityClass   //fixme maybe passing fieldID is sufficient?
+                entity = fieldParams.entity as? T
             )
             is DescriptiveFieldValue.CountableField -> EntityField.EntityLink.EntityLinkCountable(
                 fieldID = fieldID,
                 description = fieldParams.description,
                 entity = fieldParams.entity as? T,
-                entityClass = fieldID.entityClass,
                 count = fieldParams.count
             )
             is DescriptiveFieldValue.ValuableField -> EntityField.EntityLink.EntityLinkValuable(
                 fieldID = fieldID,
                 description = fieldParams.description,
                 entity = fieldParams.entity as? T,
-                entityClass = fieldID.entityClass,
                 value = fieldParams.value,
                 factor = fieldParams.factor,
                 unit = fieldParams.unit

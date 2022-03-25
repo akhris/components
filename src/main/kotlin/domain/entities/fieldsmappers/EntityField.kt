@@ -86,28 +86,25 @@ sealed class EntityField {
 
     sealed class EntityLink : EntityField() {
         abstract val entity: IEntity<*>?
-        abstract val entityClass: KClass<out IEntity<*>>
+        abstract override val fieldID: EntityFieldID.EntityID
 
         data class EntityLinkSimple(
-            override val fieldID: EntityFieldID,
+            override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
-            override val entity: IEntity<*>?,
-            override val entityClass: KClass<out IEntity<*>>
+            override val entity: IEntity<*>?
         ) : EntityLink()
 
         data class EntityLinkCountable(
-            override val fieldID: EntityFieldID,
+            override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?,
-            override val entityClass: KClass<out IEntity<*>>,
             val count: Long? = null
         ) : EntityLink()
 
         data class EntityLinkValuable constructor(
-            override val fieldID: EntityFieldID,
+            override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?,
-            override val entityClass: KClass<out IEntity<*>>,
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null

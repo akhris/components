@@ -37,15 +37,6 @@ data class Parameter(
     override fun toString(): String = name
 }
 
-data class Value(
-    override val id: String = IDUtils.newID(),
-    val parameter: Parameter?,
-    val value: String,
-    val factor: Float? = null
-) : IEntity<String> {
-    override fun toString(): String = value
-}
-
 /**
  * e.g. m, cm, km
  */
