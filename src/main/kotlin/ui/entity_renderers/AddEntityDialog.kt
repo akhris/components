@@ -47,7 +47,7 @@ fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
 
     LaunchedEffect(entityToSave) {
         entityToSave?.let {
-            insertUseCase.invoke(InsertEntity.Insert(it))
+            insertUseCase?.invoke(InsertEntity.Insert(it))
             onDismiss()
         }
     }

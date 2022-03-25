@@ -1,15 +1,22 @@
 package ui.entity_renderers
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,7 +46,8 @@ fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
     entities: List<T>,
     onEntityRemoved: ((T) -> Unit)? = null,
-    onEntityUpdated: ((T) -> Unit)? = null
+    onEntityUpdated: ((T) -> Unit)? = null,
+    onEntityCopied: ((T) -> Unit)? = null
 ) {
 
     val lazyColumnState = rememberLazyListState()
@@ -62,7 +70,8 @@ fun <T : IEntity<*>> EntityScreenContent(
                                 log("entity changed: $it")
                                 onEntityUpdated?.invoke(it)
                             },
-                            onEntityRemoved = onEntityRemoved
+                            onEntityRemoved = onEntityRemoved,
+                            onEntityCopyClicked = onEntityCopied
                         )
                     }
                 })
@@ -83,12 +92,14 @@ fun <T : IEntity<*>> EntityScreenContent(
 /**
  * Renders entity in a card way - all it's fields in a column one by one.
  * At the bottom of the card there are three buttons: delete entity, save changes and discard changes.
+ * todo: add collapsible/expandable feature
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntitySaveClicked: (T) -> Unit,
+    onEntityCopyClicked: ((T) -> Unit)?=null,
     onEntityRemoved: ((T) -> Unit)? = null
 ) {
     val di = localDI()
@@ -97,6 +108,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
     var objectTypeField by remember { mutableStateOf<EntityField.EntityLink?>(null) }
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
+    var isExpanded by remember { mutableStateOf(false) }
 
     val fields =
         remember(mapper, entity) {
@@ -112,40 +124,84 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
         border = BorderStroke(Dp.Hairline, color = Color.LightGray)
     ) {
 
-        Column{
-            fields.forEach {
-                RenderField(
-                    it,
-                    onFieldChange = { changedField ->
-                        //todo check if this is object type and item, and add new parameters if necessary
-                        val entityField = changedField as? EntityField.EntityLink
-                        val objectType = entityField?.entity as? ObjectType
-                        if (objectType == null) {
-                            entity = mapper.mapIntoEntity(entity, changedField)
-                        } else {
-                            objectTypeField = entityField
-                        }
-                    })
 
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                onEntityRemoved?.let { onRemoveCallback ->
-                    TextButton(
-                        modifier = Modifier.padding(ButtonDefaults.ContentPadding),
-                        onClick = { showDeletePrompt = initialEntity },
-                        content = { Text(text = "delete", color = MaterialTheme.colors.error) })
+        Column {
+
+            fields
+                .take(if (isExpanded) fields.size else 1)
+                .forEach {
+                    RenderField(
+                        it,
+                        onFieldChange = { changedField ->
+                            //todo check if this is object type and item, and add new parameters if necessary
+                            val entityField = changedField as? EntityField.EntityLink
+                            val objectType = entityField?.entity as? ObjectType
+                            if (objectType == null) {
+                                entity = mapper.mapIntoEntity(entity, changedField)
+                            } else {
+                                objectTypeField = entityField
+                            }
+                        })
+
+                }
+            //buttons row:
+            if (isExpanded)
+                Divider(modifier = Modifier.fillMaxWidth())
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                //expand/collapse:
+                val rotation by animateFloatAsState(if (isExpanded) 0f else 180f)
+                TooltipArea(tooltip = {
+                    Surface(
+                        modifier = Modifier.shadow(4.dp),
+                        color = Color(255, 255, 210),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = if (isExpanded) "collapse card" else "expand card",
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                }) {
+                    IconButton(
+                        onClick = { isExpanded = !isExpanded },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowUp,
+                                contentDescription = if (isExpanded) "collapse" else "expand",
+                                modifier = Modifier.rotate(rotation)
+                            )
+                        }
+                    )
                 }
 
 
+                Spacer(modifier = Modifier.weight(1f))
+
                 if (entity != initialEntity) {
                     TextButton(
-                        modifier = Modifier.padding(ButtonDefaults.ContentPadding),
                         onClick = { entity = initialEntity },
                         content = { Text(text = "discard") })
                     Button(
-                        modifier = Modifier.padding(ButtonDefaults.ContentPadding),
                         onClick = { onEntitySaveClicked(entity) },
                         content = { Text(text = "save") })
+                } else {
+                    //copy button
+                    onEntityCopyClicked?.let {
+                        TextButton(
+                            onClick = { it(entity) },
+                            content = { Text(text = "copy") })
+                    }
+
+                    //delete button
+                    onEntityRemoved?.let { onRemoveCallback ->
+                        TextButton(
+                            onClick = { showDeletePrompt = initialEntity },
+                            content = { Text(text = "delete", color = MaterialTheme.colors.error) })
+                    }
                 }
             }
         }

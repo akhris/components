@@ -1,9 +1,6 @@
 package ui.screens.entities_screen.entities_list
 
-import com.akhris.domain.core.application.GetEntities
-import com.akhris.domain.core.application.RemoveEntity
-import com.akhris.domain.core.application.Result
-import com.akhris.domain.core.application.UpdateEntity
+import com.akhris.domain.core.application.*
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.utils.log
@@ -23,6 +20,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
+    private val insertEntity: InsertEntity<*, out T>?,  //used for copying
     private val onEntitiesLoaded: (List<T>) -> Unit
 ) :
     IEntitiesList<T>,
@@ -92,6 +90,14 @@ class EntitiesListComponent<T : IEntity<*>>(
         {
             scope.launch {
                 re(params = RemoveEntity.Remove(it))
+            }
+        }
+    }
+
+    override val onEntityCopiedCallback: ((T) -> Unit)? = insertEntity?.let { ie ->
+        {
+            scope.launch {
+                ie(params = InsertEntity.Copy(it))
             }
         }
     }

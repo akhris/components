@@ -18,6 +18,7 @@ interface IEntitiesList<T : IEntity<*>> {
 
     fun onEntityUpdated(entity: T)
     val onEntityRemovedCallback: ((T) -> Unit)?
+    val onEntityCopiedCallback: ((T) -> Unit)?
 
     //entities list model
     data class Model<T : IEntity<*>>(

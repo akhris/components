@@ -91,7 +91,6 @@ val di = DI {
             instance(),
             instance(),
             instance(),
-            instance(),
             instance()
         )
     }

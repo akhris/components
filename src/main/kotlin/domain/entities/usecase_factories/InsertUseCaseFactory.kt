@@ -16,11 +16,10 @@ class InsertUseCaseFactory(
     private val insertSupplier: InsertSupplier,
     private val insertItemIncome: InsertItemIncome,
     private val insertItemOutcome: InsertItemOutcome,
-    private val insertProject: InsertProject,
-    private val insertWarehouseItem: InsertWarehouseItem
+    private val insertProject: InsertProject
 ) : IInsertUseCaseFactory {
 
-    override fun <T : IEntity<*>> getInsertUseCase(entityClass: KClass<out T>): InsertEntity<*, T> {
+    override fun <T : IEntity<*>> getInsertUseCase(entityClass: KClass<out T>): InsertEntity<*, T>? {
         val a = when (entityClass) {
             Item::class -> insertItem
             Parameter::class -> insertParameter
@@ -31,9 +30,8 @@ class InsertUseCaseFactory(
             ItemIncome::class -> insertItemIncome
             ItemOutcome::class -> insertItemOutcome
             Project::class -> insertProject
-            WarehouseItem::class -> insertWarehouseItem
-            else -> throw IllegalArgumentException("not found insert-use-case for entity class: $entityClass")
+            else -> null
         }
-        return a as InsertEntity<*, T>
+        return a as? InsertEntity<*, T>
     }
 }

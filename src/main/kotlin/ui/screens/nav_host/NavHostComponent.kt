@@ -9,10 +9,7 @@ import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import domain.entities.*
 import domain.entities.fieldsmappers.FieldsMapperFactory
-import domain.entities.usecase_factories.IGetListUseCaseFactory
-import domain.entities.usecase_factories.IGetUseCaseFactory
-import domain.entities.usecase_factories.IRemoveUseCaseFactory
-import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import domain.entities.usecase_factories.*
 import navigation.NavItem
 import navigation.Screen
 import settings.AppSettingsRepository
@@ -29,6 +26,7 @@ class NavHostComponent(
     private val getUseCaseFactory: IGetUseCaseFactory,
     private val updateUseCaseFactory: IUpdateUseCaseFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory,
+    private val insertUseCaseFactory: IInsertUseCaseFactory,
     private val removeUseCaseFactory: IRemoveUseCaseFactory
 ) :
     INavHost, ComponentContext by componentContext {
@@ -90,7 +88,8 @@ class NavHostComponent(
                         fieldsMapperFactory = fieldsMapperFactory,
                         getListUseCaseFactory = getListUseCaseFactory,
                         updateUseCaseFactory = updateUseCaseFactory,
-                        removeUseCaseFactory = removeUseCaseFactory
+                        removeUseCaseFactory = removeUseCaseFactory,
+                        insertUseCaseFactory = insertUseCaseFactory
                     )
                 )
             }

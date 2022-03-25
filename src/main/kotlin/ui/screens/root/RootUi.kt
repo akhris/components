@@ -14,10 +14,7 @@ import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import domain.entities.*
 import domain.entities.Unit
 import domain.entities.fieldsmappers.FieldsMapperFactory
-import domain.entities.usecase_factories.IGetListUseCaseFactory
-import domain.entities.usecase_factories.IGetUseCaseFactory
-import domain.entities.usecase_factories.IRemoveUseCaseFactory
-import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import domain.entities.usecase_factories.*
 import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
@@ -42,6 +39,8 @@ fun RootUi() {
     val fieldsMapperFactory: FieldsMapperFactory by di.instance()
     val getUseCaseFactory: IGetUseCaseFactory by di.instance()
     val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
+    val insertUseCaseFactory: IInsertUseCaseFactory by di.instance()
+
     val navHostComponent =
         remember {
             NavHostComponent(
@@ -51,7 +50,8 @@ fun RootUi() {
                 updateUseCaseFactory = updateUseCaseFactory,
                 getListUseCaseFactory = listUseCaseFactory,
                 getUseCaseFactory = getUseCaseFactory,
-                removeUseCaseFactory = removeUseCaseFactory
+                removeUseCaseFactory = removeUseCaseFactory,
+                insertUseCaseFactory = insertUseCaseFactory
             )
         }
 
