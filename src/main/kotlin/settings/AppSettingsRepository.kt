@@ -3,14 +3,15 @@ package settings
 import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import strings.ENStringGetter
+import strings.StringProvider
+import strings.toLocalStringGetter
 import utils.FileUtils
 import utils.replace
+import java.nio.file.Files
 import kotlin.io.path.*
 
 class AppSettingsRepository(private val scope: CoroutineScope) {
@@ -19,7 +20,8 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
     private val _settingsValue = MutableStateFlow(AppSettings.default)
 
     val settingsValue: StateFlow<AppSettings> = _settingsValue
-    val appSettingsFileName = "app_settings.json"
+
+    private val appSettingsFileName = "app_settings.json"
     private val appSettingsFile = AppFoldersManager.getAppPath().resolve(appSettingsFileName)
 //        Path(currentUserPath, componentsSupPath, appSettingsFileName)
 //    private val defaultDBLocation = Path(currentUserPath, componentsSupPath, defaultComponentsDatabaseFilename)
@@ -38,9 +40,24 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             }
     }
 
-    fun getSetting(key: String): AppSetting? {
-        return _settingsValue.value.settings.find { it.key == key }
+    fun getLocalizedStringProvider(): Flow<StringProvider> {
+        return _settingsValue
+            .mapNotNull {
+                it.settings.find { s -> s.key == key_localization_file } as? AppSetting.ListSetting
+            }
+            .distinctUntilChanged()
+            .map {
+                try {
+                    val jsonString = Path(it.key).readText()
+                    jsonString.toLocalStringGetter()
+                } catch (e: Exception) {
+                    null
+                } ?: ENStringGetter()
+            }.map {
+                StringProvider(it)
+            }
     }
+
 
     private suspend fun setSetting(appSetting: AppSetting) {
         val currentSettings = _settingsValue.value ?: AppSettings(listOf())
@@ -86,6 +103,12 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
                             is AppSetting.StringSetting -> {
                                 (currentSetting as? AppSetting.StringSetting)?.copy(value = setting.value)
                             }
+                            is AppSetting.ListSetting -> {
+                                (currentSetting as? AppSetting.ListSetting)?.copy(
+                                    selectedKey = setting.selectedKey,
+                                    values = setting.values
+                                )
+                            }
                             null -> null
                         } ?: currentSetting
 
@@ -102,15 +125,57 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
         }
     }
 
+    /**
+     * Update list of files paths inside 'translations' directory
+     */
+    private suspend fun invalidateTranslations() {
+        withContext(Dispatchers.IO) {
+            val translationsFiles = Files.list(AppFoldersManager.translationsPath).toList()
+            val translations = translationsFiles.mapNotNull { path ->
+                path.readText().toLocalStringGetter()?.let { path.absolutePathString() to it.language }
+            }.toMap()
+
+            val defaultTranslation =
+                mapOf("default" to ENStringGetter().language)
+
+            log("translations found: ${translations.size}")
+            translations.forEach { (t, u) ->
+                log("$t: $u")
+            }
+
+            val translationsWithDefault = defaultTranslation.plus(translations)
+
+
+            val translationSetting =
+                (_settingsValue.value.settings.find { it.key == key_localization_file } as? AppSetting.ListSetting)?.copy(
+                    values = translationsWithDefault
+                )
+
+            log("existed translationSetting: $translationSetting")
+
+            setSetting(
+                translationSetting ?: AppSetting.ListSetting(
+                    key = key_localization_file,
+                    values = translationsWithDefault,
+                    selectedKey = translations.keys.firstOrNull() ?: ""
+                )
+            )
+
+        }
+    }
+
     init {
-        scope.launch { invalidateSettings() }
+        scope.launch {
+            invalidateSettings()
+            invalidateTranslations()
+        }
     }
 
 
     companion object {
         const val key_is_dark_theme = "key_is_dark_theme"
         const val key_db_location = "key_db_location"
-
+        const val key_localization_file = "key_localization_file"
 
         const val defaultComponentsDatabaseFilename = "components.db"
     }

@@ -1,13 +1,18 @@
 package ui.screens.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
+import com.akhris.domain.core.utils.log
 import settings.AppSetting
 import strings.Strings
 import ui.composable.ScrollableBox
@@ -55,9 +60,19 @@ fun SettingsUi(settingsComponent: ISettings) {
                         }
                         is AppSetting.PathSetting -> {
                             PathPreference(
-                                s.value,
-                                description = it.description,
+                                s.value ?: "",
+                                description = it.name,
                                 onPathChanged = { newPath -> settingsComponent.onSettingChanged(s.copy(value = newPath)) })
+                        }
+                        is AppSetting.ListSetting -> {
+                            ListPreference(
+                                description = it.name,
+                                valuesMap = s.values,
+                                selectedKey = s.selectedKey,
+                                onKeyChanged = { newKey ->
+                                    settingsComponent.onSettingChanged(s.copy(selectedKey = newKey))
+                                }
+                            )
                         }
                     }
                 }
@@ -122,6 +137,65 @@ private fun PathPreference(path: String, description: String? = null, onPathChan
             showFileDialog = false
         })
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ListPreference(
+    description: String? = null,
+    valuesMap: Map<String, String>,
+    selectedKey: String,
+    onKeyChanged: (String) -> Unit
+) {
+
+    var showDropDown by remember { mutableStateOf(false) }
+
+    Card(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        ListItem(
+            modifier = Modifier.clickable {
+                showDropDown = !showDropDown
+            },
+            text = {
+                Text(valuesMap[selectedKey] ?: "")
+            }, overlineText = description?.let {
+                {
+                    Text(it)
+                }
+            }, trailing = {
+                IconButton(
+                    modifier = Modifier.rotate(if (showDropDown) 180f else 0f),
+                    content = {
+                        Icon(
+                            Icons.Rounded.ArrowDropDown,
+                            contentDescription = "show dropdown menu"
+                        )
+                    },
+                    onClick = { showDropDown = !showDropDown })
+            })
+    }
+
+    DropdownMenu(
+        modifier = Modifier.fillMaxWidth(),
+        expanded = showDropDown,
+        onDismissRequest = { showDropDown = false },
+        content = {
+            valuesMap.forEach { (key, value) ->
+                val background =
+                    if (key == selectedKey) MaterialTheme.colors.primarySurface else MaterialTheme.colors.background
+                DropdownMenuItem(content = {
+                    Surface(color = background) {
+                        ListItem(
+                            singleLineSecondaryText = true,
+                            text = { Text(value) },
+                            secondaryText = { Text(key) })
+                    }
+                }, onClick = {
+                    onKeyChanged(key)
+                    showDropDown = false
+                })
+            }
+        })
+
 }
 
 

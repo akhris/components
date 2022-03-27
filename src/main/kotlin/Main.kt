@@ -19,6 +19,7 @@ import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 import settings.AppSetting
 import settings.AppSettingsRepository
+import strings.StringProvider
 import test.*
 import ui.screens.root.RootUi
 import ui.theme.AppSettings
@@ -54,10 +55,23 @@ private fun mainWindow() = withDI(di) {
                     it.value
                 } else false
             }
-    }.collectAsState(false)
+    }.collectAsState(null)
 
+    val stringProvider by remember(settingsRepository) {
+        settingsRepository.getLocalizedStringProvider().distinctUntilChanged()
+    }.collectAsState(null)
+
+
+
+    Root(isDarkTheme ?: false, stringProvider ?: StringProvider())
+
+
+}
+
+@Composable
+private fun Root(isDarkTheme: Boolean, stringProvider: StringProvider) {
     AppTheme(darkTheme = isDarkTheme) {
-        RootUi()
+        RootUi(stringProvider)
     }
 }
 

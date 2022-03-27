@@ -10,6 +10,7 @@ class SettingsMapper {
             override val name: String = when (setting.key) {
                 AppSettingsRepository.key_is_dark_theme -> "Dark theme mode"
                 AppSettingsRepository.key_db_location -> "database location"
+                AppSettingsRepository.key_localization_file->"localization file"
                 else -> ""
             }
 

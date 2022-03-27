@@ -7,9 +7,18 @@ object AppFoldersManager {
     private val currentUserPath = System.getProperty("user.home")       //"/home/user"
     private val componentsSupPath = ".components_app"
     private val appPath = Path(currentUserPath, componentsSupPath)      //"/home/user/.components_app"
+    private val translationsSubPath = "translations"
+    val translationsPath: Path
+        get() {
+            val path = appPath.resolve(translationsSubPath)
+            if (path.notExists()) {
+                path.createDirectories()
+            }
+            return path
+        }
 
     fun getAppPath(): Path {
-        if(appPath.notExists())
+        if (appPath.notExists())
             appPath.createDirectories()
 
         return appPath

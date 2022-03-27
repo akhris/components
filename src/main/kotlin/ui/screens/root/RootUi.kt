@@ -19,6 +19,7 @@ import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
+import strings.StringProvider
 import ui.dialogs.Type
 import ui.dialogs.TypesPickerDialog
 import ui.entity_renderers.AddEntityDialog
@@ -29,8 +30,8 @@ import ui.screens.navigation_rail.NavigationRailUi
 
 
 @Composable
-fun RootUi() {
-
+fun RootUi(stringProvider: StringProvider) {
+    //todo use stringProvider
     val di = localDI()
     val appSettingsRepository by di.instance<AppSettingsRepository>()
     val lifecycle = LifecycleRegistry()
