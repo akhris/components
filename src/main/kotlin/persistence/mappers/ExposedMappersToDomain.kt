@@ -1,5 +1,6 @@
 package persistence.mappers
 
+import com.akhris.domain.core.utils.log
 import domain.entities.*
 import domain.entities.Unit
 import persistence.dto.exposed.*
@@ -11,7 +12,7 @@ fun EntityUnit.toUnit(): Unit {
 fun EntityItemIncome.toItemIncome(): ItemIncome {
     return ItemIncome(
         id = id.value.toString(),
-        item = item?.let { EntityCountable(it.toItem(), count ?: 0L) },
+        item = EntityCountable(item.toItem(), count ?: 0L),
         container = container?.toContainer(),
         dateTime = dateTime,
         supplier = supplier?.toSupplier()
@@ -36,12 +37,13 @@ fun EntityItem.toItem(): Item {
     )
 }
 
-fun EntityContainer.toContainer(): Container {
+fun EntityContainer.toContainer(level: Int = 1): Container {
+    log("mapping container:${this.name}. parent container: ${this.parents.firstOrNull()?.name}")
     return Container(
         id = id.value.toString(),
         name = name,
         description = description,
-        parentContainer = parents.firstOrNull()?.toContainer()
+        parentContainer = if (level <= 0) null else parents.firstOrNull()?.toContainer(level - 1)
     )
 }
 
@@ -55,12 +57,12 @@ fun EntitySupplier.toSupplier(): Supplier {
     )
 }
 
-fun EntityObjectType.toObjectType(): ObjectType {
+fun EntityObjectType.toObjectType(level: Int = 1): ObjectType {
     return ObjectType(
         id = id.value.toString(),
         name = name,
         parameters = parameters.map { it.toParameter() },
-        parentObjectType = parents.firstOrNull()?.toObjectType()
+        parentObjectType = if (level <= 0) null else parents.firstOrNull()?.toObjectType(level - 1)
     )
 }
 

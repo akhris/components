@@ -18,22 +18,24 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import strings.LocalizedStrings
+import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.title
-import utils.toLocalizedString
 import kotlin.reflect.KClass
 
 @Composable
-fun EntitiesSelectorUi(component: IEntitiesSelector) {
+fun EntitiesSelectorUi(component: IEntitiesSelector, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
     val state by component.state.subscribeAsState()
 
     Column {
 
-       //entities selector:
+        //entities selector:
         state.entitiesSelector?.let {
             EntitiesSelector(
                 entities = it.items,
                 selection = it.selection,
-                onSelectionChanged = { e -> component.selectEntity(e) }
+                onSelectionChanged = { e -> component.selectEntity(e) },
+                localizedStrings
             )
         }
     }
@@ -44,7 +46,8 @@ fun EntitiesSelectorUi(component: IEntitiesSelector) {
 private fun EntitiesSelector(
     entities: List<KClass<out IEntity<*>>>,
     selection: KClass<out IEntity<*>>,
-    onSelectionChanged: (KClass<out IEntity<*>>) -> Unit
+    onSelectionChanged: (KClass<out IEntity<*>>) -> Unit,
+    localizedStrings: LocalizedStrings
 ) {
 
     Column {
@@ -72,7 +75,7 @@ private fun EntitiesSelector(
                         shape = MaterialTheme.shapes.medium
                     )
                     .padding(8.dp),
-                text = entity.title?.toLocalizedString() ?: entity.simpleName ?: entity.toString(),
+                text = entity.title?.let { localizedStrings(it) } ?: entity.simpleName ?: entity.toString(),
                 color = MaterialTheme.colors.contentColorFor(background)
             )
 

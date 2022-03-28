@@ -226,7 +226,7 @@ private fun RenderValuableEntityLink(
             onValueChange = { value = it },
             label = {
                 val labelBuilder = StringBuilder(field.getName())
-                field.unit?.let{
+                field.unit?.let {
                     labelBuilder.append(", $it")
                 }
                 Text(labelBuilder.toString())
@@ -261,7 +261,7 @@ private fun RenderCommonEntityLink(
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: () -> Unit
 ) {
-    ListItem(
+    ListItem(modifier = Modifier.clickable { onEntityLinkSelect() },
         text = { Text(text = name) },
         secondaryText = { Text(text = description) },
         trailing = { ui.composable.Icons.ClearIcon(modifier = Modifier.clickable { onEntityLinkClear() }) }

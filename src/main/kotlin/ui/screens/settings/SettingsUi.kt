@@ -12,11 +12,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
-import com.akhris.domain.core.utils.log
 import settings.AppSetting
-import strings.Strings
+import strings.LocalizedStrings
+import strings.StringsIDs
+import strings.defaultLocalizedStrings
 import ui.composable.ScrollableBox
-import utils.toLocalizedString
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.FilenameFilter
@@ -24,7 +24,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.extension
 
 @Composable
-fun SettingsUi(settingsComponent: ISettings) {
+fun SettingsUi(settingsComponent: ISettings, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
 
     val settings by settingsComponent.state.collectAsState(null)
 
@@ -35,7 +35,7 @@ fun SettingsUi(settingsComponent: ISettings) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = Strings.navitem_settings_title.toLocalizedString(),
+                text = localizedStrings(StringsIDs.navitem_settings_title),
                 style = MaterialTheme.typography.h3
             )
         }

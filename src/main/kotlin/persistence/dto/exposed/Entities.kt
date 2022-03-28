@@ -75,7 +75,6 @@ class EntityContainer(id: EntityID<UUID>) : UUIDEntity(id) {
     var description by Tables.Containers.description
     var parents by EntityContainer.via(Tables.ContainerToContainers.child, Tables.ContainerToContainers.parent)
     var children by EntityContainer.via(Tables.ContainerToContainers.parent, Tables.ContainerToContainers.child)
-
 }
 
 class EntitySupplier(id: EntityID<UUID>) : UUIDEntity(id) {

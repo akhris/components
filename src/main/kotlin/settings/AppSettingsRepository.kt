@@ -48,9 +48,10 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             .distinctUntilChanged()
             .map {
                 try {
-                    val jsonString = Path(it.key).readText()
+                    val jsonString = Path(it.selectedKey).readText()
                     jsonString.toLocalStringGetter()
                 } catch (e: Exception) {
+                    log("exception while deserializing: $e")
                     null
                 } ?: ENStringGetter()
             }.map {

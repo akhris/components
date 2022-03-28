@@ -8,13 +8,9 @@ import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import settings.AppSettingsRepository
-import strings.IStringsProvider
-import strings.RUStringsProvider
 import ui.screens.settings.SettingsMapper
 
 val di = DI {
-
-    bindSingleton<IStringsProvider> { RUStringsProvider() }
 
     import(objectTypesModule)
     import(itemsModule)
@@ -27,6 +23,7 @@ val di = DI {
     import(projectModule)
     import(warehouseItemModule)
 //    import(valuesModule)
+
 
     bindSingleton<CoroutineScope> { MainScope() }
     bindSingleton { AppSettingsRepository(instance()) }

@@ -1,10 +1,12 @@
 package strings
 
-interface IStringsProvider {
-    fun getString(strings: Strings): String
-}
-
 interface IStringGetter {
     val language: String
     fun getString(id: String): String?
+}
+
+typealias LocalizedStrings = (StringsIDs) -> String
+
+val defaultLocalizedStrings: LocalizedStrings = {
+    StringProvider.default.getLocalizedString(it.name)
 }

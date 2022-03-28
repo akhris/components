@@ -19,7 +19,8 @@ import navigation.NavItem
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import settings.AppSettingsRepository
-import strings.StringProvider
+import strings.LocalizedStrings
+import strings.defaultLocalizedStrings
 import ui.dialogs.Type
 import ui.dialogs.TypesPickerDialog
 import ui.entity_renderers.AddEntityDialog
@@ -30,7 +31,7 @@ import ui.screens.navigation_rail.NavigationRailUi
 
 
 @Composable
-fun RootUi(stringProvider: StringProvider) {
+fun RootUi(localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
     //todo use stringProvider
     val di = localDI()
     val appSettingsRepository by di.instance<AppSettingsRepository>()
@@ -63,22 +64,22 @@ fun RootUi(stringProvider: StringProvider) {
             navHostComponent.setDestination(it.route)
         }, onAddButtonClicked = {
             addClickedNavItem = it
-        }))
+        }), localizedStrings = localizedStrings)
 
         Box(modifier = Modifier.fillMaxHeight().weight(1f)) {
-            NavHostUi(component = navHostComponent)
+            NavHostUi(component = navHostComponent, localizedStrings = localizedStrings)
         }
     }
 
     addClickedNavItem?.let { navItem ->
-        HandleAddButtonClicks(navItem, onDismiss = { addClickedNavItem = null })
+        HandleAddButtonClicks(navItem, onDismiss = { addClickedNavItem = null }, localizedStrings = localizedStrings)
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit) {
+private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit, localizedStrings: LocalizedStrings) {
     var addEntity by remember { mutableStateOf<IEntity<*>?>(null) }
     val showPicker = remember(navItem, addEntity) { navItem == NavItem.DataTypes && addEntity == null }
 
@@ -102,7 +103,7 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
         }, onDismiss = {
             if (addEntity == null)
                 onDismiss()
-        })
+        }, localizedStrings = localizedStrings)
     }
 
     LaunchedEffect(navItem) {

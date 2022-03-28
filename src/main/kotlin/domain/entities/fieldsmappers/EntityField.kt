@@ -92,14 +92,18 @@ sealed class EntityField {
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?
-        ) : EntityLink()
+        ) : EntityLink(){
+            override fun toString(): String = entity?.toString() ?: description
+        }
 
         data class EntityLinkCountable(
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?,
             val count: Long? = null
-        ) : EntityLink()
+        ) : EntityLink(){
+            override fun toString(): String = entity?.toString() ?: description
+        }
 
         data class EntityLinkValuable constructor(
             override val fieldID: EntityFieldID.EntityID,
@@ -108,7 +112,12 @@ sealed class EntityField {
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null
-        ) : EntityLink()
+        ) : EntityLink(){
+            override fun toString(): String = entity?.toString() ?: description
+        }
+
+        //used for filtering
+
     }
 
     /**

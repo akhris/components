@@ -19,6 +19,7 @@ import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 import settings.AppSetting
 import settings.AppSettingsRepository
+import strings.LocalizedStrings
 import strings.StringProvider
 import test.*
 import ui.screens.root.RootUi
@@ -62,7 +63,9 @@ private fun mainWindow() = withDI(di) {
     }.collectAsState(null)
 
 
-
+    remember(stringProvider) {
+        log("got new string provider from settingsRepository: $stringProvider")
+    }
     Root(isDarkTheme ?: false, stringProvider ?: StringProvider())
 
 
@@ -70,8 +73,12 @@ private fun mainWindow() = withDI(di) {
 
 @Composable
 private fun Root(isDarkTheme: Boolean, stringProvider: StringProvider) {
+
+    val localizedStrings =
+        remember<LocalizedStrings>(stringProvider) { { stringID -> stringProvider.getLocalizedString(stringID.name) } }
+
     AppTheme(darkTheme = isDarkTheme) {
-        RootUi(stringProvider)
+        RootUi(localizedStrings = localizedStrings)
     }
 }
 

@@ -99,7 +99,7 @@ fun <T : IEntity<*>> EntityScreenContent(
 fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntitySaveClicked: (T) -> Unit,
-    onEntityCopyClicked: ((T) -> Unit)?=null,
+    onEntityCopyClicked: ((T) -> Unit)? = null,
     onEntityRemoved: ((T) -> Unit)? = null
 ) {
     val di = localDI()
@@ -133,13 +133,15 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                     RenderField(
                         it,
                         onFieldChange = { changedField ->
-                            //todo check if this is object type and item, and add new parameters if necessary
-                            val entityField = changedField as? EntityField.EntityLink
-                            val objectType = entityField?.entity as? ObjectType
-                            if (objectType == null) {
-                                entity = mapper.mapIntoEntity(entity, changedField)
+                            if (initialEntity::class == Item::class) {
+                                val entityField = changedField as? EntityField.EntityLink
+                                val objectType = entityField?.entity as? ObjectType
+                                if (objectType != null) {
+                                    //check if this is object type and item, and add new parameters if necessary
+                                    objectTypeField = entityField
+                                }
                             } else {
-                                objectTypeField = entityField
+                                entity = mapper.mapIntoEntity(entity, changedField)
                             }
                         })
 

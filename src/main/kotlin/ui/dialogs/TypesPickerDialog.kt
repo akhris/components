@@ -8,13 +8,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
-import strings.Strings
-import utils.toLocalizedString
+import strings.LocalizedStrings
+import strings.StringsIDs
+import strings.defaultLocalizedStrings
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TypesPickerDialog(onItemPicked: (Type) -> kotlin.Unit, onDismiss: () -> kotlin.Unit) {
+fun TypesPickerDialog(
+    onItemPicked: (Type) -> kotlin.Unit,
+    onDismiss: () -> kotlin.Unit,
+    localizedStrings: LocalizedStrings = defaultLocalizedStrings
+) {
     val types = Type.getAllTypes()
 
     ListPickerDialog(
@@ -24,9 +29,9 @@ fun TypesPickerDialog(onItemPicked: (Type) -> kotlin.Unit, onDismiss: () -> kotl
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 text = {
-                    Text(text = type.name?.toLocalizedString() ?: "")
+                    Text(text = type.name?.let { localizedStrings(it) } ?: "")
                 }, secondaryText = {
-                    Text(text = type.description?.toLocalizedString() ?: "")
+                    Text(text = type.description?.let { localizedStrings(it) } ?: "")
                 }
             )
         },
@@ -35,25 +40,26 @@ fun TypesPickerDialog(onItemPicked: (Type) -> kotlin.Unit, onDismiss: () -> kotl
 
     )
 }
+
 @Parcelize
-sealed class Type(val name: Strings?, val description: Strings?) : Parcelable {
+sealed class Type(val name: StringsIDs?, val description: StringsIDs?) : Parcelable {
     @Parcelize
-    object ObjectType : Type(Strings.TypesOfData.types_title, Strings.TypesOfData.types_description)
+    object ObjectType : Type(StringsIDs.types_title, StringsIDs.types_description)
 
     @Parcelize
-    object Parameters : Type(Strings.TypesOfData.parameters_title, Strings.TypesOfData.parameters_description)
+    object Parameters : Type(StringsIDs.parameters_title, StringsIDs.parameters_description)
 
     @Parcelize
-    object Units : Type(Strings.TypesOfData.units_title, Strings.TypesOfData.units_description)
+    object Units : Type(StringsIDs.units_title, StringsIDs.units_description)
 
     @Parcelize
-    object Items : Type(Strings.TypesOfData.items_title, Strings.TypesOfData.items_description)
+    object Items : Type(StringsIDs.items_title, StringsIDs.items_description)
 
     @Parcelize
-    object Containers : Type(Strings.TypesOfData.containers_title, Strings.TypesOfData.containers_description)
+    object Containers : Type(StringsIDs.containers_title, StringsIDs.containers_description)
 
     @Parcelize
-    object Suppliers : Type(Strings.TypesOfData.suppliers_title, Strings.TypesOfData.suppliers_description)
+    object Suppliers : Type(StringsIDs.suppliers_title, StringsIDs.suppliers_description)
 
     @Parcelize
     object None : Type(null, null)

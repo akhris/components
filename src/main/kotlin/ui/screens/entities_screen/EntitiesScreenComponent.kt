@@ -15,7 +15,7 @@ import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IInsertUseCaseFactory
 import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
-import strings.Strings
+import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
@@ -193,36 +193,36 @@ class EntitiesScreenComponent(
 
 }
 
-val KClass<out IEntity<*>>.title: Strings?
+val KClass<out IEntity<*>>.title: StringsIDs?
     get() {
         return when (this) {
-            ItemIncome::class->Strings.TypesOfData.itemIncome_title
-            ItemOutcome::class->Strings.TypesOfData.itemOutcome_title
-            WarehouseItem::class->Strings.TypesOfData.warehouseItem_title
-            ObjectType::class -> Strings.TypesOfData.types_title
-            Parameter::class -> Strings.TypesOfData.parameters_title
-            domain.entities.Unit::class -> Strings.TypesOfData.units_title
-            Item::class -> Strings.TypesOfData.items_title
-            Container::class -> Strings.TypesOfData.containers_title
-            Supplier::class -> Strings.TypesOfData.suppliers_title
-            Project::class -> Strings.TypesOfData.projects_title
+            ItemIncome::class->StringsIDs.itemIncome_title
+            ItemOutcome::class->StringsIDs.itemOutcome_title
+            WarehouseItem::class->StringsIDs.warehouseItem_title
+            ObjectType::class -> StringsIDs.types_title
+            Parameter::class -> StringsIDs.parameters_title
+            domain.entities.Unit::class -> StringsIDs.units_title
+            Item::class -> StringsIDs.items_title
+            Container::class -> StringsIDs.containers_title
+            Supplier::class -> StringsIDs.suppliers_title
+            Project::class -> StringsIDs.projects_title
             else -> null
         }
     }
 
-val KClass<out IEntity<*>>.description: Strings?
+val KClass<out IEntity<*>>.description: StringsIDs?
     get() {
         return when (this) {
-            ItemIncome::class->Strings.TypesOfData.itemIncome_description
-            ItemOutcome::class->Strings.TypesOfData.itemOutcome_description
-            WarehouseItem::class->Strings.TypesOfData.warehouseItem_description
-            ObjectType::class -> Strings.TypesOfData.types_description
-            Parameter::class -> Strings.TypesOfData.parameters_description
-            domain.entities.Unit::class -> Strings.TypesOfData.units_description
-            Item::class -> Strings.TypesOfData.items_description
-            Container::class -> Strings.TypesOfData.containers_description
-            Supplier::class -> Strings.TypesOfData.suppliers_description
-            Project::class -> Strings.TypesOfData.projects_description
+            ItemIncome::class->StringsIDs.itemIncome_description
+            ItemOutcome::class->StringsIDs.itemOutcome_description
+            WarehouseItem::class->StringsIDs.warehouseItem_description
+            ObjectType::class -> StringsIDs.types_description
+            Parameter::class -> StringsIDs.parameters_description
+            domain.entities.Unit::class -> StringsIDs.units_description
+            Item::class -> StringsIDs.items_description
+            Container::class -> StringsIDs.containers_description
+            Supplier::class -> StringsIDs.suppliers_description
+            Project::class -> StringsIDs.projects_description
             else -> null
         }
     }

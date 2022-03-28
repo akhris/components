@@ -3,7 +3,7 @@ package ui.screens.entities_screen
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
-import strings.Strings
+import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.IEntitiesFilter
 import ui.screens.entities_screen.entities_list.IEntitiesList
 import ui.screens.entities_screen.entities_selector.IEntitiesSelector
@@ -24,8 +24,8 @@ interface IEntitiesScreen {
     val state: Value<Model>
 
     data class Model(
-        val screenTitle: Strings? = null,
-        val screenDescription: Strings? = null,
+        val screenTitle: StringsIDs? = null,
+        val screenDescription: StringsIDs? = null,
         val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.default
     )
 

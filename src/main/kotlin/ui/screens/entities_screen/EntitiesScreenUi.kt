@@ -16,12 +16,13 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.cros
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
+import strings.LocalizedStrings
+import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.patterns.ScreenWithFilterSheet
-import utils.toLocalizedString
 
 /**
  * Ui element: Screen of entities.
@@ -33,7 +34,7 @@ import utils.toLocalizedString
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun EntitiesScreenUi(component: IEntitiesScreen) {
+fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
 
     val state by component.state.subscribeAsState()
 
@@ -52,8 +53,8 @@ fun EntitiesScreenUi(component: IEntitiesScreen) {
         },
         mainScreenTitle = {
             ListItem(
-                text = { state.screenTitle?.toLocalizedString()?.let { Text(it) } },
-                secondaryText = { state.screenDescription?.toLocalizedString()?.let { Text(it) } }
+                text = { state.screenTitle?.let { Text(localizedStrings(it)) } },
+                secondaryText = { state.screenDescription?.let { Text(localizedStrings(it)) } }
             )
         }
     )

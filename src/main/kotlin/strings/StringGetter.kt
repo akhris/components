@@ -16,4 +16,12 @@ class StringProvider(private val stringGetter: IStringGetter = ENStringGetter())
                 ?: throw IllegalStateException("String for id: $id was not found in given string getter: $stringGetter or default getter: $ENStringGetter")
         }
     }
+
+    override fun toString(): String {
+        return "string provider for language: ${stringGetter.language}"
+    }
+
+    companion object {
+        val default = StringProvider()
+    }
 }
