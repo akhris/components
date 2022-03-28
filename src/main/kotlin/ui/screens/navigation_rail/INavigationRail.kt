@@ -5,7 +5,7 @@ import navigation.NavItem
 
 interface INavigationRail {
 
-    val models: Value<Model>
+    val state: Value<Model>
 
     fun onDestinationSelected(destination: NavItem)
     fun onAddButtonClicked()

@@ -19,6 +19,7 @@ import com.arkivanov.decompose.value.Value
 import strings.LocalizedStrings
 import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
+import ui.screens.entities_screen.entities_grouping.EntitiesGroupingUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
@@ -47,7 +48,8 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
         filterContent = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
                 ViewModeSelector(component.viewSettingsRouterState)
-                SelectorPanel(component.selectorRouterState)
+                SelectorPanel(component.selectorRouterState, localizedStrings = localizedStrings)
+                GroupingPanel(component.groupingRouterState)
                 FilterPanel(component.filterRouterState)
             }
         },
@@ -80,11 +82,14 @@ private fun ListPane(
 
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
-private fun SelectorPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>) {
+private fun SelectorPanel(
+    routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>,
+    localizedStrings: LocalizedStrings
+) {
     Children(routerState, animation = crossfade()) {
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesSelectorChild.EntitiesSelector -> {
-                EntitiesSelectorUi(component = child.component)
+                EntitiesSelectorUi(component = child.component, localizedStrings = localizedStrings)
             }
         }
     }
@@ -97,6 +102,18 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesFilterChild.EntitiesFilter -> {
                 EntitiesFilterUi(component = child.component)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalDecomposeApi::class)
+@Composable
+private fun GroupingPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesGroupingChild>>) {
+    Children(routerState, animation = crossfade()) {
+        when (val child = it.instance) {
+            is IEntitiesScreen.EntitiesGroupingChild.EntitiesGrouping -> {
+                EntitiesGroupingUi(component = child.component)
             }
         }
     }

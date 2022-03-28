@@ -21,7 +21,7 @@ import ui.theme.NavigationPanelSettings
 
 @Composable
 fun NavigationRailUi(component: INavigationRail, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
-    val navModel by component.models.subscribeAsState()
+    val navModel by component.state.subscribeAsState()
 
     val isExpandable by remember { mutableStateOf(false) }
 

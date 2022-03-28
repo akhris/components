@@ -11,20 +11,12 @@ import utils.replace
 class EntitiesFilterComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
     private val entities: List<T>,
-//    private val onFilterModelChanged: (IEntitiesFilter.Model) -> Unit,
     private val mapperFactory: FieldsMapperFactory
 ) : IEntitiesFilter, ComponentContext by componentContext {
 
     private val _state = MutableValue(IEntitiesFilter.Model())
 
     override val state: Value<IEntitiesFilter.Model> = _state
-
-//    override fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType) {
-//        _state.reduce {
-//            it.copy(itemRepresentationType = itemRepresentationType)
-//        }
-//        onFilterModelChanged(_state.value)
-//    }
 
     override fun setFilter(filterSettings: IEntitiesFilter.FilterSettings) {
         _state.reduce { model ->

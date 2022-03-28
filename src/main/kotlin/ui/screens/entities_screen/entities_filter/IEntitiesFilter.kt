@@ -14,11 +14,7 @@ interface IEntitiesFilter {
     //current state of the screen
     val state: Value<Model>
 
-
     //methods to change the state:
-    //change representation (cards/ grid):
-//    fun changeItemRepresentationType(itemRepresentationType: ItemRepresentationType)
-
     // add / update filter setting
     fun setFilter(filterSettings: FilterSettings)
 
@@ -27,9 +23,6 @@ interface IEntitiesFilter {
 
     //filter screen model:
     data class Model(
-        //cards / grid
-//        val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
-
         // filter settings for each entity field IDs from the data of main list screen
         val filters: List<FilterSettings> = listOf()
     )

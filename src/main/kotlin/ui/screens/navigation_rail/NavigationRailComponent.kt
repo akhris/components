@@ -18,7 +18,7 @@ class NavigationRailComponent(
         )
     )
 
-    override val models: Value<INavigationRail.Model> = _models
+    override val state: Value<INavigationRail.Model> = _models
 
 
     override fun onAddButtonClicked() {
