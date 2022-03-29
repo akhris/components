@@ -12,10 +12,22 @@ sealed class Specification : ISpecification {
     data class ByItem(val itemID: String) : Specification()
     data class Paginated(val pageNumber: Long, val itemsPerPage: Long) : Specification()
     data class Filters(val filters: List<FilterSpec> = listOf()) : Specification()
+    data class Sorted(val spec: SortingSpec) : Specification()
+    data class Grouped(val spec: GroupingSpec) : Specification()
+    data class CombinedSpecification(val specs: List<Specification>) : Specification()
 }
 
 data class FilterSpec(
     val entityClass: KClass<out IEntity<*>>,
     val fieldID: EntityFieldID,
     val filteredValues: List<EntityField>
+)
+
+data class SortingSpec(
+    val fieldID: EntityFieldID,
+    val isAscending: Boolean = true
+)
+
+data class GroupingSpec(
+    val fieldID: EntityFieldID
 )

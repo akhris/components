@@ -113,13 +113,18 @@ class EntitiesScreenComponent(
                         insertEntity = entitiesListConfig.entityClass?.let { insertUseCaseFactory.getInsertUseCase(it) },
                         removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
                         onEntitiesLoaded = { entities ->
-                            filterRouter.navigate { stack ->
-                                stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
-                                    .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
-                            }
-                            groupingRouter.navigate { stack ->
-                                stack.dropLastWhile { it is EntitiesGroupingConfig.EntitiesGrouping }
-                                    .plus(EntitiesGroupingConfig.EntitiesGrouping(entities = entities))
+
+                            //update filter/grouping items only if entitiesListConfig.entityClass is different!
+                            val currentClass = listRouter.activeChild.configuration.entityClass
+                            if (entitiesListConfig.entityClass != currentClass) {
+                                filterRouter.navigate { stack ->
+                                    stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
+                                        .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
+                                }
+                                groupingRouter.navigate { stack ->
+                                    stack.dropLastWhile { it is EntitiesGroupingConfig.EntitiesGrouping }
+                                        .plus(EntitiesGroupingConfig.EntitiesGrouping(entities = entities))
+                                }
                             }
                         },
                         filterSpec = _filterSpec

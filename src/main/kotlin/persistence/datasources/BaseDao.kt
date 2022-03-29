@@ -1,9 +1,11 @@
 package persistence.datasources
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
 import persistence.repository.FilterSpec
+import persistence.repository.IGSFPRepository
 
 interface BaseDao<T : IEntity<*>> {
     suspend fun getByID(id: String): T?
@@ -18,6 +20,21 @@ interface BasePagingDao<T : IEntity<*>> {
     suspend fun getItemsCount(): Long
 }
 
+interface IBaseGSFPDao<T : IEntity<*>> : BaseDao<T> {
+    suspend fun query(
+        groupingSpec: ISpecification?,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?
+    ): List<IGSFPRepository.Result<T>>
+
+    suspend fun getItemsCount(
+        groupingSpec: ISpecification?,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?
+    ): Long
+}
 
 
 interface IItemsIncomeDao : BaseDao<ItemIncome>, BasePagingDao<ItemIncome>
