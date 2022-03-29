@@ -6,10 +6,12 @@ import com.akhris.domain.core.repository.*
 import kotlinx.coroutines.flow.SharedFlow
 import persistence.datasources.BaseDao
 import persistence.datasources.BasePagingDao
+import persistence.datasources.IBaseGSFPDao
 
 class BaseRepository<ENTITY : IEntity<String>>(
     private val baseDao: BaseDao<ENTITY>,
-    private val basePagingDao: BasePagingDao<ENTITY>? = null
+    private val basePagingDao: BasePagingDao<ENTITY>? = null,
+    private val gsfpDao: IBaseGSFPDao<ENTITY>? = null
 ) :
     IRepository<String, ENTITY>,
     IRepositoryCallback<ENTITY>,
@@ -45,12 +47,20 @@ class BaseRepository<ENTITY : IEntity<String>>(
             Specification.QueryAll -> baseDao.getAll(listOf())
             is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
             is Specification.Filters -> baseDao.getAll(specification.filters)
+            is Specification.CombinedSpecification -> TODO()
+            is Specification.Grouped -> TODO()
+            is Specification.Sorted -> TODO()
         }
     }
 
     private fun requirePagingDao(): BasePagingDao<ENTITY> {
         return basePagingDao
             ?: throw IllegalArgumentException("to use paging functions please provide instance of BasePagingDao")
+    }
+
+    private fun requireGSFPDao(): IBaseGSFPDao<ENTITY> {
+        return gsfpDao
+            ?: throw IllegalArgumentException("to use combined specifications functions please provide instance of IBaseGSFPDao")
     }
 
     override suspend fun remove(t: ENTITY) {
