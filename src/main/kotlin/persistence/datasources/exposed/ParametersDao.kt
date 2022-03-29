@@ -11,6 +11,7 @@ import persistence.dto.exposed.EntityParameter
 import persistence.dto.exposed.EntityUnit
 import persistence.dto.exposed.Tables
 import persistence.mappers.toParameter
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -27,7 +28,7 @@ class ParametersDao : IParametersDao {
         }
     }
 
-    override suspend fun getAll(): List<Parameter> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<Parameter> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityParameter.all().map { it.toParameter() }

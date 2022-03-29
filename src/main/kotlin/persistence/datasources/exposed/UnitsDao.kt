@@ -10,6 +10,7 @@ import persistence.datasources.IUnitsDao
 import persistence.dto.exposed.EntityUnit
 import persistence.dto.exposed.Tables
 import persistence.mappers.toUnit
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -26,7 +27,7 @@ class UnitsDao : IUnitsDao {
         }
     }
 
-    override suspend fun getAll(): List<Unit> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<Unit> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityUnit.all().map { it.toUnit() }

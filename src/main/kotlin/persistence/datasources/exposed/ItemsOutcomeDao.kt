@@ -11,6 +11,7 @@ import persistence.datasources.IItemsOutcomeDao
 import persistence.dto.exposed.EntityItemOutcome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemOutcome
+import persistence.repository.FilterSpec
 import utils.set
 import utils.toUUID
 import java.util.*
@@ -72,7 +73,7 @@ class ItemsOutcomeDao : IItemsOutcomeDao {
         }
     }
 
-    override suspend fun getAll(): List<ItemOutcome> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<ItemOutcome> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityItemOutcome.all().map { it.toItemOutcome() }

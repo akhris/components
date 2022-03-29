@@ -7,6 +7,7 @@ import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.decompose.value.ValueObserver
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.*
@@ -17,6 +18,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
 //    private val sidePanelModel: Value<IEntitiesSidePanel.Model>,
 //    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
+    private val filterSpec: Value<Specification.Filters>,
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
@@ -102,18 +104,13 @@ class EntitiesListComponent<T : IEntity<*>>(
         }
     }
 
-//    override fun onEntityRemoved(entity: T) {
-//        scope.launch {
-//            log("removing entity: $entity")
-//            val result = removeEntity?.invoke(params = RemoveEntity.Remove(entity))
-//            log(result ?: "empty result")
-//        }
-//    }
+
 
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
+        val filterParams = filterSpec.value
         val specification = if (pagingParams == null) {
-            Specification.QueryAll
+            Specification.Filters(filterParams.filters)
         } else {
             Specification.Paginated(pageNumber = pagingParams.currentPage, itemsPerPage = pagingParams.itemsPerPage)
         }
@@ -136,9 +133,20 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     }
 
+    private val filterSpecObserver = object : ValueObserver<Specification.Filters> {
+        override fun invoke(p1: Specification.Filters) {
+            log("new filters spec came: $p1")
+            scope.launch {
+                invalidateEntities()
+            }
+        }
+    }
+
+
     init {
         lifecycle.subscribe(onDestroy = {
             scope.coroutineContext.cancelChildren()
+            filterSpec.unsubscribe(filterSpecObserver)
         })
 
         val repoCallback = (getEntities?.repo as? IRepositoryCallback<T>)
@@ -151,5 +159,7 @@ class EntitiesListComponent<T : IEntity<*>>(
                 invalidateEntities()
             }
         }
+
+        filterSpec.subscribe(filterSpecObserver)
     }
 }

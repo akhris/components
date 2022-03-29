@@ -89,5 +89,6 @@ sealed class EntityFieldID {
     companion object {
         const val tag_name = "tag_name"
         const val tag_description = "tag_description"
+        const val tag_entity_id = "tag_entity_id"
     }
 }

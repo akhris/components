@@ -11,6 +11,7 @@ import persistence.dto.exposed.Tables.ProjectItems.count
 import persistence.dto.exposed.Tables.ProjectItems.item
 import persistence.dto.exposed.Tables.ProjectItems.project
 import persistence.mappers.toProject
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -27,7 +28,7 @@ class ProjectsDao : BaseDao<Project> {
         }
     }
 
-    override suspend fun getAll(): List<Project> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<Project> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityProject.all().map { it.toProject() }

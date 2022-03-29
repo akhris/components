@@ -9,7 +9,7 @@ class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
         return listOf(
             EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
             EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),
-            EntityFieldID.EntityID(tag = "entity_id", "parent container", entityClass = Container::class)
+            EntityFieldID.EntityID(name = "parent container", tag = EntityFieldID.tag_entity_id, entityClass = Container::class)
         )
     }
 
@@ -20,7 +20,10 @@ class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
                 description = "parent container"
             )
             is EntityFieldID.StringID -> when (fieldID.tag) {
-                EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "item's name")
+                EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
+                    entity = entity.name,
+                    description = "item's name"
+                )
                 EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
                     entity = entity.description,
                     description = "item's description"

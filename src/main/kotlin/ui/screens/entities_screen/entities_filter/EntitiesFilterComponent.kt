@@ -11,7 +11,8 @@ import utils.replace
 class EntitiesFilterComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
     private val entities: List<T>,
-    private val mapperFactory: FieldsMapperFactory
+    private val mapperFactory: FieldsMapperFactory,
+    private val onFiltersChange: (List<IEntitiesFilter.FilterSettings>) -> Unit
 ) : IEntitiesFilter, ComponentContext by componentContext {
 
     private val _state = MutableValue(IEntitiesFilter.Model())
@@ -32,6 +33,7 @@ class EntitiesFilterComponent<T : IEntity<*>>(
 
             )
         }
+        onFiltersChange(_state.value.filters)
 //        onFilterModelChanged(_state.value)
     }
 

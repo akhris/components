@@ -10,6 +10,7 @@ import persistence.datasources.BaseDao
 import persistence.dto.exposed.EntitySupplier
 import persistence.dto.exposed.Tables
 import persistence.mappers.toSupplier
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -26,7 +27,7 @@ class SuppliersDao : BaseDao<Supplier> {
         }
     }
 
-    override suspend fun getAll(): List<Supplier> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<Supplier> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntitySupplier.all().map { it.toSupplier() }

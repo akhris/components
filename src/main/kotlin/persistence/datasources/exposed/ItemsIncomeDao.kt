@@ -8,6 +8,7 @@ import persistence.datasources.IItemsIncomeDao
 import persistence.dto.exposed.EntityItemIncome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemIncome
+import persistence.repository.FilterSpec
 import utils.set
 import utils.toUUID
 import java.util.*
@@ -80,7 +81,7 @@ class ItemsIncomeDao : IItemsIncomeDao {
         }
     }
 
-    override suspend fun getAll(): List<ItemIncome> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<ItemIncome> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityItemIncome.all().map { it.toItemIncome() }

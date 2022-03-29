@@ -1,8 +1,10 @@
 package ui.screens.entities_screen
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
+import com.arkivanov.decompose.router.activeChild
 import com.arkivanov.decompose.router.router
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -15,8 +17,11 @@ import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IInsertUseCaseFactory
 import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import persistence.repository.Specification
 import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
+import ui.screens.entities_screen.entities_filter.IEntitiesFilter
+import ui.screens.entities_screen.entities_filter.toSpec
 import ui.screens.entities_screen.entities_grouping.EntitiesGroupingComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
@@ -36,6 +41,9 @@ class EntitiesScreenComponent(
     private val _state = MutableValue(IEntitiesScreen.Model())
 
     override val state: Value<IEntitiesScreen.Model> = _state
+
+
+    private val _filterSpec: MutableValue<Specification.Filters> = MutableValue(Specification.Filters())
 
     private val listRouter =
         router(
@@ -95,6 +103,8 @@ class EntitiesScreenComponent(
 
         return when (entitiesListConfig) {
             is EntitiesListConfig.EntitiesList -> {
+                log("creating new list with filters: ${entitiesListConfig.filters}")
+
                 IEntitiesScreen.ListChild.List(
                     component = EntitiesListComponent(
                         componentContext = componentContext,
@@ -111,7 +121,8 @@ class EntitiesScreenComponent(
                                 stack.dropLastWhile { it is EntitiesGroupingConfig.EntitiesGrouping }
                                     .plus(EntitiesGroupingConfig.EntitiesGrouping(entities = entities))
                             }
-                        }
+                        },
+                        filterSpec = _filterSpec
                     )
                 )
             }
@@ -149,11 +160,19 @@ class EntitiesScreenComponent(
                 EntitiesFilterComponent(
                     componentContext = componentContext,
                     entities = entitiesFilterConfig.entities,
-                    mapperFactory = fieldsMapperFactory
+                    mapperFactory = fieldsMapperFactory,
+                    onFiltersChange = { newFilters ->
+                        _filterSpec.reduce {
+                            //create specifications from filters
+                            newFilters.toSpec(listRouter.activeChild.configuration.entityClass)
+                        }
+                    }
                 )
             )
         }
     }
+
+
     private fun createGroupingChild(
         entitiesFilterConfig: EntitiesGroupingConfig,
         componentContext: ComponentContext
@@ -202,7 +221,10 @@ class EntitiesScreenComponent(
 
     sealed class EntitiesListConfig : Parcelable {
         @Parcelize
-        data class EntitiesList(val entityClass: KClass<out IEntity<*>>?) : EntitiesListConfig()
+        data class EntitiesList(
+            val entityClass: KClass<out IEntity<*>>?,
+            val filters: List<IEntitiesFilter.FilterSettings> = listOf()
+        ) : EntitiesListConfig()
     }
 
     sealed class EntitiesSelectorConfig : Parcelable {
@@ -231,9 +253,9 @@ class EntitiesScreenComponent(
 val KClass<out IEntity<*>>.title: StringsIDs?
     get() {
         return when (this) {
-            ItemIncome::class->StringsIDs.itemIncome_title
-            ItemOutcome::class->StringsIDs.itemOutcome_title
-            WarehouseItem::class->StringsIDs.warehouseItem_title
+            ItemIncome::class -> StringsIDs.itemIncome_title
+            ItemOutcome::class -> StringsIDs.itemOutcome_title
+            WarehouseItem::class -> StringsIDs.warehouseItem_title
             ObjectType::class -> StringsIDs.types_title
             Parameter::class -> StringsIDs.parameters_title
             domain.entities.Unit::class -> StringsIDs.units_title
@@ -248,9 +270,9 @@ val KClass<out IEntity<*>>.title: StringsIDs?
 val KClass<out IEntity<*>>.description: StringsIDs?
     get() {
         return when (this) {
-            ItemIncome::class->StringsIDs.itemIncome_description
-            ItemOutcome::class->StringsIDs.itemOutcome_description
-            WarehouseItem::class->StringsIDs.warehouseItem_description
+            ItemIncome::class -> StringsIDs.itemIncome_description
+            ItemOutcome::class -> StringsIDs.itemOutcome_description
+            WarehouseItem::class -> StringsIDs.warehouseItem_description
             ObjectType::class -> StringsIDs.types_description
             Parameter::class -> StringsIDs.parameters_description
             domain.entities.Unit::class -> StringsIDs.units_description

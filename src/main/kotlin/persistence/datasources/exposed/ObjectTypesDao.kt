@@ -8,6 +8,7 @@ import persistence.datasources.BaseDao
 import persistence.dto.exposed.EntityObjectType
 import persistence.dto.exposed.Tables
 import persistence.mappers.toObjectType
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -24,7 +25,7 @@ class ObjectTypesDao : BaseDao<ObjectType> {
         }
     }
 
-    override suspend fun getAll(): List<ObjectType> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<ObjectType> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
             EntityObjectType.all().map { it.toObjectType() }

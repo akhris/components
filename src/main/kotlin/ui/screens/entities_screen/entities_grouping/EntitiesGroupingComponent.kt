@@ -1,6 +1,7 @@
 package ui.screens.entities_screen.entities_grouping
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -22,13 +23,21 @@ class EntitiesGroupingComponent<T : IEntity<*>>(
 
     override fun groupBy(fieldID: EntityFieldID) {
         _state.reduce {
-            it.copy(currentGrouping = IEntitiesGrouping.GroupingSettings(fieldID))
+            it.copy(
+                currentGrouping = if (it.currentGrouping?.fieldID == fieldID) null else
+                    IEntitiesGrouping.GroupingSettings(fieldID)
+            )
         }
     }
 
-    private fun updateFilters() {
-        val mapper = entities.firstOrNull()?.let { it::class }?.let { mapperFactory.getFieldsMapper(it) } ?: return
-        val fieldIDs = entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
+    private fun updateGroupings() {
+        val mapper = entities.firstOrNull()?.let { mapperFactory.getFieldsMapper(it::class) } ?: return
+        val fieldIDs =
+            entities.flatMap { e -> mapper.getEntityIDs(e) }.filter { it !is EntityFieldID.EntitiesListID }.toSet()
+        log("got fieldIDs for grouping: ")
+        fieldIDs.forEach {
+            log(it)
+        }
         _state.reduce { m ->
             m.copy(groupingSettings = fieldIDs.map { fId ->
                 val fields =
@@ -39,7 +48,7 @@ class EntitiesGroupingComponent<T : IEntity<*>>(
     }
 
     init {
-        updateFilters()
+        updateGroupings()
     }
 
 }

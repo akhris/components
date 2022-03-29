@@ -42,8 +42,9 @@ class BaseRepository<ENTITY : IEntity<String>>(
                     limit = specification.itemsPerPage
                 )
             }
-            Specification.QueryAll -> baseDao.getAll()
+            Specification.QueryAll -> baseDao.getAll(listOf())
             is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
+            is Specification.Filters -> baseDao.getAll(specification.filters)
         }
     }
 

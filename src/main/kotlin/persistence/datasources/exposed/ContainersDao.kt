@@ -8,6 +8,7 @@ import persistence.datasources.BaseDao
 import persistence.dto.exposed.EntityContainer
 import persistence.dto.exposed.Tables
 import persistence.mappers.toContainer
+import persistence.repository.FilterSpec
 import utils.toUUID
 import java.util.*
 
@@ -24,10 +25,14 @@ class ContainersDao : BaseDao<Container> {
         }
     }
 
-    override suspend fun getAll(): List<Container> {
+    override suspend fun getAll(filters: List<FilterSpec>): List<Container> {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            EntityContainer.all().map { it.toContainer() }
+            val query = Tables.Containers.selectAll()
+            filters.flatMap { it.toExposedFilter() }.forEach {
+                query.orWhere { it.first eq it.second }
+            }
+            EntityContainer.wrapRows(query).map { it.toContainer() }
         }
     }
 
@@ -82,7 +87,7 @@ class ContainersDao : BaseDao<Container> {
                     //do nothing
                 }
             }
-        commit()
+            commit()
 
         }
     }
