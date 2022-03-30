@@ -6,6 +6,7 @@ import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
+import persistence.datasources.GroupedResult
 
 interface IPagingRepository {
     suspend fun getItemsCount(specification: ISpecification): Long
@@ -19,13 +20,13 @@ interface IPagingRepository {
  */
 interface IGSFPRepository<ENTITY : IEntity<*>> {
     suspend fun query(
-        groupingSpec: ISpecification,
-        filterSpec: ISpecification,
-        sortingSpec: ISpecification,
-        pagingSpec: ISpecification
-    ): List<Result<ENTITY>>
+        groupingSpec: ISpecification?,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?
+    ): List<GroupedResult<ENTITY>>
 
-    data class Result<ENTITY : IEntity<*>>(val key: String, val items: List<ENTITY>)
+
 }
 
 /*

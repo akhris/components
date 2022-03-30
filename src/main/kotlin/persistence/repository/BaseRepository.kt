@@ -5,17 +5,15 @@ import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
 import kotlinx.coroutines.flow.SharedFlow
 import persistence.datasources.BaseDao
-import persistence.datasources.BasePagingDao
-import persistence.datasources.IBaseGSFPDao
+import persistence.datasources.GroupedResult
+
 
 class BaseRepository<ENTITY : IEntity<String>>(
-    private val baseDao: BaseDao<ENTITY>,
-    private val basePagingDao: BasePagingDao<ENTITY>? = null,
-    private val gsfpDao: IBaseGSFPDao<ENTITY>? = null
+    private val baseDao: BaseDao<ENTITY>
 ) :
     IRepository<String, ENTITY>,
     IRepositoryCallback<ENTITY>,
-    IPagingRepository {
+    IGSFPRepository<ENTITY> {
     private val repoCallbacks: RepositoryCallbacks<ENTITY> = RepositoryCallbacks()
 
     override val updates: SharedFlow<RepoResult<ENTITY>> = repoCallbacks.updates
@@ -38,12 +36,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
         }
         return when (specification) {
             is Specification.ByItem -> TODO("querying by Specification.ByItem is not yet implemented")
-            is Specification.Paginated -> {
-                requirePagingDao().query(
-                    offset = specification.itemsPerPage * (specification.pageNumber - 1),
-                    limit = specification.itemsPerPage
-                )
-            }
+            is Specification.Paginated -> throw UnsupportedOperationException("paginated output is not supported")
             Specification.QueryAll -> baseDao.getAll(listOf())
             is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
             is Specification.Filters -> baseDao.getAll(specification.filters)
@@ -53,15 +46,15 @@ class BaseRepository<ENTITY : IEntity<String>>(
         }
     }
 
-    private fun requirePagingDao(): BasePagingDao<ENTITY> {
-        return basePagingDao
-            ?: throw IllegalArgumentException("to use paging functions please provide instance of BasePagingDao")
-    }
+//    private fun requirePagingDao(): BasePagingDao<ENTITY> {
+//        return basePagingDao
+//            ?: throw IllegalArgumentException("to use paging functions please provide instance of BasePagingDao")
+//    }
 
-    private fun requireGSFPDao(): IBaseGSFPDao<ENTITY> {
-        return gsfpDao
-            ?: throw IllegalArgumentException("to use combined specifications functions please provide instance of IBaseGSFPDao")
-    }
+//    private fun requireGSFPDao(): IBaseGSFPDao<ENTITY> {
+//        return gsfpDao
+//            ?: throw IllegalArgumentException("to use combined specifications functions please provide instance of IBaseGSFPDao")
+//    }
 
     override suspend fun remove(t: ENTITY) {
         baseDao.removeById(t.id)
@@ -77,7 +70,22 @@ class BaseRepository<ENTITY : IEntity<String>>(
         repoCallbacks.onItemUpdated(t)
     }
 
-    override suspend fun getItemsCount(specification: ISpecification): Long {
-        return requirePagingDao().getItemsCount()
+    override suspend fun query(
+        groupingSpec: ISpecification?,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?
+    ): List<GroupedResult<ENTITY>> {
+        return baseDao.query(
+            groupingSpec = groupingSpec,
+            filterSpec = filterSpec,
+            sortingSpec = sortingSpec,
+            pagingSpec = pagingSpec
+        )
     }
+
+
+//    override suspend fun getItemsCount(specification: ISpecification): Long {
+//        return requirePagingDao().getItemsCount()
+//    }
 }
