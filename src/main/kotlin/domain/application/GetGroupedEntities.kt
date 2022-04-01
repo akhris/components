@@ -4,6 +4,7 @@ import com.akhris.domain.core.application.UseCase
 import com.akhris.domain.core.di.IoDispatcher
 import com.akhris.domain.core.entities.IEntity
 import kotlinx.coroutines.CoroutineDispatcher
+import persistence.datasources.GroupedResult
 import persistence.repository.IGSFPRepository
 import persistence.repository.Specification
 
@@ -11,10 +12,10 @@ class GetGroupedEntities<ID, ENTITY : IEntity<ID>>(
     private val repo: IGSFPRepository<ENTITY>,
     @IoDispatcher
     ioDispatcher: CoroutineDispatcher
-) : UseCase<List<IGSFPRepository.GroupedResult<ENTITY>>, GetGroupedEntities.Params>(ioDispatcher) {
+) : UseCase<List<GroupedResult<ENTITY>>, GetGroupedEntities.Params>(ioDispatcher) {
 
 
-    override suspend fun run(params: Params): List<IGSFPRepository.GroupedResult<ENTITY>> {
+    override suspend fun run(params: Params): List<GroupedResult<ENTITY>> {
         return when (params) {
             is Params.GetData -> {
                 val groupingSpec = params.specifications.find { it is Specification.Grouped }

@@ -105,6 +105,8 @@ class ContainersDao : BaseDao<Container> {
         }
     }
 
+
+
     override suspend fun query(
         groupingSpec: ISpecification?,
         filterSpec: ISpecification?,
@@ -112,6 +114,11 @@ class ContainersDao : BaseDao<Container> {
         pagingSpec: ISpecification?
     ): List<GroupedResult<Container>> {
         return newSuspendedTransaction {
+
+
+            //1. if groupingSpec!=null
+
+
             addLogger(StdOutSqlLogger)
             //1. initial query - select all items
             val query = Tables.Containers.selectAll()
@@ -172,65 +179,6 @@ class ContainersDao : BaseDao<Container> {
         TODO("Not yet implemented")
     }
 
-    private fun Query.addFiltering(filterSpec: ISpecification?) {
-        if (filterSpec !is Specification.Filters) {
-            return
-        }
-
-        val filters = filterSpec.filters.mapNotNull { spec ->
-            if (spec.entityClass != Container::class) return@mapNotNull null
-
-            when (spec.fieldID.tag) {
-                //name
-                EntityFieldID.tag_name -> spec.filteredValues.mapNotNull {
-                    (it as? EntityField.StringField)?.value?.let { name ->
-                        ExposedFilter(Tables.Containers.name, name)
-                    }
-                }
-                //description
-                EntityFieldID.tag_description -> spec.filteredValues.mapNotNull {
-                    (it as? EntityField.StringField)?.value?.let { description ->
-                        ExposedFilter(Tables.Containers.description, description)
-                    }
-                }
-                else -> null
-            }
-        }.flatten()
-
-        filters.forEach {
-            orWhere { it.first eq it.second }
-        }
-    }
 
 
-    private fun Query.addSorting(sortingSpec: ISpecification?) {
-        if (sortingSpec !is Specification.Sorted) {
-            return
-        }
-
-        when (sortingSpec.spec.fieldID.tag) {
-            //name
-            EntityFieldID.tag_name -> {
-                orderBy(
-                    Tables.Containers.name,
-                    order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
-                )
-            }
-            //description
-            EntityFieldID.tag_description -> {
-                orderBy(
-                    Tables.Containers.description,
-                    order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
-                )
-            }
-        }
-    }
-
-
-    private fun Query.addPaging(pagingSpec: ISpecification?) {
-        if (pagingSpec !is Specification.Paginated) {
-            return
-        }
-        limit(n = pagingSpec.itemsPerPage.toInt(), offset = pagingSpec.itemsPerPage * (pagingSpec.pageNumber - 1))
-    }
 }

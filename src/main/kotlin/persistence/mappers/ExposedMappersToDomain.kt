@@ -22,7 +22,7 @@ fun EntityItemIncome.toItemIncome(): ItemIncome {
 fun EntityItemOutcome.toItemOutcome(): ItemOutcome {
     return ItemOutcome(
         id = id.value.toString(),
-        item = item?.let { EntityCountable(it.toItem(), count ?: 0L) },
+        item = EntityCountable(item.toItem(), count ?: 0L),
         container = container?.toContainer(),
         dateTime = dateTime
     )
@@ -65,15 +65,6 @@ fun EntityObjectType.toObjectType(level: Int = 1): ObjectType {
         parentObjectType = if (level <= 0) null else parents.firstOrNull()?.toObjectType(level - 1)
     )
 }
-
-//fun EntityValue.toValue(): Value {
-//    return Value(
-//        id = id.value.toString(),
-//        parameter = parameter?.toParameter(),
-//        value = value,
-//        factor = factor
-//    )
-//}
 
 fun EntityParameter.toParameter(): Parameter {
     return Parameter(
