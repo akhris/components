@@ -6,11 +6,10 @@ import domain.entities.ItemIncome
 import domain.entities.ItemOutcome
 import domain.entities.Parameter
 import domain.entities.Unit
-import persistence.repository.FilterSpec
 
 interface BaseDao<T : IEntity<*>> {
     suspend fun getByID(id: String): T?
-    suspend fun getAll(filters: List<FilterSpec>): List<T>
+//    suspend fun getAll(filters: List<FilterSpec>): List<T>
     suspend fun insert(entity: T)
     suspend fun update(entity: T)
     suspend fun removeById(id: String)
