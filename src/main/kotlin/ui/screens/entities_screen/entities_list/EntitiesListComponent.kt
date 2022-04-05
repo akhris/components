@@ -18,7 +18,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
 //    private val sidePanelModel: Value<IEntitiesSidePanel.Model>,
 //    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
-    private val filterSpec: Value<Specification.Filters>,
+    private val filterSpec: Value<Specification.Filtered>,
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
@@ -110,7 +110,7 @@ class EntitiesListComponent<T : IEntity<*>>(
         val pagingParams = _state.value.pagingParameters
         val filterParams = filterSpec.value
         val specification = if (pagingParams == null) {
-            Specification.Filters(filterParams.filters)
+            Specification.Filtered(filterParams.filters)
         } else {
             Specification.Paginated(pageNumber = pagingParams.currentPage, itemsPerPage = pagingParams.itemsPerPage)
         }
@@ -133,8 +133,8 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     }
 
-    private val filterSpecObserver = object : ValueObserver<Specification.Filters> {
-        override fun invoke(p1: Specification.Filters) {
+    private val filterSpecObserver = object : ValueObserver<Specification.Filtered> {
+        override fun invoke(p1: Specification.Filtered) {
             log("new filters spec came: $p1")
             scope.launch {
                 invalidateEntities()

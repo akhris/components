@@ -19,7 +19,6 @@ import com.arkivanov.decompose.value.Value
 import strings.LocalizedStrings
 import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
-import ui.screens.entities_screen.entities_grouping.EntitiesGroupingUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
@@ -49,7 +48,6 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
                 ViewModeSelector(component.viewSettingsRouterState)
                 SelectorPanel(component.selectorRouterState, localizedStrings = localizedStrings)
-                GroupingPanel(component.groupingRouterState)
                 FilterPanel(component.filterRouterState)
             }
         },
@@ -107,17 +105,6 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
     }
 }
 
-@OptIn(ExperimentalDecomposeApi::class)
-@Composable
-private fun GroupingPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesGroupingChild>>) {
-    Children(routerState, animation = crossfade()) {
-        when (val child = it.instance) {
-            is IEntitiesScreen.EntitiesGroupingChild.EntitiesGrouping -> {
-                EntitiesGroupingUi(component = child.component)
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable

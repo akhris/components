@@ -1,18 +1,87 @@
 package persistence.datasources.exposed
 
-import com.akhris.domain.core.utils.log
 import domain.entities.ObjectType
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.BaseDao
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityObjectType
 import persistence.dto.exposed.Tables
 import persistence.mappers.toObjectType
-import persistence.repository.FilterSpec
 import utils.toUUID
-import java.util.*
 
-class ObjectTypesDao : BaseDao<ObjectType> {
+class ObjectTypesDao : BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
+    table = Tables.ObjectTypes,
+    entityClass = EntityObjectType
+) {
+    override fun mapToEntity(exposedEntity: EntityObjectType): ObjectType = exposedEntity.toObjectType()
+
+    override fun insertStatement(entity: ObjectType): Tables.ObjectTypes.(InsertStatement<Number>) -> Unit = {
+        it[name] = entity.name
+    }
+
+    override fun Transaction.doAfterInsert(entity: ObjectType) {
+        Tables.ParametersToObjectType.batchInsert(entity.parameters) { p ->
+            this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
+            this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
+        }
+        entity.parentObjectType?.let { pot ->
+            Tables.ObjectTypeToObjectTypes.insert { statement ->
+                statement[parent] = pot.id.toUUID()
+                statement[child] = entity.id.toUUID()
+            }
+        }
+    }
+
+    override fun updateStatement(entity: ObjectType): Tables.ObjectTypes.(UpdateStatement) -> Unit = {
+        it[name] = entity.name
+    }
+
+    override fun Transaction.doAfterUpdate(entity: ObjectType) {
+        //3. if parameters list changed - update it:
+
+        //remove all old parameters
+        Tables
+            .ParametersToObjectType
+            .deleteWhere { Tables.ParametersToObjectType.objectType eq entity.id.toUUID() }
+
+        //batch insert all new parameters
+        Tables.ParametersToObjectType.batchInsert(entity.parameters) { p ->
+            this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
+            this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
+        }
+
+
+        //3. update children-parent reference:
+        if (entity.parentObjectType == null) {
+            //delete reference:
+            Tables
+                .ObjectTypeToObjectTypes
+                .deleteWhere { Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }
+        } else {
+            //update reference
+            val rowsUpdated = Tables
+                .ObjectTypeToObjectTypes
+                .update({ Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }) {
+                    it[parent] = entity.parentObjectType.id.toUUID()
+                }
+            //if nothing was updated - insert new row
+            if (rowsUpdated == 0) {
+                Tables
+                    .ObjectTypeToObjectTypes
+                    .insert { statement ->
+                        statement[child] = entity.id.toUUID()
+                        statement[parent] = entity.parentObjectType.id.toUUID()
+                    }
+            } else {
+                //do nothing
+            }
+        }
+    }
+
+}
+
+
+/*
     override suspend fun getByID(id: String): ObjectType? {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
@@ -114,4 +183,5 @@ class ObjectTypesDao : BaseDao<ObjectType> {
             commit()
         }
     }
-}
+
+     */

@@ -11,9 +11,8 @@ sealed class Specification : ISpecification {
     data class Search(val searchString: String) : Specification()
     data class ByItem(val itemID: String) : Specification()
     data class Paginated(val pageNumber: Long, val itemsPerPage: Long) : Specification()
-    data class Filters(val filters: List<FilterSpec> = listOf()) : Specification()
+    data class Filtered(val filters: List<FilterSpec> = listOf()) : Specification()
     data class Sorted(val spec: SortingSpec) : Specification()
-    data class Grouped(val spec: GroupingSpec) : Specification()
     data class CombinedSpecification(val specs: List<Specification>) : Specification()
 }
 

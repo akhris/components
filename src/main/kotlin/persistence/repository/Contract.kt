@@ -1,33 +1,15 @@
 package persistence.repository
 
-import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
-import persistence.datasources.GroupedResult
 
 interface IPagingRepository {
     suspend fun getItemsCount(specification: ISpecification): Long
 }
 
-/**
- * G = Grouping
- * S = Sorting
- * F = Filtering
- * P = Paging
- */
-interface IGSFPRepository<ENTITY : IEntity<*>> {
-    suspend fun query(
-        groupingSpec: ISpecification?,
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): List<GroupedResult<ENTITY>>
-
-
-}
 
 /*
 

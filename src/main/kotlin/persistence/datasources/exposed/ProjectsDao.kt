@@ -1,21 +1,62 @@
 package persistence.datasources.exposed
 
-import com.akhris.domain.core.utils.log
 import domain.entities.Project
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.BaseDao
+import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.batchInsert
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityProject
 import persistence.dto.exposed.Tables
-import persistence.dto.exposed.Tables.ProjectItems.count
-import persistence.dto.exposed.Tables.ProjectItems.item
-import persistence.dto.exposed.Tables.ProjectItems.project
 import persistence.mappers.toProject
-import persistence.repository.FilterSpec
 import utils.toUUID
-import java.util.*
 
-class ProjectsDao : BaseDao<Project> {
+class ProjectsDao : BaseUUIDDao<Project, EntityProject, Tables.Projects>(
+    table = Tables.Projects,
+    entityClass = EntityProject
+) {
+    override fun mapToEntity(exposedEntity: EntityProject): Project = exposedEntity.toProject()
+
+    override fun insertStatement(entity: Project): Tables.Projects.(InsertStatement<Number>) -> Unit = {
+        it[name] = entity.name
+        it[description] = entity.description
+    }
+
+    override fun Transaction.doAfterInsert(entity: Project) {
+        Tables.ProjectItems.batchInsert(entity.items) { i ->
+            this[Tables.ProjectItems.project] = entity.id.toUUID()
+            this[Tables.ProjectItems.item] = i.entity.id.toUUID()
+            this[Tables.ProjectItems.count] = i.count
+        }
+    }
+
+    override fun updateStatement(entity: Project): Tables.Projects.(UpdateStatement) -> Unit = {
+        it[name] = entity.name
+        it[description] = entity.description
+    }
+
+    override fun Transaction.doAfterUpdate(entity: Project) {
+        //3. if items list changed - update it:
+        //remove all old parameters
+        Tables
+            .ProjectItems
+            .deleteWhere { Tables.ProjectItems.project eq entity.id.toUUID() }
+
+        //batch insert all new parameters
+        Tables
+            .ProjectItems
+            .batchInsert(entity.items) { i ->
+                this[Tables.ProjectItems.project] = entity.id.toUUID()
+                this[Tables.ProjectItems.item] = i.entity.id.toUUID()
+                this[Tables.ProjectItems.count] = i.count
+            }
+
+    }
+
+}
+
+
+/*
     override suspend fun getByID(id: String): Project? {
         return try {
             newSuspendedTransaction {
@@ -90,4 +131,5 @@ class ProjectsDao : BaseDao<Project> {
             commit()
         }
     }
-}
+
+     */

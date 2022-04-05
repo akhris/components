@@ -1,22 +1,39 @@
 package persistence.datasources.exposed
 
-import com.akhris.domain.core.utils.log
 import domain.entities.ItemOutcome
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.update
-import persistence.datasources.IItemsOutcomeDao
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityItemOutcome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemOutcome
-import persistence.repository.FilterSpec
 import utils.set
 import utils.toUUID
-import java.util.*
 
-class ItemsOutcomeDao : IItemsOutcomeDao {
+class ItemsOutcomeDao : BaseUUIDDao<ItemOutcome, EntityItemOutcome, Tables.ItemOutcomes>(
+    table = Tables.ItemOutcomes,
+    entityClass = EntityItemOutcome
+) {
+    override fun mapToEntity(exposedEntity: EntityItemOutcome): ItemOutcome = exposedEntity.toItemOutcome()
+
+    override fun insertStatement(entity: ItemOutcome): Tables.ItemOutcomes.(InsertStatement<Number>) -> Unit = {
+        it[id] = entity.id.toUUID()
+        it[item] = entity.item?.entity?.id?.toUUID()
+        it[count] = entity.item?.count
+        it[container]=entity.container?.id?.toUUID()
+        it[dateTime] = entity.dateTime
+    }
+
+    override fun updateStatement(entity: ItemOutcome): Tables.ItemOutcomes.(UpdateStatement) -> Unit = {
+        it[dateTime] = entity.dateTime
+        it[container] = entity.container?.id?.toUUID()
+        it[item] = entity.item?.entity?.id?.toUUID()
+        it[count] = entity.item?.count
+    }
+
+}
+
+
+/*
     override suspend fun getByID(id: String): ItemOutcome? {
         return try {
             newSuspendedTransaction {
@@ -96,4 +113,6 @@ class ItemsOutcomeDao : IItemsOutcomeDao {
             EntityItemOutcome.all().count()
         }
     }
-}
+
+
+     */

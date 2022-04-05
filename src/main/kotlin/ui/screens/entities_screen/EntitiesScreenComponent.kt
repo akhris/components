@@ -22,7 +22,6 @@ import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_filter.IEntitiesFilter
 import ui.screens.entities_screen.entities_filter.toSpec
-import ui.screens.entities_screen.entities_grouping.EntitiesGroupingComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsComponent
@@ -43,7 +42,7 @@ class EntitiesScreenComponent(
     override val state: Value<IEntitiesScreen.Model> = _state
 
 
-    private val _filterSpec: MutableValue<Specification.Filters> = MutableValue(Specification.Filters())
+    private val _filterSpec: MutableValue<Specification.Filtered> = MutableValue(Specification.Filtered())
 
     private val listRouter =
         router(
@@ -67,12 +66,6 @@ class EntitiesScreenComponent(
             childFactory = ::createFilterChild
         )
 
-    private val groupingRouter =
-        router(
-            initialConfiguration = EntitiesGroupingConfig.EntitiesGrouping(listOf()),
-            key = "grouping_router",
-            childFactory = ::createGroupingChild
-        )
 
     private val viewSettingsRouter =
         router(
@@ -89,8 +82,6 @@ class EntitiesScreenComponent(
     override val filterRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>> =
         filterRouter.state
 
-    override val groupingRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesGroupingChild>> =
-        groupingRouter.state
 
     override val viewSettingsRouterState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>> =
         viewSettingsRouter.state
@@ -120,10 +111,6 @@ class EntitiesScreenComponent(
                                 filterRouter.navigate { stack ->
                                     stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
                                         .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
-                                }
-                                groupingRouter.navigate { stack ->
-                                    stack.dropLastWhile { it is EntitiesGroupingConfig.EntitiesGrouping }
-                                        .plus(EntitiesGroupingConfig.EntitiesGrouping(entities = entities))
                                 }
                             }
                         },
@@ -178,21 +165,6 @@ class EntitiesScreenComponent(
     }
 
 
-    private fun createGroupingChild(
-        entitiesFilterConfig: EntitiesGroupingConfig,
-        componentContext: ComponentContext
-    ): IEntitiesScreen.EntitiesGroupingChild {
-        return when (entitiesFilterConfig) {
-            is EntitiesGroupingConfig.EntitiesGrouping -> IEntitiesScreen.EntitiesGroupingChild.EntitiesGrouping(
-                EntitiesGroupingComponent(
-                    componentContext = componentContext,
-                    entities = entitiesFilterConfig.entities,
-                    mapperFactory = fieldsMapperFactory
-                )
-            )
-        }
-    }
-
     private fun createViewSettingsChild(
         entitiesViewSettingsConfig: EntitiesViewSettingsConfig,
         componentContext: ComponentContext
@@ -240,11 +212,6 @@ class EntitiesScreenComponent(
     sealed class EntitiesFilterConfig : Parcelable {
         @Parcelize
         data class EntitiesFilter(val entities: List<IEntity<*>>) : EntitiesFilterConfig()
-    }
-
-    sealed class EntitiesGroupingConfig : Parcelable {
-        @Parcelize
-        data class EntitiesGrouping(val entities: List<IEntity<*>>) : EntitiesGroupingConfig()
     }
 
     sealed class EntitiesViewSettingsConfig : Parcelable {

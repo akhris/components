@@ -18,7 +18,6 @@ class GetListUseCaseFactory(
     private val getItemOutcomesList: GetItemOutcomesList,
     private val getProjectsList: GetProjectsList,
     private val getWareHouseItemsList: GetWarehouseItemsList
-//    private val getValuesList: GetValuesList
 ) :
     IGetListUseCaseFactory {
 

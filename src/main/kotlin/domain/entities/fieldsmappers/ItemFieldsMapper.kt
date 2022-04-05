@@ -7,8 +7,6 @@ import domain.entities.Parameter
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
-    private val tag_values = "tag_values"
-    private val tag_type = "tag_type"
 
 
     override fun getEntityIDs(entity: Item): List<EntityFieldID> {
@@ -106,6 +104,12 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
                 } else itemValuable
             }
         )
+    }
+
+    companion object{
+        const val tag_values = "tag_values"
+        const val tag_type = "tag_type"
+
     }
 
 

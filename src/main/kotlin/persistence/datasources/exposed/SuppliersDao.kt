@@ -1,20 +1,40 @@
 package persistence.datasources.exposed
 
-import com.akhris.domain.core.utils.log
 import domain.entities.Supplier
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.BaseDao
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntitySupplier
 import persistence.dto.exposed.Tables
 import persistence.mappers.toSupplier
-import persistence.repository.FilterSpec
-import utils.toUUID
-import java.util.*
 
-class SuppliersDao : BaseDao<Supplier> {
+class SuppliersDao : BaseUUIDDao<Supplier, EntitySupplier, Tables.Suppliers>(
+    table = Tables.Suppliers,
+    entityClass = EntitySupplier
+){
+    override fun mapToEntity(exposedEntity: EntitySupplier): Supplier = exposedEntity.toSupplier()
+
+    override fun insertStatement(entity: Supplier): Tables.Suppliers.(InsertStatement<Number>) -> Unit = {
+        it[name] = entity.name
+        it[url] = entity.url
+        it[description] = entity.description
+        it[isFavorite] = entity.isFavorite
+    }
+
+    override fun updateStatement(entity: Supplier): Tables.Suppliers.(UpdateStatement) -> Unit = {
+        it[name] = entity.name
+        it[url] = entity.url
+        it[description] = entity.description
+        it[isFavorite] = entity.isFavorite
+    }
+
+}
+
+
+
+
+
+
+/*
     override suspend fun getByID(id: String): Supplier? {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
@@ -72,4 +92,5 @@ class SuppliersDao : BaseDao<Supplier> {
             commit()
         }
     }
-}
+
+     */

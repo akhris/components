@@ -1,20 +1,37 @@
 package persistence.datasources.exposed
 
-import com.akhris.domain.core.utils.log
 import domain.entities.Unit
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.IUnitsDao
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityUnit
 import persistence.dto.exposed.Tables
 import persistence.mappers.toUnit
-import persistence.repository.FilterSpec
-import utils.toUUID
-import java.util.*
 
-class UnitsDao : IUnitsDao {
+class UnitsDao : BaseUUIDDao<Unit, EntityUnit, Tables.Units>(
+    table = Tables.Units,
+    entityClass = EntityUnit
+) {
+
+
+    override fun mapToEntity(exposedEntity: EntityUnit): Unit {
+        return exposedEntity.toUnit()
+    }
+
+    override fun insertStatement(entity: Unit): Tables.Units.(InsertStatement<Number>) -> kotlin.Unit = {
+        it[unit] = entity.unit
+        it[isMultipliable] = entity.isMultipliable
+    }
+
+    override fun updateStatement(entity: Unit): Tables.Units.(UpdateStatement) -> kotlin.Unit = {
+        it[unit] = entity.unit
+        it[isMultipliable] = entity.isMultipliable
+    }
+
+
+}
+
+
+/*
     override suspend fun getByID(id: String): Unit? {
         return newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
@@ -68,4 +85,5 @@ class UnitsDao : IUnitsDao {
             commit()
         }
     }
-}
+
+     */

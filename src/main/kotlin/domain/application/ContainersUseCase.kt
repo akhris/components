@@ -8,4 +8,3 @@ typealias InsertContainer = InsertEntity<String, Container>
 typealias RemoveContainer = RemoveEntity<String, Container>
 typealias UpdateContainer = UpdateEntity<String, Container>
 typealias GetContainersList = GetEntities<String, Container>
-typealias GetContainersGroupedList = GetGroupedEntities<String, Container>

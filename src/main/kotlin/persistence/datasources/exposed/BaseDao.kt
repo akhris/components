@@ -10,55 +10,57 @@ import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.statements.InsertStatement
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.BaseDao
-import persistence.datasources.GroupedResult
+import persistence.datasources.IBaseDao
 import persistence.dto.exposed.Tables
 import persistence.repository.Specification
+import java.util.*
 
 abstract class BaseDao<
         ENTITY : IEntity<*>,
         EXPOSED_ID : Comparable<EXPOSED_ID>,
         EXPOSED_ENTITY : Entity<EXPOSED_ID>,
-        EXPOSED_ENTITY_CLASS : EntityClass<EXPOSED_ID, EXPOSED_ENTITY>
+        EXPOSED_TABLE : IdTable<EXPOSED_ID>
         >(
-    protected val table: IdTable<EXPOSED_ID>,
-    private val entityClass: EXPOSED_ENTITY_CLASS
+    protected val table: EXPOSED_TABLE,
+    private val entityClass: EntityClass<EXPOSED_ID, EXPOSED_ENTITY>
 ) :
-    BaseDao<ENTITY> {
+    IBaseDao<ENTITY> {
 
-
-    /**
-     * Resulting table in GroupingSlice must contain entity's id (table.id)
-     */
-    protected abstract fun getTableField(fieldID: EntityFieldID): GroupingSlice
 
     abstract fun mapToEntity(exposedEntity: EXPOSED_ENTITY): ENTITY
 
+//    abstract fun Transaction.mapIntoExposed(exposed: EXPOSED_ENTITY, entity: ENTITY)
 
-//    abstract fun mapToExposed(entity: ENTITY): EXPOSED_ENTITY
+    protected abstract fun mapToID(id: Any): EXPOSED_ID
 
-    abstract fun Transaction.mapIntoExposed(exposed: EXPOSED_ENTITY, entity: ENTITY)
+    protected abstract fun insertStatement(entity: ENTITY): EXPOSED_TABLE.(InsertStatement<Number>) -> Unit
+    protected open fun Transaction.doAfterInsert(entity: ENTITY) {}
 
-    abstract fun mapToID(id: Any): EXPOSED_ID
+    protected abstract fun updateStatement(entity: ENTITY): EXPOSED_TABLE.(UpdateStatement) -> Unit
+    protected open fun Transaction.doAfterUpdate(entity: ENTITY) {}
 
-    override suspend fun query(
-        groupingSpec: ISpecification?,
+
+    override suspend fun getItemsCount(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?
-    ): List<GroupedResult<ENTITY>> {
+    ): Long {
         return newSuspendedTransaction {
-            if (groupingSpec == null) {
-                getNotGroupedResult(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
-            } else {
-                getGroupedResult(
-                    groupingSpec = groupingSpec,
-                    filterSpec = filterSpec,
-                    sortingSpec = sortingSpec,
-                    pagingSpec = pagingSpec
-                )
-            }
+            getNotGroupedQuery(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec).count()
+        }
+    }
+
+    override suspend fun query(
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?
+    ): List<ENTITY> {
+        return newSuspendedTransaction {
+            val query = getNotGroupedQuery(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+            entityClass.wrapRows(query).map { mapToEntity(it) }
         }
     }
 
@@ -77,60 +79,36 @@ abstract class BaseDao<
     override suspend fun insert(entity: ENTITY) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            entityClass.new {
-                mapIntoExposed(this, entity)
+            entity.id?.let {
+                table.insert { statement -> statement[id] = mapToID(it) }
             }
+            table.insert(insertStatement(entity))
+            doAfterInsert(entity)
             commit()
         }
     }
+
 
     override suspend fun update(entity: ENTITY) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            val currentEntity = entity.id?.let { entityClass[mapToID(it)] }
-            currentEntity?.let {
-                mapIntoExposed(it, entity)
-            }
+            table.update(where = entity.id?.let { { table.id eq mapToID(it) } }, body = updateStatement(entity))
+            doAfterUpdate(entity)
+//            val currentEntity = entity.id?.let { entityClass[mapToID(it)] }
+//            currentEntity?.let {
+//                mapIntoExposed(it, entity)
+//            }
             commit()
         }
     }
 
-    override suspend fun getItemsCount(
-        groupingSpec: ISpecification?,
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): Long {
-        return newSuspendedTransaction {
-            if (groupingSpec == null) {
-                getNotGroupedQuery(filterSpec, sortingSpec, pagingSpec).count()
-            } else {
-                getGroupedResultGroups(
-                    groupingSpec = groupingSpec,
-                    filterSpec = filterSpec,
-                    sortingSpec = sortingSpec,
-                    pagingSpec = pagingSpec
-                ).size.toLong()
-            }
-        }
-    }
 
     override suspend fun removeById(id: String) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            val currentEntity = entityClass[mapToID(id)]
-            currentEntity.delete()
+            entityClass[mapToID(id)].delete()
             commit()
         }
-    }
-
-    private fun Transaction.getNotGroupedResult(
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): List<GroupedResult<ENTITY>> {
-        val query = getNotGroupedQuery(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
-        return listOf(GroupedResult("default", entityClass.wrapRows(query).map { mapToEntity(it) }))
     }
 
     private fun Transaction.getNotGroupedQuery(
@@ -139,7 +117,7 @@ abstract class BaseDao<
         pagingSpec: ISpecification?
     ): Query {
         val query = table.selectAll()
-        (filterSpec as? Specification.Filters)?.let {
+        (filterSpec as? Specification.Filtered)?.let {
             query.addFiltering(it)
         }
         (sortingSpec as? Specification.Sorted)?.let {
@@ -152,71 +130,8 @@ abstract class BaseDao<
         return query
     }
 
-    private fun Transaction.getGroupedResult(
-        groupingSpec: ISpecification?,
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): List<GroupedResult<ENTITY>> {
 
-        val groupsKeys = getGroupedResultGroups(
-            groupingSpec = groupingSpec,
-            filterSpec = filterSpec,
-            sortingSpec = sortingSpec,
-            pagingSpec = pagingSpec
-        )
-
-        return listOf()
-    }
-
-    /**
-     * Returned grouped result in a form of the list of pair:
-     * ID of
-     */
-    private fun Transaction.getGroupedResultGroups(
-        groupingSpec: ISpecification?,
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): List<Pair<Any, List<EXPOSED_ID>>> {
-        val query = table.selectAll()
-        //1. filtering if it's given
-        (filterSpec as? Specification.Filters)?.let {
-            query.addFiltering(it)
-        }
-
-        //2. sorting if it's given
-        (sortingSpec as? Specification.Sorted)?.let {
-            query.addSorting(it)
-        }
-        //3. grouping if it's given
-        return (groupingSpec as? Specification.Grouped)?.let {
-            val groupByFieldID = it.spec.fieldID
-            // get all values for that fieldID:
-            // need a table and field in Exposed for fieldID
-            val groupSlice = getTableField(groupByFieldID)
-
-            //using DSL - get all values for given column
-            //convert list of pairs <a,b> to list of pair<"key", list<entity id>>
-            groupSlice
-                .table
-                .slice(groupSlice.groupColumn, table.id)
-                .selectAll()
-                .distinct()
-                .mapNotNull { result ->
-                    result[groupSlice.groupColumn]?.let { gc -> gc to result[table.id] as EXPOSED_ID }
-                } //https://stackoverflow.com/questions/53433108/kotlin-from-a-list-of-maps-to-a-map-grouped-by-key
-                .groupBy({ entry -> entry.first }, { entry -> entry.second })
-                .toList()
-        } ?: throw IllegalArgumentException("groupingSpec must be Specification.Grouped class instance")
-    }
-
-    protected inner class GroupingSlice(
-        val table: ColumnSet,
-        val groupColumn: Column<*>
-    )
-
-    private fun Query.addFiltering(filterSpec: Specification.Filters) {
+    private fun Query.addFiltering(filterSpec: Specification.Filtered) {
 
         val filters = filterSpec.filters.mapNotNull { spec ->
             if (spec.entityClass != Container::class) return@mapNotNull null
@@ -269,4 +184,17 @@ abstract class BaseDao<
         limit(n = pagingSpec.itemsPerPage.toInt(), offset = pagingSpec.itemsPerPage * (pagingSpec.pageNumber - 1))
     }
 
+}
+
+abstract class BaseUUIDDao<ENTITY : IEntity<*>,
+        EXPOSED_ENTITY : Entity<UUID>,
+        EXPOSED_TABLE : IdTable<UUID>>(table: EXPOSED_TABLE, entityClass: EntityClass<UUID, EXPOSED_ENTITY>) :
+    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass) {
+    override fun mapToID(id: Any): UUID {
+        return if (id is String) {
+            UUID.fromString(id)
+        } else {
+            throw IllegalArgumentException("ID must be String")
+        }
+    }
 }

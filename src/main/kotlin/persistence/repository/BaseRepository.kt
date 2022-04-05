@@ -4,16 +4,14 @@ import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
 import kotlinx.coroutines.flow.SharedFlow
-import persistence.datasources.BaseDao
-import persistence.datasources.GroupedResult
+import persistence.datasources.IBaseDao
 
 
 class BaseRepository<ENTITY : IEntity<String>>(
-    private val baseDao: BaseDao<ENTITY>
+    private val baseDao: IBaseDao<ENTITY>
 ) :
     IRepository<String, ENTITY>,
-    IRepositoryCallback<ENTITY>,
-    IGSFPRepository<ENTITY> {
+    IRepositoryCallback<ENTITY> {
     private val repoCallbacks: RepositoryCallbacks<ENTITY> = RepositoryCallbacks()
 
     override val updates: SharedFlow<RepoResult<ENTITY>> = repoCallbacks.updates
@@ -36,13 +34,17 @@ class BaseRepository<ENTITY : IEntity<String>>(
         }
         return when (specification) {
             is Specification.ByItem -> TODO("querying by Specification.ByItem is not yet implemented")
-            is Specification.Paginated -> throw UnsupportedOperationException("paginated output is not supported")
-            Specification.QueryAll -> baseDao.getAll(listOf())
+            is Specification.Paginated -> baseDao.query(pagingSpec = specification)
+            Specification.QueryAll -> baseDao.query()
             is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
-            is Specification.Filters -> baseDao.getAll(specification.filters)
-            is Specification.CombinedSpecification -> TODO()
-            is Specification.Grouped -> TODO()
-            is Specification.Sorted -> TODO()
+            is Specification.Filtered -> baseDao.query(filterSpec = specification)
+            is Specification.CombinedSpecification -> {
+                val sortingSpec = specification.specs.find { it is Specification.Sorted } as? Specification.Sorted
+                val filterSpec = specification.specs.find { it is Specification.Filtered } as? Specification.Filtered
+                val pagingSpec = specification.specs.find { it is Specification.Paginated } as? Specification.Paginated
+                baseDao.query(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+            }
+            is Specification.Sorted -> baseDao.query(sortingSpec = specification)
         }
     }
 
@@ -68,20 +70,6 @@ class BaseRepository<ENTITY : IEntity<String>>(
     override suspend fun update(t: ENTITY) {
         baseDao.update(t)
         repoCallbacks.onItemUpdated(t)
-    }
-
-    override suspend fun query(
-        groupingSpec: ISpecification?,
-        filterSpec: ISpecification?,
-        sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
-    ): List<GroupedResult<ENTITY>> {
-        return baseDao.query(
-            groupingSpec = groupingSpec,
-            filterSpec = filterSpec,
-            sortingSpec = sortingSpec,
-            pagingSpec = pagingSpec
-        )
     }
 
 

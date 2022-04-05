@@ -5,7 +5,7 @@ import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import kotlin.reflect.KClass
 
-fun List<IEntitiesFilter.FilterSettings>.toSpec(entityClass: KClass<out IEntity<*>>?): Specification.Filters {
+fun List<IEntitiesFilter.FilterSettings>.toSpec(entityClass: KClass<out IEntity<*>>?): Specification.Filtered {
     val filterSpecs = if (entityClass == null || isEmpty()) listOf() else mapNotNull { filterSettings ->
 
         val filteredValuesForFieldID = filterSettings.fieldsList.filter { it.isFiltered }.map { it.field }
@@ -19,5 +19,5 @@ fun List<IEntitiesFilter.FilterSettings>.toSpec(entityClass: KClass<out IEntity<
             )
     }
 
-    return Specification.Filters(filterSpecs)
+    return Specification.Filtered(filterSpecs)
 }
