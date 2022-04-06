@@ -4,14 +4,11 @@ import domain.entities.Unit
 
 class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
-    private val tag_unit = "tag_unit"
-    private val tag_is_multipliable = "tag_is_multipliable"
-
 
     override fun getEntityIDs(entity: Unit): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(tag_unit, "unit"),
-            EntityFieldID.BooleanID(tag_is_multipliable, "is multipliable")
+            EntityFieldID.StringID(Companion.tag_unit, "unit"),
+            EntityFieldID.BooleanID(Companion.tag_is_multipliable, "is multipliable")
         )
     }
 
@@ -33,6 +30,11 @@ class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
             is EntityFieldID.BooleanID -> entity.copy(isMultipliable = (field as EntityField.BooleanField).value)
             else -> throw IllegalArgumentException("field with column: $column was not found in entity: $entity")
         }
+    }
+
+    companion object {
+        const val tag_unit = "tag_unit"
+        const val tag_is_multipliable = "tag_is_multipliable"
     }
 
 

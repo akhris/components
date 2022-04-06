@@ -61,7 +61,7 @@ class EntitiesScreenComponent(
 
     private val filterRouter =
         router(
-            initialConfiguration = EntitiesFilterConfig.EntitiesFilter(listOf()),
+            initialConfiguration = EntitiesFilterConfig.EntitiesFilter(entities = listOf()),
             key = "filter_router",
             childFactory = ::createFilterChild
         )
@@ -104,15 +104,22 @@ class EntitiesScreenComponent(
                         insertEntity = entitiesListConfig.entityClass?.let { insertUseCaseFactory.getInsertUseCase(it) },
                         removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
                         onEntitiesLoaded = { entities ->
-
-                            //update filter/grouping items only if entitiesListConfig.entityClass is different!
-                            val currentClass = listRouter.activeChild.configuration.entityClass
-                            if (entitiesListConfig.entityClass != currentClass) {
+                            val prevClass =
+                                (filterRouterState.value.activeChild.configuration as? EntitiesFilterConfig.EntitiesFilter)?.entityClass
+                            val currentClass = entitiesListConfig.entityClass
+                            if (prevClass != currentClass) {
+                                log("navigating to new filter router. prevClass: $prevClass currentClass: $currentClass")
                                 filterRouter.navigate { stack ->
                                     stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
-                                        .plus(EntitiesFilterConfig.EntitiesFilter(entities = entities))
+                                        .plus(
+                                            EntitiesFilterConfig.EntitiesFilter(
+                                                entities = entities,
+                                                entityClass = currentClass
+                                            )
+                                        )
                                 }
                             }
+//                            }
                         },
                         filterSpec = _filterSpec
                     )
@@ -211,7 +218,10 @@ class EntitiesScreenComponent(
 
     sealed class EntitiesFilterConfig : Parcelable {
         @Parcelize
-        data class EntitiesFilter(val entities: List<IEntity<*>>) : EntitiesFilterConfig()
+        data class EntitiesFilter(
+            val entityClass: KClass<out IEntity<*>>? = null,
+            val entities: List<IEntity<*>>
+        ) : EntitiesFilterConfig()
     }
 
     sealed class EntitiesViewSettingsConfig : Parcelable {

@@ -1,6 +1,8 @@
 package persistence.datasources.exposed
 
 import domain.entities.Unit
+import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.UnitFieldsMapper
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityUnit
@@ -26,6 +28,23 @@ class UnitsDao : BaseUUIDDao<Unit, EntityUnit, Tables.Units>(
         it[unit] = entity.unit
         it[isMultipliable] = entity.isMultipliable
     }
+
+    override val filter: ((EntityField) -> ExposedFilter<Any>?)
+        get() = {
+            when (it.fieldID.tag) {
+                //name
+                UnitFieldsMapper.tag_unit ->
+                    (it as? EntityField.StringField)?.value?.let { unit ->
+                        ExposedFilter(Tables.Units.unit, unit)
+                    }
+                //description
+                UnitFieldsMapper.tag_is_multipliable ->
+                    (it as? EntityField.BooleanField)?.value?.let { isMultipliable ->
+                        ExposedFilter(Tables.Units.isMultipliable, isMultipliable)
+                    }
+                else -> null
+            } as? ExposedFilter<Any>?
+        }
 
 
 }

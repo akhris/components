@@ -1,6 +1,7 @@
 package ui.screens.entities_screen.entities_filter
 
 import com.akhris.domain.core.entities.IEntity
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -54,8 +55,10 @@ class EntitiesFilterComponent<T : IEntity<*>>(
     }
 
     private fun updateFilters() {
+        log("updating Filters for entities list of size: ${entities.size}")
         val mapper = entities.firstOrNull()?.let { it::class }?.let { mapperFactory.getFieldsMapper(it) } ?: return
         val fieldIDs = entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
+        log("fieldIDs: $fieldIDs")
         _state.reduce { m ->
             m.copy(filters = fieldIDs.map { fId ->
                 val fields =
@@ -68,6 +71,7 @@ class EntitiesFilterComponent<T : IEntity<*>>(
     }
 
     init {
+        log("initialize filter component for entities: $entities")
         updateFilters()
     }
 }

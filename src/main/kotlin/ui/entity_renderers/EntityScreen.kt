@@ -133,12 +133,16 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
                     RenderField(
                         it,
                         onFieldChange = { changedField ->
+                            log("onFieldChange: $changedField")
                             if (initialEntity::class == Item::class) {
                                 val entityField = changedField as? EntityField.EntityLink
                                 val objectType = entityField?.entity as? ObjectType
                                 if (objectType != null) {
                                     //check if this is object type and item, and add new parameters if necessary
                                     objectTypeField = entityField
+                                } else {
+                                    //
+                                    entity = mapper.mapIntoEntity(entity, changedField)
                                 }
                             } else {
                                 entity = mapper.mapIntoEntity(entity, changedField)

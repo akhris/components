@@ -11,7 +11,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
     private val baseDao: IBaseDao<ENTITY>
 ) :
     IRepository<String, ENTITY>,
-    IRepositoryCallback<ENTITY> {
+    IRepositoryCallback<ENTITY>, IPagingRepository {
     private val repoCallbacks: RepositoryCallbacks<ENTITY> = RepositoryCallbacks()
 
     override val updates: SharedFlow<RepoResult<ENTITY>> = repoCallbacks.updates
@@ -33,7 +33,6 @@ class BaseRepository<ENTITY : IEntity<String>>(
             throw IllegalArgumentException("unknown specification: $specification")
         }
         return when (specification) {
-            is Specification.ByItem -> TODO("querying by Specification.ByItem is not yet implemented")
             is Specification.Paginated -> baseDao.query(pagingSpec = specification)
             Specification.QueryAll -> baseDao.query()
             is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
@@ -48,15 +47,30 @@ class BaseRepository<ENTITY : IEntity<String>>(
         }
     }
 
+    override suspend fun getItemsCount(specification: ISpecification): Long {
+        if (specification !is Specification) {
+            throw IllegalArgumentException("unknown specification: $specification")
+        }
+        return when (specification) {
+            is Specification.Paginated -> baseDao.getItemsCount(pagingSpec = specification)
+            Specification.QueryAll -> baseDao.getItemsCount()
+            is Specification.Search -> TODO("querying by Specification.Search is not yet implemented")
+            is Specification.Filtered -> baseDao.getItemsCount(filterSpec = specification)
+            is Specification.CombinedSpecification -> {
+                val sortingSpec = specification.specs.find { it is Specification.Sorted } as? Specification.Sorted
+                val filterSpec = specification.specs.find { it is Specification.Filtered } as? Specification.Filtered
+                val pagingSpec = specification.specs.find { it is Specification.Paginated } as? Specification.Paginated
+                baseDao.getItemsCount(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+            }
+            is Specification.Sorted -> baseDao.getItemsCount(sortingSpec = specification)
+        }
+    }
+
 //    private fun requirePagingDao(): BasePagingDao<ENTITY> {
 //        return basePagingDao
 //            ?: throw IllegalArgumentException("to use paging functions please provide instance of BasePagingDao")
 //    }
 
-//    private fun requireGSFPDao(): IBaseGSFPDao<ENTITY> {
-//        return gsfpDao
-//            ?: throw IllegalArgumentException("to use combined specifications functions please provide instance of IBaseGSFPDao")
-//    }
 
     override suspend fun remove(t: ENTITY) {
         baseDao.removeById(t.id)

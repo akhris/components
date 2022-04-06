@@ -1,6 +1,8 @@
 package persistence.datasources.exposed
 
 import domain.entities.Container
+import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.EntityFieldID
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -67,6 +69,22 @@ class ContainersDao : BaseUUIDDao<Container, EntityContainer, Tables.Containers>
         }
     }
 
+    override val filter: ((EntityField) -> ExposedFilter<Any>?)
+        get() = {
+            when (it.fieldID.tag) {
+                //name
+                EntityFieldID.tag_name ->
+                    (it as? EntityField.StringField)?.value?.let { name ->
+                        ExposedFilter(Tables.Containers.name, name)
+                    }
+                //description
+                EntityFieldID.tag_description ->
+                    (it as? EntityField.StringField)?.value?.let { description ->
+                        ExposedFilter(Tables.Containers.description, description)
+                    }
+                else -> null
+            } as? ExposedFilter<Any>?
+        }
 
 }
 

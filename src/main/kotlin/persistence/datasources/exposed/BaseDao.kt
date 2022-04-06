@@ -3,7 +3,6 @@ package persistence.datasources.exposed
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
-import domain.entities.Container
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import org.jetbrains.exposed.dao.Entity
@@ -79,10 +78,10 @@ abstract class BaseDao<
     override suspend fun insert(entity: ENTITY) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            entity.id?.let {
-                table.insert { statement -> statement[id] = mapToID(it) }
+            table.insert { statement ->
+                entity.id?.let { statement[id] = mapToID(it) }
+                insertStatement(entity).invoke(table, statement)
             }
-            table.insert(insertStatement(entity))
             doAfterInsert(entity)
             commit()
         }
@@ -130,28 +129,18 @@ abstract class BaseDao<
         return query
     }
 
+    protected open val filter: ((EntityField) -> ExposedFilter<Any>?)? = null
 
     private fun Query.addFiltering(filterSpec: Specification.Filtered) {
 
-        val filters = filterSpec.filters.mapNotNull { spec ->
-            if (spec.entityClass != Container::class) return@mapNotNull null
-
-            when (spec.fieldID.tag) {
-                //name
-                EntityFieldID.tag_name -> spec.filteredValues.mapNotNull {
-                    (it as? EntityField.StringField)?.value?.let { name ->
-                        ExposedFilter(Tables.Containers.name, name)
+        val filters =
+            filterSpec
+                .filters
+                .flatMap { spec ->
+                    spec.filteredValues.mapNotNull { filteredField ->
+                        filter?.invoke(filteredField)
                     }
                 }
-                //description
-                EntityFieldID.tag_description -> spec.filteredValues.mapNotNull {
-                    (it as? EntityField.StringField)?.value?.let { description ->
-                        ExposedFilter(Tables.Containers.description, description)
-                    }
-                }
-                else -> null
-            }
-        }.flatten()
 
         filters.forEach {
             orWhere { it.first eq it.second }

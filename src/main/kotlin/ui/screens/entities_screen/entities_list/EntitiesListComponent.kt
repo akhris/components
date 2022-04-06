@@ -105,15 +105,20 @@ class EntitiesListComponent<T : IEntity<*>>(
     }
 
 
-
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
         val filterParams = filterSpec.value
-        val specification = if (pagingParams == null) {
-            Specification.Filtered(filterParams.filters)
-        } else {
-            Specification.Paginated(pageNumber = pagingParams.currentPage, itemsPerPage = pagingParams.itemsPerPage)
+
+        val filterSpec = Specification.Filtered(filterParams.filters)
+        val pagingSpec = pagingParams?.let {
+            Specification.Paginated(
+                pageNumber = it.currentPage,
+                itemsPerPage = it.itemsPerPage
+            )
         }
+
+        val specification = Specification.CombinedSpecification(listOfNotNull(filterSpec, pagingSpec))
+
         val entitiesResult = getEntities?.invoke(GetEntities.GetBySpecification(specification))
 
         log("invalidating entities for spec: $specification, entitiesResult: $entitiesResult")
@@ -150,9 +155,10 @@ class EntitiesListComponent<T : IEntity<*>>(
         })
 
         val repoCallback = (getEntities?.repo as? IRepositoryCallback<T>)
-
+        log("initial entities invalidate:")
         scope.launch {
-            setupPagination()
+//            setupPagination()
+
             invalidateEntities()    //todo subscribe to pagination parameters change
             repoCallback?.updates?.collect {
                 log("entities updated: $it")
