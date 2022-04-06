@@ -1,6 +1,9 @@
 package persistence.datasources.exposed
 
 import domain.entities.ItemIncome
+import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.ItemIncomeFieldsMapper
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import persistence.dto.exposed.EntityItemIncome
@@ -32,6 +35,37 @@ class ItemsIncomeDao : BaseUUIDDao<ItemIncome, EntityItemIncome, Tables.ItemInco
         it[count] = entity.item?.count
         it[supplier] = entity.supplier?.id?.toUUID()
     }
+
+    override val filter: ((EntityField) -> ExposedFilter<Any>?)?
+        get() = { entityField ->
+            when (entityField) {
+                is EntityField.EntityLink -> entityField.entity?.id?.let { eid ->
+                    when (entityField.fieldID.tag) {
+                        ItemIncomeFieldsMapper.tag_item ->
+                            ExposedFilter(
+                                Tables.ItemIncomes.item,
+                                EntityID(id = mapToID(eid), table = Tables.Items)
+                            )
+
+                        ItemIncomeFieldsMapper.tag_container ->
+                            ExposedFilter(
+                                Tables.ItemIncomes.container,
+                                EntityID(id = mapToID(eid), table = Tables.Containers)
+                            )
+
+                        ItemIncomeFieldsMapper.tag_supplier ->
+                            ExposedFilter(
+                                Tables.ItemIncomes.supplier,
+                                EntityID(id = mapToID(eid), table = Tables.Suppliers)
+                            )
+                        else -> null
+                    }
+                }
+                is EntityField.DateTimeField -> ExposedFilter(Tables.ItemIncomes.dateTime, entityField.value)
+                else -> null
+            } as? ExposedFilter<Any>?
+        }
+
 
 }
 

@@ -70,20 +70,27 @@ class ContainersDao : BaseUUIDDao<Container, EntityContainer, Tables.Containers>
     }
 
     override val filter: ((EntityField) -> ExposedFilter<Any>?)
-        get() = {
-            when (it.fieldID.tag) {
-                //name
-                EntityFieldID.tag_name ->
-                    (it as? EntityField.StringField)?.value?.let { name ->
-                        ExposedFilter(Tables.Containers.name, name)
+        get() = { entityField ->
+            when (entityField) {
+                //todo need a join somewhere in the top of the querying chain
+//                is EntityField.EntityLink -> {
+//                    entityField.entity?.id?.let {
+//                        ExposedFilter(
+//                            Tables.ContainerToContainers.parent,
+//                            EntityID(id = mapToID(it), table = table)
+//                        )
+//                    }
+//                }
+                is EntityField.StringField -> {
+                    when (entityField.fieldID.tag) {
+                        EntityFieldID.tag_name -> ExposedFilter(Tables.Containers.name, entityField.value)
+                        EntityFieldID.tag_description -> ExposedFilter(Tables.Containers.description, entityField.value)
+                        else -> null
                     }
-                //description
-                EntityFieldID.tag_description ->
-                    (it as? EntityField.StringField)?.value?.let { description ->
-                        ExposedFilter(Tables.Containers.description, description)
-                    }
+                }
                 else -> null
             } as? ExposedFilter<Any>?
+
         }
 
 }

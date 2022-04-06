@@ -4,19 +4,13 @@ import domain.entities.*
 
 class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
 
-    private val tag_item = "tag_item"
-    private val tag_container = "tag_container"
-    private val tag_quantity = "tag_quantity"
-    private val tag_date_time = "tag_date_time"
-    private val tag_supplier = "tag_supplier"
-
     override fun getEntityIDs(entity: ItemIncome): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
-            EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
+            EntityFieldID.EntityID(tag = Companion.tag_item, name = "item", entityClass = Item::class),
+            EntityFieldID.EntityID(tag = Companion.tag_container, name = "container", entityClass = Container::class),
 //            EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
-            EntityFieldID.DateTimeID(tag = tag_date_time, name = "date"),
-            EntityFieldID.EntityID(tag = tag_supplier, name = "supplier", entityClass = Supplier::class)
+            EntityFieldID.DateTimeID(tag = Companion.tag_date_time, name = "date"),
+            EntityFieldID.EntityID(tag = Companion.tag_supplier, name = "supplier", entityClass = Supplier::class)
         )
     }
 
@@ -24,12 +18,12 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_container -> DescriptiveFieldValue.CommonField(
+                    Companion.tag_container -> DescriptiveFieldValue.CommonField(
                         entity.container,
                         description = "container where item was put"
                     )
-                    tag_supplier -> DescriptiveFieldValue.CommonField(entity.supplier, description = "where items came from")
-                    tag_item -> DescriptiveFieldValue.CountableField(
+                    Companion.tag_supplier -> DescriptiveFieldValue.CommonField(entity.supplier, description = "where items came from")
+                    Companion.tag_item -> DescriptiveFieldValue.CountableField(
                         entity.item?.entity,
                         description = "item that came",
                         count = entity.item?.count
@@ -59,5 +53,12 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
             is EntityFieldID.DateTimeID -> entity.copy(dateTime = (field as? EntityField.DateTimeField)?.value)
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
+    }
+
+    companion object {
+       const val tag_item = "tag_item"
+       const val tag_container = "tag_container"
+       const val tag_date_time = "tag_date_time"
+       const val tag_supplier = "tag_supplier"
     }
 }
