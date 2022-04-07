@@ -130,6 +130,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
             fields
                 .take(if (isExpanded) fields.size else 1)
                 .forEach {
+
                     RenderField(
                         it,
                         onFieldChange = { changedField ->

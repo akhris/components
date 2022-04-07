@@ -5,6 +5,7 @@ import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.router.activeChild
+import com.arkivanov.decompose.router.replaceCurrent
 import com.arkivanov.decompose.router.router
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -20,14 +21,13 @@ import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import persistence.repository.Specification
 import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
-import ui.screens.entities_screen.entities_filter.IEntitiesFilter
 import ui.screens.entities_screen.entities_filter.toSpec
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsComponent
 import kotlin.reflect.KClass
 
-class EntitiesScreenComponent(
+class EntitiesScreenComponent constructor(
     componentContext: ComponentContext,
     private val entityClasses: List<KClass<out IEntity<*>>>,
     private val fieldsMapperFactory: FieldsMapperFactory,
@@ -40,9 +40,6 @@ class EntitiesScreenComponent(
     private val _state = MutableValue(IEntitiesScreen.Model())
 
     override val state: Value<IEntitiesScreen.Model> = _state
-
-
-    private val _filterSpec: MutableValue<Specification.Filtered> = MutableValue(Specification.Filtered())
 
     private val listRouter =
         router(
@@ -94,34 +91,31 @@ class EntitiesScreenComponent(
 
         return when (entitiesListConfig) {
             is EntitiesListConfig.EntitiesList -> {
-                log("creating new list with filters: ${entitiesListConfig.filters}")
-
+                log("creating new list component in $this")
                 IEntitiesScreen.ListChild.List(
                     component = EntitiesListComponent(
                         componentContext = componentContext,
+                        fSpec = entitiesListConfig.filterSpecification,
                         getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                         updateEntity = entitiesListConfig.entityClass?.let { updateUseCaseFactory.getUpdateUseCase(it) },
-                        insertEntity = entitiesListConfig.entityClass?.let { insertUseCaseFactory.getInsertUseCase(it) },
                         removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
+                        insertEntity = entitiesListConfig.entityClass?.let { insertUseCaseFactory.getInsertUseCase(it) },
                         onEntitiesLoaded = { entities ->
                             val prevClass =
-                                (filterRouterState.value.activeChild.configuration as? EntitiesFilterConfig.EntitiesFilter)?.entityClass
+                                (filterRouter.state.value.activeChild.configuration as? EntitiesFilterConfig.EntitiesFilter)?.entityClass
                             val currentClass = entitiesListConfig.entityClass
+                            // TODO: 4/7/22 update filter's here: disable values that are already filtered out! maybe use entitiesListConfig.filterSpecification?
+
                             if (prevClass != currentClass) {
                                 log("navigating to new filter router. prevClass: $prevClass currentClass: $currentClass")
-                                filterRouter.navigate { stack ->
-                                    stack.dropLastWhile { it is EntitiesFilterConfig.EntitiesFilter }
-                                        .plus(
-                                            EntitiesFilterConfig.EntitiesFilter(
-                                                entities = entities,
-                                                entityClass = currentClass
-                                            )
-                                        )
-                                }
+                                filterRouter.replaceCurrent(
+                                    EntitiesFilterConfig.EntitiesFilter(
+                                        entities = entities,
+                                        entityClass = currentClass
+                                    )
+                                )
                             }
-//                            }
-                        },
-                        filterSpec = _filterSpec
+                        }
                     )
                 )
             }
@@ -138,11 +132,7 @@ class EntitiesScreenComponent(
                     entityClasses = entityClasses,
                     componentContext = componentContext,
                     onEntitySelected = { newEntity ->
-                        listRouter.navigate { stack ->
-                            stack
-                                .dropLastWhile { it is EntitiesListConfig.EntitiesList }
-                                .plus(EntitiesListConfig.EntitiesList(entityClass = newEntity))
-                        }
+                        listRouter.replaceCurrent(EntitiesListConfig.EntitiesList(entityClass = newEntity))
                         updateTitleAndDescription(newEntity)
                     }
                 )
@@ -161,10 +151,13 @@ class EntitiesScreenComponent(
                     entities = entitiesFilterConfig.entities,
                     mapperFactory = fieldsMapperFactory,
                     onFiltersChange = { newFilters ->
-                        _filterSpec.reduce {
-                            //create specifications from filters
-                            newFilters.toSpec(listRouter.activeChild.configuration.entityClass)
-                        }
+                        val currentClass = listRouter.activeChild.configuration.entityClass
+                        listRouter.replaceCurrent(
+                            EntitiesListConfig.EntitiesList(
+                                entityClass = currentClass,
+                                filterSpecification = newFilters.toSpec(currentClass)
+                            )
+                        )
                     }
                 )
             )
@@ -197,6 +190,7 @@ class EntitiesScreenComponent(
     }
 
     init {
+        log("initializing EntitiesScreenComponent: $this")
         entityClasses.firstOrNull()?.let {
             updateTitleAndDescription(it)
         }
@@ -207,7 +201,7 @@ class EntitiesScreenComponent(
         @Parcelize
         data class EntitiesList(
             val entityClass: KClass<out IEntity<*>>?,
-            val filters: List<IEntitiesFilter.FilterSettings> = listOf()
+            val filterSpecification: Specification.Filtered = Specification.Filtered()
         ) : EntitiesListConfig()
     }
 

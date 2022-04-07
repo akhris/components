@@ -9,65 +9,36 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.akhris.domain.core.entities.IEntity
-import com.arkivanov.decompose.DefaultComponentContext
-import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import domain.entities.*
 import domain.entities.Unit
-import domain.entities.fieldsmappers.FieldsMapperFactory
-import domain.entities.usecase_factories.*
 import navigation.NavItem
-import org.kodein.di.compose.localDI
-import org.kodein.di.instance
-import settings.AppSettingsRepository
 import strings.LocalizedStrings
 import strings.defaultLocalizedStrings
 import ui.dialogs.Type
 import ui.dialogs.TypesPickerDialog
 import ui.entity_renderers.AddEntityDialog
-import ui.screens.nav_host.NavHostComponent
+import ui.screens.nav_host.INavHost
 import ui.screens.nav_host.NavHostUi
 import ui.screens.navigation_rail.NavigationRailComponent
 import ui.screens.navigation_rail.NavigationRailUi
 
 
 @Composable
-fun RootUi(localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
+fun RootUi(component: INavHost, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
     //todo use stringProvider
-    val di = localDI()
-    val appSettingsRepository by di.instance<AppSettingsRepository>()
-    val lifecycle = LifecycleRegistry()
-    val updateUseCaseFactory by di.instance<IUpdateUseCaseFactory>()
-    val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
-    val fieldsMapperFactory: FieldsMapperFactory by di.instance()
-    val getUseCaseFactory: IGetUseCaseFactory by di.instance()
-    val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
-    val insertUseCaseFactory: IInsertUseCaseFactory by di.instance()
 
-    val navHostComponent =
-        remember {
-            NavHostComponent(
-                componentContext = DefaultComponentContext(lifecycle),
-                fieldsMapperFactory = fieldsMapperFactory,
-                appSettingsRepository = appSettingsRepository,
-                updateUseCaseFactory = updateUseCaseFactory,
-                getListUseCaseFactory = listUseCaseFactory,
-                getUseCaseFactory = getUseCaseFactory,
-                removeUseCaseFactory = removeUseCaseFactory,
-                insertUseCaseFactory = insertUseCaseFactory
-            )
-        }
 
     var addClickedNavItem by remember { mutableStateOf<NavItem?>(null) }
 
     Row(modifier = Modifier.background(MaterialTheme.colors.background)) {
         NavigationRailUi(NavigationRailComponent(onNavigateTo = {
-            navHostComponent.setDestination(it.route)
+            component.setDestination(it.route)
         }, onAddButtonClicked = {
             addClickedNavItem = it
         }), localizedStrings = localizedStrings)
 
         Box(modifier = Modifier.fillMaxHeight().weight(1f)) {
-            NavHostUi(component = navHostComponent, localizedStrings = localizedStrings)
+            NavHostUi(component = component, localizedStrings = localizedStrings)
         }
     }
 

@@ -40,7 +40,7 @@ import kotlin.math.sign
 @Composable
 fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentationType: ItemRepresentationType) {
 
-    val state by component.state.subscribeAsState()
+    val state by remember(component) { component.state }.subscribeAsState()
 
     Box(modifier = Modifier.fillMaxHeight()) {
         EntityScreenContent(
@@ -48,7 +48,7 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
             entities = state.entities,
             onEntityRemoved = component.onEntityRemovedCallback?.let { rc -> { rc(it) } },
             onEntityUpdated = component::onEntityUpdated,
-            onEntityCopied = component.onEntityCopiedCallback?.let{cc->{cc(it)}}
+            onEntityCopied = component.onEntityCopiedCallback?.let { cc -> { cc(it) } }
         )
 
         state.pagingParameters?.let { pagingParams ->

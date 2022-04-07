@@ -24,7 +24,7 @@ interface INavHost {
      * Child classes containing child components.
      */
     sealed class Child {
-        class Settings(val component: ISettings) : Child()
-        class EntitiesListWithSidePanel(val component: IEntitiesScreen) : Child()
+        data class Settings(val component: ISettings) : Child()
+        data class EntitiesListWithSidePanel(val component: IEntitiesScreen) : Child()
     }
 }

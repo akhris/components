@@ -19,7 +19,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 
 @Composable
 fun EntitiesViewSettingsUi(component: IEntitiesViewSettings) {
-    val state by component.state.subscribeAsState()
+    val state by remember(component) { component.state }.subscribeAsState()
     RepresentationTypesSelector(
         representationTypes = state.representationTypes,
         currentType = state.currentType,

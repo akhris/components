@@ -1,6 +1,5 @@
 package persistence.mappers
 
-import com.akhris.domain.core.utils.log
 import domain.entities.*
 import domain.entities.Unit
 import persistence.dto.exposed.*
@@ -38,7 +37,6 @@ fun EntityItem.toItem(): Item {
 }
 
 fun EntityContainer.toContainer(level: Int = 1): Container {
-    log("mapping container:${this.name}. parent container: ${this.parents.firstOrNull()?.name}")
     return Container(
         id = id.value.toString(),
         name = name,

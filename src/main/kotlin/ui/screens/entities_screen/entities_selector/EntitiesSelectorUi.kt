@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.Role
@@ -25,7 +26,7 @@ import kotlin.reflect.KClass
 
 @Composable
 fun EntitiesSelectorUi(component: IEntitiesSelector, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
-    val state by component.state.subscribeAsState()
+    val state by remember(component) { component.state }.subscribeAsState()
 
     Column {
 

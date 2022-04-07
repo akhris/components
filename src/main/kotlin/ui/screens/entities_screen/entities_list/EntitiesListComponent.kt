@@ -7,7 +7,6 @@ import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.ValueObserver
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.*
@@ -16,9 +15,7 @@ import persistence.repository.Specification
 
 class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
-//    private val sidePanelModel: Value<IEntitiesSidePanel.Model>,
-//    private val onListModelChanged: (IEntitiesList.Model<T>) -> Unit,
-    private val filterSpec: Value<Specification.Filtered>,
+    private val fSpec: Specification.Filtered,
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
@@ -107,7 +104,7 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
-        val filterParams = filterSpec.value
+        val filterParams = fSpec
 
         val filterSpec = Specification.Filtered(filterParams.filters)
         val pagingSpec = pagingParams?.let {
@@ -138,20 +135,9 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     }
 
-    private val filterSpecObserver = object : ValueObserver<Specification.Filtered> {
-        override fun invoke(p1: Specification.Filtered) {
-            log("new filters spec came: $p1")
-            scope.launch {
-                invalidateEntities()
-            }
-        }
-    }
-
-
     init {
         lifecycle.subscribe(onDestroy = {
             scope.coroutineContext.cancelChildren()
-            filterSpec.unsubscribe(filterSpecObserver)
         })
 
         val repoCallback = (getEntities?.repo as? IRepositoryCallback<T>)
@@ -166,6 +152,6 @@ class EntitiesListComponent<T : IEntity<*>>(
             }
         }
 
-        filterSpec.subscribe(filterSpecObserver)
+
     }
 }

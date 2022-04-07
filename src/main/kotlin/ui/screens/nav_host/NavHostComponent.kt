@@ -2,7 +2,7 @@ package ui.screens.nav_host
 
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.RouterState
-import com.arkivanov.decompose.router.bringToFront
+import com.arkivanov.decompose.router.replaceCurrent
 import com.arkivanov.decompose.router.router
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
@@ -19,7 +19,7 @@ import ui.screens.settings.SettingsComponent
 /**
  * Main navigation component that holds all destinations
  */
-class NavHostComponent(
+class NavHostComponent constructor(
     componentContext: ComponentContext,
     private val fieldsMapperFactory: FieldsMapperFactory,
     private val appSettingsRepository: AppSettingsRepository,
@@ -38,7 +38,8 @@ class NavHostComponent(
         router(
             initialConfiguration = Config(NavItem.getDefaultHome().route),
             handleBackButton = true, // Pop the back stack on back button press
-            childFactory = ::createChild
+            childFactory = ::createChild,
+            key = "nav_host_router"
         )
 
     /**
@@ -50,7 +51,7 @@ class NavHostComponent(
      * Navigate to destination by route.
      */
     override fun setDestination(route: String) {
-        router.bringToFront(Config(route))
+        router.replaceCurrent(Config(route))
     }
 
     /**
@@ -81,6 +82,7 @@ class NavHostComponent(
                     )
                     else -> throw UnsupportedOperationException("unknown root: ${config.route}")
                 }
+
                 INavHost.Child.EntitiesListWithSidePanel(
                     EntitiesScreenComponent(
                         componentContext = componentContext,

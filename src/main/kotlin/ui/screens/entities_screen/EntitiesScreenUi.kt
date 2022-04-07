@@ -8,8 +8,10 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
@@ -36,19 +38,27 @@ import ui.screens.patterns.ScreenWithFilterSheet
 @Composable
 fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
 
-    val state by component.state.subscribeAsState()
 
+    val state by remember(component) { component.state }.subscribeAsState()
+
+    val itemRepresentationType = remember(state) { state.itemRepresentationType }
+    val listRouterState = remember(component){component.listRouterState}
+    val viewSettingsRouterState = remember(component){component.viewSettingsRouterState}
+    val selectorRouterState = remember(component){component.selectorRouterState}
+    val filterRouterState = remember(component){component.filterRouterState}
+
+    log("composing EntitiesScreenUi. component: $component localizedStrings: $localizedStrings")
     ScreenWithFilterSheet(
         isOpened = true,
         isModal = true,
         content = {
-            ListPane(component.listRouterState, itemRepresentationType = state.itemRepresentationType)
+            ListPane(listRouterState, itemRepresentationType = itemRepresentationType)
         },
         filterContent = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
-                ViewModeSelector(component.viewSettingsRouterState)
-                SelectorPanel(component.selectorRouterState, localizedStrings = localizedStrings)
-                FilterPanel(component.filterRouterState)
+                ViewModeSelector(viewSettingsRouterState)
+                SelectorPanel(selectorRouterState, localizedStrings = localizedStrings)
+                FilterPanel(filterRouterState)
             }
         },
         mainScreenTitle = {
@@ -69,6 +79,7 @@ private fun ListPane(
     Children(routerState) {
         when (val child = it.instance) {
             is IEntitiesScreen.ListChild.List<*> -> {
+                log("create list ui for $child")
                 ui.screens.entities_screen.entities_list.EntitiesListUi(
                     component = child.component,
                     itemRepresentationType = itemRepresentationType

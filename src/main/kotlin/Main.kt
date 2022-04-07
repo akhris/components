@@ -6,8 +6,12 @@ import androidx.compose.ui.window.application
 import com.akhris.domain.core.application.InsertEntity
 import com.akhris.domain.core.utils.LogUtils
 import com.akhris.domain.core.utils.log
+import com.arkivanov.decompose.DefaultComponentContext
+import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.di
 import domain.application.*
+import domain.entities.fieldsmappers.FieldsMapperFactory
+import domain.entities.usecase_factories.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.kodein.di.DI
@@ -22,25 +26,58 @@ import settings.AppSettingsRepository
 import strings.LocalizedStrings
 import strings.StringProvider
 import test.*
+import ui.screens.nav_host.INavHost
+import ui.screens.nav_host.NavHostComponent
 import ui.screens.root.RootUi
 import ui.theme.AppSettings
 import ui.theme.AppTheme
 
-fun main() = application {
+fun main() {
     LogUtils.isLogEnabled = true
     ExposedDbSettings.db   //connect to database
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = AppSettings.appTitle,
-        icon = painterResource("vector/grid_view_black_24dp.svg"),
-        content = {
-            mainWindow()
-        }
+
+    val appSettingsRepository by di.instance<AppSettingsRepository>()
+    val lifecycle = LifecycleRegistry()
+    val updateUseCaseFactory by di.instance<IUpdateUseCaseFactory>()
+    val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
+    val fieldsMapperFactory: FieldsMapperFactory by di.instance()
+    val getUseCaseFactory: IGetUseCaseFactory by di.instance()
+    val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
+    val insertUseCaseFactory: IInsertUseCaseFactory by di.instance()
+
+    val rootComponent = NavHostComponent(
+        componentContext = DefaultComponentContext(lifecycle),
+        fieldsMapperFactory = fieldsMapperFactory,
+        appSettingsRepository = appSettingsRepository,
+        getUseCaseFactory = getUseCaseFactory,
+        updateUseCaseFactory = updateUseCaseFactory,
+        getListUseCaseFactory = listUseCaseFactory,
+        insertUseCaseFactory = insertUseCaseFactory,
+        removeUseCaseFactory = removeUseCaseFactory
     )
+
+    application {
+
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = AppSettings.appTitle,
+            icon = painterResource("vector/grid_view_black_24dp.svg"),
+            content = {
+                mainWindow(rootComponent)
+            }
+        )
+    }
+
 }
 
+//fun main() =
+//    application {
+//
+//    }
+
 @Composable
-private fun mainWindow() = withDI(di) {
+private fun mainWindow(rootComponent: INavHost) = withDI(di) {
+
 
     val di = localDI()
     val settingsRepository: AppSettingsRepository by di.instance()
@@ -66,19 +103,19 @@ private fun mainWindow() = withDI(di) {
     remember(stringProvider) {
         log("got new string provider from settingsRepository: $stringProvider")
     }
-    Root(isDarkTheme ?: false, stringProvider ?: StringProvider())
+    Root(rootComponent, isDarkTheme ?: false, stringProvider ?: StringProvider())
 
 
 }
 
 @Composable
-private fun Root(isDarkTheme: Boolean, stringProvider: StringProvider) {
+private fun Root(component: INavHost, isDarkTheme: Boolean, stringProvider: StringProvider) {
 
     val localizedStrings =
         remember<LocalizedStrings>(stringProvider) { { stringID -> stringProvider.getLocalizedString(stringID.name) } }
 
     AppTheme(darkTheme = isDarkTheme) {
-        RootUi(localizedStrings = localizedStrings)
+        RootUi(component = component, localizedStrings = localizedStrings)
     }
 }
 

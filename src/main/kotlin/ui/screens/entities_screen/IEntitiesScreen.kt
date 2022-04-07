@@ -35,7 +35,7 @@ interface IEntitiesScreen {
     val viewSettingsRouterState: Value<RouterState<*, ViewSettingsChild>>
 
     sealed class ListChild {
-        class List<T : IEntity<*>>(val component: IEntitiesList<T>) : ListChild()
+        data class List<T : IEntity<*>>(val component: IEntitiesList<T>) : ListChild()
     }
 
     sealed class EntitiesSelectorChild {

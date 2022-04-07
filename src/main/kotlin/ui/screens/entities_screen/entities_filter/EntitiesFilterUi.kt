@@ -15,7 +15,7 @@ import utils.replace
 
 @Composable
 fun EntitiesFilterUi(component: IEntitiesFilter) {
-    val state by component.state.subscribeAsState()
+    val state by remember(component) { component.state }.subscribeAsState()
 
 
     Column {
