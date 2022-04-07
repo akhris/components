@@ -105,7 +105,8 @@ abstract class BaseDao<
     override suspend fun removeById(id: String) {
         newSuspendedTransaction {
             addLogger(StdOutSqlLogger)
-            entityClass[mapToID(id)].delete()
+            table.deleteWhere { table.id eq mapToID(id) }
+//            entityClass[mapToID(id)].delete()
             commit()
         }
     }
