@@ -111,6 +111,22 @@ abstract class BaseDao<
         }
     }
 
+    /**
+     * returns distinct values for the single column for the whole table.
+     * The column is given by it's name. If the name is not found - empty list is returned and message is sent to log.
+     */
+    override suspend fun slice(columnName: String): List<Any> {
+        val column = table.columns.find { it.name == columnName } ?: kotlin.run {
+            log("cannot find column with name: $columnName")
+            return listOf()
+        }
+        return table
+            .slice(column)
+            .selectAll()
+            .distinct()
+            .mapNotNull { it[column] }
+    }
+
     private fun Transaction.getNotGroupedQuery(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,

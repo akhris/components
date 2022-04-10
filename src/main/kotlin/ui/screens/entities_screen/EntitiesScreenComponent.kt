@@ -148,6 +148,8 @@ class EntitiesScreenComponent constructor(
             is EntitiesFilterConfig.EntitiesFilter -> IEntitiesScreen.EntitiesFilterChild.EntitiesFilter(
                 EntitiesFilterComponent(
                     componentContext = componentContext,
+                    getEntities = entitiesFilterConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
+                    entityClass = entitiesFilterConfig.entityClass,
                     entities = entitiesFilterConfig.entities,
                     mapperFactory = fieldsMapperFactory,
                     onFiltersChange = { newFilters ->

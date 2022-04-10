@@ -10,6 +10,10 @@ interface IPagingRepository {
     suspend fun getItemsCount(specification: ISpecification): Long
 }
 
+interface ISlicingRepository {
+    suspend fun getSlice(columnName: String): List<Any>
+}
+
 
 /*
 

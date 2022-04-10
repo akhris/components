@@ -9,7 +9,8 @@ import domain.entities.Unit
 
 interface IBaseDao<T : IEntity<*>> {
     suspend fun getByID(id: String): T?
-//    suspend fun getAll(filters: List<FilterSpec>): List<T>
+
+    //    suspend fun getAll(filters: List<FilterSpec>): List<T>
     suspend fun insert(entity: T)
     suspend fun update(entity: T)
     suspend fun removeById(id: String)
@@ -25,11 +26,6 @@ interface IBaseDao<T : IEntity<*>> {
         sortingSpec: ISpecification? = null,
         pagingSpec: ISpecification? = null
     ): Long
+
+    suspend fun slice(columnName: String): List<Any>
 }
-
-interface IItemsIncomeDao : IBaseDao<ItemIncome>
-interface IItemsOutcomeDao : IBaseDao<ItemOutcome>
-interface IUnitsDao : IBaseDao<Unit>
-
-//interface IValuesDao : BaseDao<Value>
-interface IParametersDao : IBaseDao<Parameter>

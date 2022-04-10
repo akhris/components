@@ -11,7 +11,9 @@ class BaseRepository<ENTITY : IEntity<String>>(
     private val baseDao: IBaseDao<ENTITY>
 ) :
     IRepository<String, ENTITY>,
-    IRepositoryCallback<ENTITY>, IPagingRepository {
+    IRepositoryCallback<ENTITY>,
+    IPagingRepository,
+    ISlicingRepository {
     private val repoCallbacks: RepositoryCallbacks<ENTITY> = RepositoryCallbacks()
 
     override val updates: SharedFlow<RepoResult<ENTITY>> = repoCallbacks.updates
@@ -86,6 +88,9 @@ class BaseRepository<ENTITY : IEntity<String>>(
         repoCallbacks.onItemUpdated(t)
     }
 
+    override suspend fun getSlice(columnName: String): List<Any> {
+        return baseDao.slice(columnName)
+    }
 
 //    override suspend fun getItemsCount(specification: ISpecification): Long {
 //        return requirePagingDao().getItemsCount()
