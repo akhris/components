@@ -20,7 +20,7 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
     private val getEntities: GetEntities<*, out T>?,
     private val entities: List<T>,
     private val mapperFactory: FieldsMapperFactory,
-    private val onFiltersChange: (List<IEntitiesFilter.FilterSettings>) -> Unit
+    private val onFiltersChange: (List<IEntitiesFilter.Filter>) -> Unit
 ) : IEntitiesFilter, ComponentContext by componentContext {
 
     private val _state = MutableValue(IEntitiesFilter.Model())
@@ -30,7 +30,7 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
     private val scope =
         CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    override fun setFilter(filterSettings: IEntitiesFilter.FilterSettings) {
+    override fun setFilter(filter: IEntitiesFilter.Filter) {
         _state.reduce { model ->
 
 
@@ -38,8 +38,8 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
 
             model.copy(
                 filters =
-                model.filters.replace(filterSettings.copy(isActive = true)) { fs ->
-                    fs.fieldID == filterSettings.fieldID
+                model.filters.replace(filter.copy(isActive = true)) { fs ->
+                    fs.fieldID == filter.fieldID
                 }
 
             )
@@ -48,16 +48,16 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
 //        onFilterModelChanged(_state.value)
     }
 
-    override fun removeFilter(filterSettings: IEntitiesFilter.FilterSettings) {
+    override fun removeFilter(filter: IEntitiesFilter.Filter) {
         _state.reduce { model ->
             val filterPresented =
-                model.filters.find { it.fieldID == filterSettings.fieldID } ?: IEntitiesFilter.FilterSettings(
-                    filterSettings.fieldID
+                model.filters.find { it.fieldID == filter.fieldID } ?: IEntitiesFilter.Filter(
+                    filter.fieldID
                 )
 
             model.copy(
                 filters = model.filters.replace(filterPresented.copy(isActive = false)) { fs ->
-                    fs.fieldID == filterSettings.fieldID
+                    fs.fieldID == filter.fieldID
                 }
             )
         }
@@ -79,9 +79,9 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
             val columnNames = fieldIDs.mapNotNull { it.columnName }
             val a = columnNames.map {
                 val columnValues = repo.getSlice(it)
-                IEntitiesFilter.FilterSettings(
+                IEntitiesFilter.Filter.Values(
                     fieldID,
-                    fieldsList = columnValues.map{IEntitiesFilter.FilteredField(field = mapper.getFieldByID())}
+                    fieldsList = columnValues.map { IEntitiesFilter.FilteringValue(it) }
                 )
             }
 
