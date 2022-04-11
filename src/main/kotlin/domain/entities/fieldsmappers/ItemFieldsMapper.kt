@@ -7,22 +7,20 @@ import domain.entities.Parameter
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
-
-
-    override fun getEntityIDs(entity: Item): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(tag = "tag_name", name = "name"),
             EntityFieldID.EntityID(tag = tag_type, name = "object type", entityClass = ObjectType::class),
             EntityFieldID.EntitiesListID(
                 tag = tag_values,
                 name = "values",
-                entitiesIDs = entity.values.mapIndexed { index, v ->
-                    EntityFieldID.EntityID(
-                        tag = "${tag_values}${index}",
-                        name = "value ${index + 1}",
-                        entityClass = Parameter::class
-                    )
-                },
+//                entitiesIDs = entity.values.mapIndexed { index, v ->
+//                    EntityFieldID.EntityID(
+//                        tag = "${tag_values}${index}",
+//                        name = "value ${index + 1}",
+//                        entityClass = Parameter::class
+//                    )
+//                },
                 entityClass = Parameter::class
             )
         )

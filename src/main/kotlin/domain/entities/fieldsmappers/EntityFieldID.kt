@@ -11,6 +11,7 @@ sealed class EntityFieldID {
     abstract val name: String
     abstract val tag: String
     abstract val isReadOnly: Boolean
+    open val columnName: String? = null
 
     /**
      * Field represents another Entity of class [entityClass]
@@ -19,18 +20,19 @@ sealed class EntityFieldID {
         override val tag: String,
         override val name: String,
         override val isReadOnly: Boolean = false,
-        val entityClass: KClass<out IEntity<*>>
+        val entityClass: KClass<out IEntity<*>>,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 
     /**
      * Field represents list of Entities of class [entityClass]
      */
-    data class EntitiesListID(
+    data class EntitiesListID constructor(
         override val tag: String,
         override val name: String,
         override val isReadOnly: Boolean = false,
-        val entitiesIDs: List<EntityID> = listOf(),
+//        val entitiesIDs: List<EntityID> = listOf(),
         val entityClass: KClass<out IEntity<*>>
     ) : EntityFieldID()
 
@@ -41,7 +43,8 @@ sealed class EntityFieldID {
     data class StringID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false
+        override val isReadOnly: Boolean = false,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 
@@ -51,7 +54,8 @@ sealed class EntityFieldID {
     data class DateTimeID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false
+        override val isReadOnly: Boolean = false,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 
@@ -61,7 +65,8 @@ sealed class EntityFieldID {
     data class FloatID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false
+        override val isReadOnly: Boolean = false,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 
@@ -71,7 +76,8 @@ sealed class EntityFieldID {
     data class LongID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false
+        override val isReadOnly: Boolean = false,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 
@@ -81,7 +87,8 @@ sealed class EntityFieldID {
     data class BooleanID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false
+        override val isReadOnly: Boolean = false,
+        override val columnName: String? = null
     ) :
         EntityFieldID()
 

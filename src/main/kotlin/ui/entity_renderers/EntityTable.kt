@@ -24,7 +24,6 @@ import domain.entities.Container
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.fieldsmappers.IFieldsMapper
-import domain.entities.fieldsmappers.flatten
 import test.Containers
 
 /**
@@ -34,8 +33,18 @@ import test.Containers
 @Composable
 fun <T : IEntity<*>> EntityTableContent(entities: List<T>, fieldsMapper: IFieldsMapper<T>) {
     val fields = remember(fieldsMapper, entities) {
-        entities.flatMap {
-            fieldsMapper.getEntityIDs(it).flatten()
+        entities.flatMap { entity ->
+
+            fieldsMapper.getEntityIDs().flatMap {
+                val field = fieldsMapper.getFieldByID(entity, it)
+                when(field){
+                    is EntityField.EntityLinksList->field.entities
+                    else-> listOfNotNull(field)
+                }.map { f->
+                    f.fieldID
+                }
+
+            }
         }.toSet()
     }
 
@@ -115,11 +124,13 @@ private fun RowScope.RenderEntityFieldCell(
         }
         is EntityField.EntityLink -> {
             RenderEntityLinkFieldCell(modifier = modifier, field, onValueChange = {
-                onFieldChange?.invoke(when(field){
-                    is EntityField.EntityLink.EntityLinkCountable -> field.copy(entity = it)
-                    is EntityField.EntityLink.EntityLinkSimple -> field.copy(entity = it)
-                    is EntityField.EntityLink.EntityLinkValuable -> field.copy(entity = it)
-                })
+                onFieldChange?.invoke(
+                    when (field) {
+                        is EntityField.EntityLink.EntityLinkCountable -> field.copy(entity = it)
+                        is EntityField.EntityLink.EntityLinkSimple -> field.copy(entity = it)
+                        is EntityField.EntityLink.EntityLinkValuable -> field.copy(entity = it)
+                    }
+                )
             })
         }
         is EntityField.EntityLinksList -> {

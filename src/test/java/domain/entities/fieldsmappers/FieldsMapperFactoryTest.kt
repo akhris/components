@@ -21,7 +21,7 @@ internal class FieldsMapperFactoryTest {
         val itemsMapper = factory.getFieldsMapper(Item::class)
         println("got items mapper: $itemsMapper")
         println("items column fields:")
-        itemsMapper.getEntityIDs(Item()).forEach {
+        itemsMapper.getEntityIDs().forEach {
             println("tag: ${it.tag}, name: ${it.name}")
         }
     }

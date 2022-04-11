@@ -7,7 +7,7 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
 
     private val tag_unit = "tag_unit"
 
-    override fun getEntityIDs(entity: Parameter): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
             EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),

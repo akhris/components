@@ -17,7 +17,10 @@ import androidx.compose.ui.window.rememberDialogState
 import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.unpack
-import domain.entities.fieldsmappers.*
+import domain.entities.fieldsmappers.EntityField
+import domain.entities.fieldsmappers.FieldsMapperFactory
+import domain.entities.fieldsmappers.IFieldsMapper
+import domain.entities.fieldsmappers.ItemFieldsMapper
 import domain.entities.usecase_factories.IGetListUseCaseFactory
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.localDI
@@ -123,9 +126,17 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
 
 
             items(entities) { entity ->
-                val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs(entity).flatten() }
+                val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs() }
                 val fields =
-                    remember(fieldsMapper, entityIDs) { entityIDs.mapNotNull { fieldsMapper.getFieldByID(entity, it) } }
+                    remember(fieldsMapper, entityIDs) {
+                        entityIDs.flatMap { fieldID ->
+                            when (val field = fieldsMapper.getFieldByID(entity, fieldID)) {
+                                is EntityField.EntityLinksList -> field.entities
+                                else -> listOfNotNull(field)
+                            }
+
+                        }
+                    }
 
                 val textString = remember(fields) {
                     val builder = StringBuilder()

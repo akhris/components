@@ -1,10 +1,15 @@
 package persistence.dto.exposed
 
+import com.akhris.domain.core.entities.IEntity
+import domain.entities.*
+import domain.entities.Unit
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.ColumnSet
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
+import kotlin.reflect.KClass
 
 object Tables {
 
@@ -111,6 +116,23 @@ object Tables {
         val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)
         val value = text(name = "value").nullable()
         val factor = integer(name = "factor").nullable()
+    }
+
+
+    fun <T : IEntity<*>> getTable(entityClass: KClass<out T>): ColumnSet? {
+        return when (entityClass) {
+            Unit::class -> Units
+            Parameter::class -> Parameters
+            ObjectType::class -> ObjectTypes
+            Item::class -> Items
+            Container::class -> Containers
+            Supplier::class -> Suppliers
+            ItemIncome::class -> ItemIncomes
+            ItemOutcome::class -> ItemOutcomes
+            Project::class -> Projects
+            WarehouseItem::class -> null
+            else -> null
+        }
     }
 
 }

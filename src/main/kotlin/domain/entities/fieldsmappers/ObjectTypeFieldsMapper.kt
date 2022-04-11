@@ -7,19 +7,19 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
     private val tag_parameters = "tag_parameters"
 
-    override fun getEntityIDs(entity: ObjectType): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.EntitiesListID(
                 tag = tag_parameters,
                 name = "parameters",
-                entitiesIDs = List(entity.parameters.size) { index ->
-                    EntityFieldID.EntityID(
-                        tag = "$tag_parameters$index",
-                        name = "parameter ${index + 1}",
-                        entityClass = Parameter::class
-                    )
-                },
+//                entitiesIDs = List(entity.parameters.size) { index ->
+//                    EntityFieldID.EntityID(
+//                        tag = "$tag_parameters$index",
+//                        name = "parameter ${index + 1}",
+//                        entityClass = Parameter::class
+//                    )
+//                },
                 entityClass = Parameter::class
             ),
             EntityFieldID.EntityID(tag = "parent_object_type", name = "parent type", entityClass = ObjectType::class)

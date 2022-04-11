@@ -112,7 +112,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
 
     val fields =
         remember(mapper, entity) {
-            mapper.getEntityIDs(entity = entity).mapNotNull { mapper.getFieldByID(entity, it) }
+            mapper.getEntityIDs().mapNotNull { mapper.getFieldByID(entity, it) }
         }
 
     Card(

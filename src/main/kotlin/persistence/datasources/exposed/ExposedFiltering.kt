@@ -1,26 +1,23 @@
 package persistence.datasources.exposed
 
-import domain.entities.Container
-import domain.entities.Item
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import org.jetbrains.exposed.sql.Column
 import persistence.dto.exposed.Tables
-import persistence.repository.FilterSpec
 
 typealias ExposedFilter<T> = Pair<Column<T>, T>
 
 
-fun FilterSpec.toExposedFilter(): List<ExposedFilter<Any>> {
-    //1. get columns by entity class:
-    return when (entityClass) {
-        Container::class -> {
-            getContainersFilters(fieldID, filteredValues)
-        }
-        Item::class -> listOf()
-        else->listOf()
-    }
-}
+//fun FilterSpec.toExposedFilter(): List<ExposedFilter<Any>> {
+//    //1. get columns by entity class:
+//    return when (entityClass) {
+//        Container::class -> {
+//            getContainersFilters(fieldID, filteredValues)
+//        }
+//        Item::class -> listOf()
+//        else->listOf()
+//    }
+//}
 
 private fun getContainersFilters(
     fieldID: EntityFieldID,

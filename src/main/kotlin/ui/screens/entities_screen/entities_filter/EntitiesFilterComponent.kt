@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 
 class EntitiesFilterComponent<T : IEntity<*>> constructor(
     componentContext: ComponentContext,
-    private val entityClass: KClass<out IEntity<*>>?,
+    private val entityClass: KClass<out T>?,
     private val getEntities: GetEntities<*, out T>?,
     private val entities: List<T>,
     private val mapperFactory: FieldsMapperFactory,
@@ -66,31 +66,48 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
 
 
     private suspend fun updateFilters() {
+        //0. for updating filters we need ISlicingRepository
         val repo = (getEntities?.repo as? ISlicingRepository) ?: return
 
         //1. get field ids of given entity:
-        log("updating Filters for entities list of size: ${entities.size}")
-        val mapper = entities.firstOrNull()?.let { it::class }?.let { mapperFactory.getFieldsMapper(it) } ?: return
-        val fieldIDs = entities.flatMap { e -> mapper.getEntityIDs(e) }.toSet()
+        val mapper = entityClass?.let { mapperFactory.getFieldsMapper(it) } ?: return
 
-        //2.for each field ID get filtered values by column name:
-        val sliceValues = fieldIDs.map {
-            //fixme entity field name != table column's name!
-          val valuesInTable = repo.getSlice(it.name)
-            IEntitiesFilter.FilterSettings(fieldID = it, fieldsList = valuesInTable.map { IEntitiesFilter.FilteredField(field = mapper.getFieldByID()) })
+        val fieldIDs = mapper.getEntityIDs()
 
-        }
 
-        log("fieldIDs: $fieldIDs")
-        _state.reduce { m ->
-            m.copy(filters = fieldIDs.map { fId ->
-                val fields =
-                    entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }.toSet()
+        val filters = fieldIDs.map { fieldID ->
+            val columnNames = fieldIDs.mapNotNull { it.columnName }
+            val a = columnNames.map {
+                val columnValues = repo.getSlice(it)
                 IEntitiesFilter.FilterSettings(
-                    fieldID = fId,
-                    fieldsList = fields.map { f -> IEntitiesFilter.FilteredField(field = f, isFiltered = false) })
-            })
+                    fieldID,
+                    fieldsList = columnValues.map{IEntitiesFilter.FilteredField(field = mapper.getFieldByID())}
+                )
+            }
+
         }
+//        //2. get fieldIDs for entity:
+//        val fieldIDs = entities.fir
+//
+//        //3. for each column get filtered values by column name:
+//        val sliceValues = table.columns.map {
+//            val valuesInTable = repo.getSlice(it.name)
+//            IEntitiesFilter.FilterSettings(
+//                fieldID = it,
+//                fieldsList = valuesInTable.map { IEntitiesFilter.FilteredField(field = mapper.getFieldByID()) })
+//
+//        }
+
+//        log("fieldIDs: $fieldIDs")
+//        _state.reduce { m ->
+//            m.copy(filters = fieldIDs.map { fId ->
+//                val fields =
+//                    entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }.toSet()
+//                IEntitiesFilter.FilterSettings(
+//                    fieldID = fId,
+//                    fieldsList = fields.map { f -> IEntitiesFilter.FilteredField(field = f, isFiltered = false) })
+//            })
+//        }
     }
 
     init {

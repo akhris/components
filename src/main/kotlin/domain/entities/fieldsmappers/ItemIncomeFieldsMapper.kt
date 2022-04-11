@@ -4,7 +4,7 @@ import domain.entities.*
 
 class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
 
-    override fun getEntityIDs(entity: ItemIncome): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.EntityID(tag = Companion.tag_item, name = "item", entityClass = Item::class),
             EntityFieldID.EntityID(tag = Companion.tag_container, name = "container", entityClass = Container::class),

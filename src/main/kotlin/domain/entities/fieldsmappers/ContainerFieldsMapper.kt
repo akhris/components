@@ -5,7 +5,7 @@ import domain.entities.Container
 class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
 
 
-    override fun getEntityIDs(entity: Container): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
             EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),

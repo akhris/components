@@ -5,7 +5,7 @@ import domain.entities.Unit
 class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
 
 
-    override fun getEntityIDs(entity: Unit): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(Companion.tag_unit, "unit"),
             EntityFieldID.BooleanID(Companion.tag_is_multipliable, "is multipliable")

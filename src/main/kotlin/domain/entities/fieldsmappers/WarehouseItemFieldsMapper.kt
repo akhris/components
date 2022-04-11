@@ -10,7 +10,7 @@ class WarehouseItemFieldsMapper : BaseFieldsMapper<WarehouseItem>() {
     private val tag_item = "tag_item"
     private val tag_container = "tag_container"
 
-    override fun getEntityIDs(entity: WarehouseItem): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class, isReadOnly = true),
             EntityFieldID.EntityID(

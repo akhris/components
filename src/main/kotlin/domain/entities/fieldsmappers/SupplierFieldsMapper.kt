@@ -7,7 +7,7 @@ class SupplierFieldsMapper : BaseFieldsMapper<Supplier>() {
     private val tag_url = "tag_url"
     private val tag_favorite = "tag_favorite"
 
-    override fun getEntityIDs(entity: Supplier): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
             EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),

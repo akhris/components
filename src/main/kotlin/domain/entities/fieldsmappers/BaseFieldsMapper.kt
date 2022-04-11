@@ -34,13 +34,26 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
             }
             is EntityFieldID.EntityID -> mapEntity(fieldID, fieldParams)
             is EntityFieldID.EntitiesListID -> {
+                val e = (getFieldParamsByFieldID(entity, fieldID).entity as? List<*>)
+                val entitiesSize = e?.size ?: 0
+                val entities = List(entitiesSize) { index ->
+                    val entityID = EntityFieldID.EntityID(
+                        tag = "${fieldID.tag}$index",
+                        name = "${fieldID.name} #${index + 1}",
+                        entityClass = fieldID.entityClass
+                    )
+                    val entityField = getFieldParamsByFieldID(entity, entityID)
+                    mapEntity(entityID, entityField)
+                }
+
                 EntityField.EntityLinksList(
                     fieldID = fieldID,
-                    entities = fieldID.entitiesIDs.map { entityID ->
-                        val entityField = getFieldParamsByFieldID(entity, entityID)
-                        mapEntity(entityID, entityField)
+                    entities = entities,
+//                    entities = fieldID.entitiesIDs.map { entityID ->
+//                        val entityField = getFieldParamsByFieldID(entity, entityID)
 //                        mapEntity(entityID, entityField)
-                    },
+////                        mapEntity(entityID, entityField)
+//                    },
                     description = fieldParams.description,
                     entityClass = fieldID.entityClass
                 )
@@ -101,6 +114,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
             )
         }
     }
+
 
 }
 

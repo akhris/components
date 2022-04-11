@@ -12,7 +12,7 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
     private val tag_quantity = "tag_quantity"
     private val tag_date_time = "tag_date_time"
 
-    override fun getEntityIDs(entity: ItemOutcome): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
             EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),

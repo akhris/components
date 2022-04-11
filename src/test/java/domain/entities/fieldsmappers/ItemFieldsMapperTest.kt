@@ -18,7 +18,7 @@ internal class ItemFieldsMapperTest {
 
     @Test
     fun test_item_fields() {
-        val fieldsIDs = mapper.getEntityIDs(item)
+        val fieldsIDs = mapper.getEntityIDs()
         println("item: ${Items.Resistors.resistor1}")
         println("fields:")
         fieldsIDs.forEachIndexed { index, fieldID ->

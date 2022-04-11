@@ -9,20 +9,20 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
 
     private val tag_items = "tag_items"
 
-    override fun getEntityIDs(entity: Project): List<EntityFieldID> {
+    override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.StringID(EntityFieldID.tag_description, "description"),
             EntityFieldID.EntitiesListID(
                 tag = tag_items,
                 name = "items",
-                entitiesIDs = List(entity.items.size) { index ->
-                    EntityFieldID.EntityID(
-                        tag = "$tag_items$index",
-                        name = "item ${index + 1}",
-                        entityClass = Item::class
-                    )
-                },
+//                entitiesIDs = List(entity.items.size) { index ->
+//                    EntityFieldID.EntityID(
+//                        tag = "$tag_items$index",
+//                        name = "item ${index + 1}",
+//                        entityClass = Item::class
+//                    )
+//                },
                 entityClass = Item::class
             )
         )
