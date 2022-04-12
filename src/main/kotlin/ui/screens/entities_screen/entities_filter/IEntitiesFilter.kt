@@ -1,7 +1,6 @@
 package ui.screens.entities_screen.entities_filter
 
 import com.arkivanov.decompose.value.Value
-import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import ui.screens.entities_screen.entities_filter.IEntitiesFilter.Filter
 
@@ -37,7 +36,7 @@ interface IEntitiesFilter {
         /**
          * Filter type that has a list of filtering values
          */
-        class Values(
+        data class Values(
             override val fieldID: EntityFieldID,
             val fieldsList: List<FilteringValue> = listOf(),
             override val isActive: Boolean = false
@@ -46,7 +45,7 @@ interface IEntitiesFilter {
         /**
          * Filter type that has a range of filtering values
          */
-        class Range(
+        data class Range(
             override val fieldID: EntityFieldID,
             val from: Any? = null,
             val to: Any? = null,

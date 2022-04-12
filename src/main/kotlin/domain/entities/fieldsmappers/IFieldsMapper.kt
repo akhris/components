@@ -9,6 +9,7 @@ interface IFieldsMapper<T : IEntity<*>> {
     fun mapIntoEntity(entity: T, field: EntityField): T
 }
 
+
 //fun List<EntityFieldID>.flatten(): List<EntityFieldID> {
 //    return flatMap { fid ->
 //        when (fid) {

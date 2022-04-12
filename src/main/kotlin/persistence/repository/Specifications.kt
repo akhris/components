@@ -2,7 +2,6 @@ package persistence.repository
 
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.ISpecification
-import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import kotlin.reflect.KClass
 
@@ -15,11 +14,25 @@ sealed class Specification : ISpecification {
     data class CombinedSpecification(val specs: List<Specification>) : Specification()
 }
 
-data class FilterSpec(
-    val entityClass: KClass<out IEntity<*>>,
-    val fieldID: EntityFieldID,
-    val filteredValues: List<EntityField>
-)
+sealed class FilterSpec(
+
+) {
+    abstract val entityClass: KClass<out IEntity<*>>
+    abstract val fieldID: EntityFieldID
+
+    data class Values<T>(
+        val filteredValues: List<T>,
+        override val entityClass: KClass<out IEntity<*>>,
+        override val fieldID: EntityFieldID
+    ) : FilterSpec()
+
+    data class Range<T>(
+        val fromValue: T?,
+        val toValue: T?,
+        override val entityClass: KClass<out IEntity<*>>,
+        override val fieldID: EntityFieldID
+    ) : FilterSpec()
+}
 
 data class SortingSpec(
     val fieldID: EntityFieldID,

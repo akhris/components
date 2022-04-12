@@ -11,7 +11,6 @@ sealed class EntityFieldID {
     abstract val name: String
     abstract val tag: String
     abstract val isReadOnly: Boolean
-    open val columnName: String? = null
 
     /**
      * Field represents another Entity of class [entityClass]
@@ -20,8 +19,7 @@ sealed class EntityFieldID {
         override val tag: String,
         override val name: String,
         override val isReadOnly: Boolean = false,
-        val entityClass: KClass<out IEntity<*>>,
-        override val columnName: String? = null
+        val entityClass: KClass<out IEntity<*>>
     ) :
         EntityFieldID()
 
@@ -43,8 +41,7 @@ sealed class EntityFieldID {
     data class StringID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        override val columnName: String? = null
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 
@@ -54,8 +51,7 @@ sealed class EntityFieldID {
     data class DateTimeID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        override val columnName: String? = null
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 
@@ -65,8 +61,7 @@ sealed class EntityFieldID {
     data class FloatID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        override val columnName: String? = null
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 
@@ -76,8 +71,7 @@ sealed class EntityFieldID {
     data class LongID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        override val columnName: String? = null
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 
@@ -87,8 +81,7 @@ sealed class EntityFieldID {
     data class BooleanID(
         override val tag: String,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        override val columnName: String? = null
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 

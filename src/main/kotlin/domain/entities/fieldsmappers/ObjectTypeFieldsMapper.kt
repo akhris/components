@@ -5,13 +5,11 @@ import domain.entities.Parameter
 
 class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
-    private val tag_parameters = "tag_parameters"
-
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.EntitiesListID(
-                tag = tag_parameters,
+                tag = Companion.tag_parameters,
                 name = "parameters",
 //                entitiesIDs = List(entity.parameters.size) { index ->
 //                    EntityFieldID.EntityID(
@@ -37,7 +35,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                     )
                 }
                 else -> {
-                    val index = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
+                    val index = fieldID.tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: -1
                     val parameter = entity.parameters.getOrNull(index)
                     DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
                 }
@@ -74,7 +72,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
     private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType? {
         val fieldID = field.fieldID
-        val paramIndex = fieldID.tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: return null
+        val paramIndex = fieldID.tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: return null
         if (objectType.parameters.getOrNull(paramIndex) == null) {
             return null
         }
@@ -85,6 +83,10 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                 } else param
             }
         )
+    }
+
+    companion object {
+        const val tag_parameters = "tag_parameters"
     }
 
 }

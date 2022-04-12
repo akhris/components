@@ -4,15 +4,12 @@ import domain.entities.Supplier
 
 class SupplierFieldsMapper : BaseFieldsMapper<Supplier>() {
 
-    private val tag_url = "tag_url"
-    private val tag_favorite = "tag_favorite"
-
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
             EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),
-            EntityFieldID.StringID(tag_url, name = "url"),
-            EntityFieldID.BooleanID(tag_favorite, "is favorite")
+            EntityFieldID.StringID(Companion.tag_url, name = "url"),
+            EntityFieldID.BooleanID(Companion.tag_favorite, "is favorite")
         )
     }
 
@@ -29,7 +26,7 @@ class SupplierFieldsMapper : BaseFieldsMapper<Supplier>() {
                         entity = entity.description,
                         description = "description"
                     )
-                    tag_url -> DescriptiveFieldValue.CommonField(entity = entity.url, description = "supplier's url")
+                    Companion.tag_url -> DescriptiveFieldValue.CommonField(entity = entity.url, description = "supplier's url")
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
@@ -51,6 +48,11 @@ class SupplierFieldsMapper : BaseFieldsMapper<Supplier>() {
             }
             else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
         }
+    }
+
+    companion object {
+        const val tag_url = "tag_url"
+        const val tag_favorite = "tag_favorite"
     }
 
 

@@ -7,6 +7,7 @@ import kotlinx.coroutines.MainScope
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
+import persistence.columnMappers.ColumnMappersFactory
 import settings.AppSettingsRepository
 import ui.screens.settings.SettingsMapper
 
@@ -109,6 +110,9 @@ val di = DI {
 
 
     bindSingleton { FieldsMapperFactory() }
+    bindSingleton { ColumnMappersFactory() }
+
+
 
 
 }

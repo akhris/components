@@ -12,6 +12,7 @@ import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.*
 import navigation.NavItem
 import navigation.Screen
+import persistence.columnMappers.ColumnMappersFactory
 import settings.AppSettingsRepository
 import ui.screens.entities_screen.EntitiesScreenComponent
 import ui.screens.settings.SettingsComponent
@@ -22,6 +23,7 @@ import ui.screens.settings.SettingsComponent
 class NavHostComponent constructor(
     componentContext: ComponentContext,
     private val fieldsMapperFactory: FieldsMapperFactory,
+    private val columnMappersFactory: ColumnMappersFactory,
     private val appSettingsRepository: AppSettingsRepository,
     private val getUseCaseFactory: IGetUseCaseFactory,
     private val updateUseCaseFactory: IUpdateUseCaseFactory,
@@ -88,6 +90,7 @@ class NavHostComponent constructor(
                         componentContext = componentContext,
                         entityClasses = entities,
                         fieldsMapperFactory = fieldsMapperFactory,
+                        columnMappersFactory = columnMappersFactory,
                         getListUseCaseFactory = getListUseCaseFactory,
                         updateUseCaseFactory = updateUseCaseFactory,
                         removeUseCaseFactory = removeUseCaseFactory,

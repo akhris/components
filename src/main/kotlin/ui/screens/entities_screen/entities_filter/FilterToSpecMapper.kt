@@ -7,16 +7,29 @@ import kotlin.reflect.KClass
 
 fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): Specification.Filtered {
     val filterSpecs = if (entityClass == null || isEmpty()) listOf() else mapNotNull { filterSettings ->
-
-        val filteredValuesForFieldID = filterSettings.fieldsList.filter { it.isFiltered }.map { it.field }
-        if (filteredValuesForFieldID.isEmpty()) {
-            null
-        } else
-            FilterSpec(
+        when(filterSettings){
+            is IEntitiesFilter.Filter.Range -> FilterSpec.Range(
+                fromValue = filterSettings.from,
+                toValue = filterSettings.to,
                 entityClass = entityClass,
-                fieldID = filterSettings.fieldID,
-                filteredValues = filteredValuesForFieldID
+                fieldID = filterSettings.fieldID
             )
+            is IEntitiesFilter.Filter.Values -> FilterSpec.Values(
+                filteredValues = filterSettings.fieldsList.map { it.value },
+                entityClass = entityClass,
+                fieldID = filterSettings.fieldID
+            )
+        }
+
+//        val filteredValuesForFieldID = filterSettings.fieldsList.filter { it.isFiltered }.map { it.field }
+//        if (filteredValuesForFieldID.isEmpty()) {
+//            null
+//        } else
+//            FilterSpec(
+//                entityClass = entityClass,
+//                fieldID = filterSettings.fieldID,
+//                filteredValues = filteredValuesForFieldID
+//            )
     }
 
     return Specification.Filtered(filterSpecs)

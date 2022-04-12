@@ -17,7 +17,6 @@ import utils.replace
 fun EntitiesFilterUi(component: IEntitiesFilter) {
     val state by remember(component) { component.state }.subscribeAsState()
 
-
     Column {
 
         Text(modifier = Modifier.padding(8.dp), text = "filter", style = MaterialTheme.typography.subtitle2)
@@ -26,40 +25,67 @@ fun EntitiesFilterUi(component: IEntitiesFilter) {
 
         ChipGroup {
             state.filters.forEach { fs ->
-                val filteredItems = fs.fieldsList.count { it.isFiltered }
-                FilterChip(
-                    text = "${fs.fieldID.name} (${filteredItems}/${fs.fieldsList.size})",
-                    isSelected = filteredItems > 0,
-                    onClick = {
-                        openedParentChips = if (fs.fieldID in openedParentChips) {
-                            openedParentChips - fs.fieldID
-                        } else {
-                            openedParentChips + fs.fieldID
-                        }
-                    },
-                    withBorder = true,
-                    withCheckIcon = false
-                )
-                if (fs.fieldID in openedParentChips && fs.fieldsList.isNotEmpty()) {
-                    ChipGroup {
-                        fs.fieldsList.forEach { ff ->
-                            FilterChip(
-                                text = ff.field.toString(),
-                                withCheckIcon = true,
-                                withBorder = false,
-                                color = MaterialTheme.colors.primaryVariant,
-                                isSelected = ff.isFiltered,
-                                onClick = {
-                                    component.setFilter(fs.copy(fieldsList = fs.fieldsList.replace(ff.copy(isFiltered = !ff.isFiltered)) {
-                                        it.field == ff.field
-                                    }))
-                                }
-                            )
-                        }
-                    }
+                when (fs) {
+                    is IEntitiesFilter.Filter.Range -> RenderFilterRange(fs)
+                    is IEntitiesFilter.Filter.Values -> RenderFilterValues(
+                        fs,
+                        showFilters = fs.fieldID in openedParentChips,
+                        onTitleChipClicked = {
+                            openedParentChips = if (fs.fieldID in openedParentChips) {
+                                openedParentChips - fs.fieldID
+                            } else {
+                                openedParentChips + fs.fieldID
+                            }
+                        },
+                        onFilterChipClicked = { ff ->
+                            component.setFilter(fs.copy(fieldsList = fs.fieldsList.replace(ff.copy(isFiltered = !ff.isFiltered)) {
+                                it.value == ff.value
+                            }))
+                        })
                 }
+
+
             }
         }
     }
 
+}
+
+@Composable
+fun RenderFilterValues(
+    filter: IEntitiesFilter.Filter.Values,
+    showFilters: Boolean,
+    onTitleChipClicked: () -> Unit,
+    onFilterChipClicked: (IEntitiesFilter.FilteringValue) -> Unit
+) {
+    val filteredItems = filter.fieldsList.count { it.isFiltered }
+
+    FilterChip(
+        text = "${filter.fieldID.name} (${filteredItems}/${filter.fieldsList.size})",
+        isSelected = filteredItems > 0,
+        onClick = onTitleChipClicked,
+        withBorder = true,
+        withCheckIcon = false
+    )
+    if (showFilters) {
+        ChipGroup {
+            filter.fieldsList.forEach { ff ->
+                FilterChip(
+                    text = ff.value.toString(),
+                    withCheckIcon = true,
+                    withBorder = false,
+                    color = MaterialTheme.colors.primaryVariant,
+                    isSelected = ff.isFiltered,
+                    onClick = {
+                        onFilterChipClicked(ff)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RenderFilterRange(filter: IEntitiesFilter.Filter.Range) {
+    Text("composing range from: ${filter.from} to: ${filter.to}")
 }

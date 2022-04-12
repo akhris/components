@@ -5,6 +5,7 @@ import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
+import domain.entities.fieldsmappers.IDBColumnMapper
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.IdTable
@@ -14,6 +15,7 @@ import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IBaseDao
 import persistence.dto.exposed.Tables
+import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
 
@@ -24,7 +26,8 @@ abstract class BaseDao<
         EXPOSED_TABLE : IdTable<EXPOSED_ID>
         >(
     protected val table: EXPOSED_TABLE,
-    private val entityClass: EntityClass<EXPOSED_ID, EXPOSED_ENTITY>
+    private val entityClass: EntityClass<EXPOSED_ID, EXPOSED_ENTITY>,
+    private val columnMapper: IDBColumnMapper<ENTITY>
 ) :
     IBaseDao<ENTITY> {
 
@@ -149,19 +152,29 @@ abstract class BaseDao<
     protected open val filter: ((EntityField) -> ExposedFilter<Any>?)? = null
 
     private fun Query.addFiltering(filterSpec: Specification.Filtered) {
-
-        val filters =
             filterSpec
                 .filters
-                .flatMap { spec ->
-                    spec.filteredValues.mapNotNull { filteredField ->
-                        filter?.invoke(filteredField)
+                .forEach { fs ->
+                    val columnName = columnMapper.getColumnName(fs.fieldID)
+                    val column = table.columns.find { it.name == columnName }
+                    if (column != null) {
+                        when (fs) {
+                            is FilterSpec.Range<*> -> {
+                                fs.fromValue?.let {
+                                    //add where clause from
+                                }
+                                fs.toValue?.let {
+                                    //add where clause to
+                                }
+                            }
+                            is FilterSpec.Values<*> -> {
+                                fs.filteredValues.forEach {
+                                    orWhere { column.eq(it) }
+                                }
+                            }
+                        }
                     }
                 }
-
-        filters.forEach {
-            orWhere { it.first eq it.second }
-        }
     }
 
 

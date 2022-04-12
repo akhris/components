@@ -18,6 +18,7 @@ import domain.entities.usecase_factories.IGetListUseCaseFactory
 import domain.entities.usecase_factories.IInsertUseCaseFactory
 import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.repository.Specification
 import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
@@ -31,6 +32,7 @@ class EntitiesScreenComponent constructor(
     componentContext: ComponentContext,
     private val entityClasses: List<KClass<out IEntity<*>>>,
     private val fieldsMapperFactory: FieldsMapperFactory,
+    private val columnMappersFactory: ColumnMappersFactory,
     private val getListUseCaseFactory: IGetListUseCaseFactory,
     private val updateUseCaseFactory: IUpdateUseCaseFactory,
     private val insertUseCaseFactory: IInsertUseCaseFactory,
@@ -148,20 +150,19 @@ class EntitiesScreenComponent constructor(
             is EntitiesFilterConfig.EntitiesFilter -> IEntitiesScreen.EntitiesFilterChild.EntitiesFilter(
                 EntitiesFilterComponent(
                     componentContext = componentContext,
-                    getEntities = entitiesFilterConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                     entityClass = entitiesFilterConfig.entityClass,
-                    entities = entitiesFilterConfig.entities,
-                    mapperFactory = fieldsMapperFactory,
-                    onFiltersChange = { newFilters ->
-                        val currentClass = listRouter.activeChild.configuration.entityClass
-                        listRouter.replaceCurrent(
-                            EntitiesListConfig.EntitiesList(
-                                entityClass = currentClass,
-                                filterSpecification = newFilters.toSpec(currentClass)
-                            )
+                    getEntities = entitiesFilterConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
+                    fieldsMapperFactory = fieldsMapperFactory,
+                    columnMapperFactory = columnMappersFactory
+                ) { newFilters ->
+                    val currentClass = listRouter.activeChild.configuration.entityClass
+                    listRouter.replaceCurrent(
+                        EntitiesListConfig.EntitiesList(
+                            entityClass = currentClass,
+                            filterSpecification = newFilters.toSpec(currentClass)
                         )
-                    }
-                )
+                    )
+                }
             )
         }
     }

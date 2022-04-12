@@ -19,6 +19,7 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
 import persistence.ExposedDbSettings
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 import settings.AppSetting
@@ -41,6 +42,7 @@ fun main() {
     val updateUseCaseFactory by di.instance<IUpdateUseCaseFactory>()
     val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
     val fieldsMapperFactory: FieldsMapperFactory by di.instance()
+    val columnMappersFactory: ColumnMappersFactory by di.instance()
     val getUseCaseFactory: IGetUseCaseFactory by di.instance()
     val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
     val insertUseCaseFactory: IInsertUseCaseFactory by di.instance()
@@ -48,6 +50,7 @@ fun main() {
     val rootComponent = NavHostComponent(
         componentContext = DefaultComponentContext(lifecycle),
         fieldsMapperFactory = fieldsMapperFactory,
+        columnMappersFactory = columnMappersFactory,
         appSettingsRepository = appSettingsRepository,
         getUseCaseFactory = getUseCaseFactory,
         updateUseCaseFactory = updateUseCaseFactory,
