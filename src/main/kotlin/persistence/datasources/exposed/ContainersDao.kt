@@ -9,16 +9,19 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.update
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityContainer
 import persistence.dto.exposed.Tables
 import persistence.mappers.toContainer
 import utils.toUUID
 
 
-class ContainersDao : BaseUUIDDao<Container, EntityContainer, Tables.Containers>(
-    table = Tables.Containers,
-    entityClass = EntityContainer
-) {
+class ContainersDao(columnMappersFactory: ColumnMappersFactory) :
+    BaseUUIDDao<Container, EntityContainer, Tables.Containers>(
+        table = Tables.Containers,
+        entityClass = EntityContainer,
+        columnMapper = columnMappersFactory.getColumnMapper(Container::class)
+    ) {
 
     override fun mapToEntity(exposedEntity: EntityContainer): Container = exposedEntity.toContainer()
 

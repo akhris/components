@@ -3,15 +3,17 @@ package persistence.datasources.exposed
 import domain.entities.Parameter
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityParameter
 import persistence.dto.exposed.Tables
 import persistence.mappers.toParameter
 import utils.set
 import utils.toUUID
 
-class ParametersDao : BaseUUIDDao<Parameter, EntityParameter, Tables.Parameters>(
+class ParametersDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Parameter, EntityParameter, Tables.Parameters>(
     table = Tables.Parameters,
-    entityClass = EntityParameter
+    entityClass = EntityParameter,
+    columnMappersFactory.getColumnMapper(Parameter::class)
 ) {
     override fun mapToEntity(exposedEntity: EntityParameter): Parameter = exposedEntity.toParameter()
 

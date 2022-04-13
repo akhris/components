@@ -17,8 +17,8 @@ interface IEntitiesFilter {
     // add / update filter setting
     fun setFilter(filter: Filter)
 
-    // remove filter setting
-    fun removeFilter(filter: Filter)
+    // clear all filters
+    fun clearFilters()
 
     //filter screen model:
     data class Model(

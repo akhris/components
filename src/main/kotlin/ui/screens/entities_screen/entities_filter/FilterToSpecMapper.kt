@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 
 fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): Specification.Filtered {
     val filterSpecs = if (entityClass == null || isEmpty()) listOf() else mapNotNull { filterSettings ->
-        when(filterSettings){
+        when (filterSettings) {
             is IEntitiesFilter.Filter.Range -> FilterSpec.Range(
                 fromValue = filterSettings.from,
                 toValue = filterSettings.to,
@@ -15,7 +15,7 @@ fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): S
                 fieldID = filterSettings.fieldID
             )
             is IEntitiesFilter.Filter.Values -> FilterSpec.Values(
-                filteredValues = filterSettings.fieldsList.map { it.value },
+                filteredValues = filterSettings.fieldsList.mapNotNull { if (it.isFiltered) it.value else null },
                 entityClass = entityClass,
                 fieldID = filterSettings.fieldID
             )

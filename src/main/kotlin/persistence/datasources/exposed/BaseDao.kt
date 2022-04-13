@@ -4,17 +4,17 @@ import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
 import domain.entities.fieldsmappers.EntityField
-import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.IDBColumnMapper
+import org.jetbrains.exposed.dao.DaoEntityID
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.IdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IBaseDao
-import persistence.dto.exposed.Tables
 import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
@@ -117,17 +117,41 @@ abstract class BaseDao<
     /**
      * returns distinct values for the single column for the whole table.
      * The column is given by it's name. If the name is not found - empty list is returned and message is sent to log.
+     *
+     * fixme return List of Pair <Value in this column, String name>
+     *     if value is the reference UUID then get name from target table
+     *     maybe use data class SliceValue(val value: Any, val name: String)
      */
     override suspend fun slice(columnName: String): List<Any> {
-        val column = table.columns.find { it.name == columnName } ?: kotlin.run {
-            log("cannot find column with name: $columnName")
-            return listOf()
+        return newSuspendedTransaction {
+            val column = table.columns.find { it.name == columnName }
+
+            column?.let { c ->
+                c.foreignKey?.let {
+                    log("column $c has foreign key: $it")
+                    log("from table: ${it.fromTable} target table: ${it.targetTable}")
+                }
+
+                table
+                    .slice(c)
+                    .selectAll()
+                    .withDistinct(true)
+                    .mapNotNull { rr ->
+                        val value = rr[column]
+                        //check if it's reference:
+                        val targetTable = c.foreignKey?.targetTable as? UUIDTable
+                        val uuid = ((value as? DaoEntityID<*>)?.value as? UUID)
+                        val nameColumn =
+                            targetTable?.columns?.find { it.name == "name" || it.columnType is TextColumnType }
+                        log("trying to get name from foreign table for $value: $targetTable nameColumn: $nameColumn uuid: $uuid")
+                        if (targetTable != null && uuid != null && nameColumn != null) {
+                            targetTable.select { targetTable.id eq uuid }.map { it[nameColumn] }
+                        } else {
+                            value
+                        }
+                    }
+            } ?: listOf()
         }
-        return table
-            .slice(column)
-            .selectAll()
-            .distinct()
-            .mapNotNull { it[column] }
     }
 
     private fun Transaction.getNotGroupedQuery(
@@ -152,50 +176,43 @@ abstract class BaseDao<
     protected open val filter: ((EntityField) -> ExposedFilter<Any>?)? = null
 
     private fun Query.addFiltering(filterSpec: Specification.Filtered) {
-            filterSpec
-                .filters
-                .forEach { fs ->
-                    val columnName = columnMapper.getColumnName(fs.fieldID)
-                    val column = table.columns.find { it.name == columnName }
-                    if (column != null) {
-                        when (fs) {
-                            is FilterSpec.Range<*> -> {
-                                fs.fromValue?.let {
-                                    //add where clause from
-                                }
-                                fs.toValue?.let {
-                                    //add where clause to
-                                }
+        log("add filtering for query. filterSpec: $filterSpec")
+        filterSpec
+            .filters
+            .forEach { fs ->
+                val column = columnMapper.getColumn(fs.fieldID)
+
+                if (column != null) {
+//                    column.foreignKey?.targetTable?.let { tt ->
+//                        //todo
+//                    }
+
+                    when (fs) {
+                        is FilterSpec.Range<*> -> {
+                            fs.fromValue?.let {
+                                //add where clause from
                             }
-                            is FilterSpec.Values<*> -> {
-                                fs.filteredValues.forEach {
-                                    orWhere { column.eq(it) }
-                                }
+                            fs.toValue?.let {
+                                //add where clause to
+                            }
+                        }
+                        is FilterSpec.Values<*> -> {
+                            fs.filteredValues.filterNotNull().forEach {
+                                orWhere { column eq it }
                             }
                         }
                     }
                 }
+            }
     }
 
 
     private fun Query.addSorting(sortingSpec: Specification.Sorted) {
-
-        when (sortingSpec.spec.fieldID.tag) {
-            //name
-            EntityFieldID.tag_name -> {
-                orderBy(
-                    Tables.Containers.name,
-                    order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
-                )
-            }
-            //description
-            EntityFieldID.tag_description -> {
-                orderBy(
-                    Tables.Containers.description,
-                    order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
-                )
-            }
-        }
+        val column = columnMapper.getColumn(sortingSpec.spec.fieldID) ?: return
+        orderBy(
+            column,
+            order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
+        )
     }
 
 
@@ -207,8 +224,12 @@ abstract class BaseDao<
 
 abstract class BaseUUIDDao<ENTITY : IEntity<*>,
         EXPOSED_ENTITY : Entity<UUID>,
-        EXPOSED_TABLE : IdTable<UUID>>(table: EXPOSED_TABLE, entityClass: EntityClass<UUID, EXPOSED_ENTITY>) :
-    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass) {
+        EXPOSED_TABLE : IdTable<UUID>>(
+    table: EXPOSED_TABLE,
+    entityClass: EntityClass<UUID, EXPOSED_ENTITY>,
+    columnMapper: IDBColumnMapper<ENTITY>
+) :
+    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper) {
     override fun mapToID(id: Any): UUID {
         return if (id is String) {
             UUID.fromString(id)

@@ -6,14 +6,16 @@ import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityProject
 import persistence.dto.exposed.Tables
 import persistence.mappers.toProject
 import utils.toUUID
 
-class ProjectsDao : BaseUUIDDao<Project, EntityProject, Tables.Projects>(
+class ProjectsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Project, EntityProject, Tables.Projects>(
     table = Tables.Projects,
-    entityClass = EntityProject
+    entityClass = EntityProject,
+    columnMapper = columnMappersFactory.getColumnMapper(Project::class)
 ) {
     override fun mapToEntity(exposedEntity: EntityProject): Project = exposedEntity.toProject()
 

@@ -4,14 +4,16 @@ import domain.entities.ObjectType
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityObjectType
 import persistence.dto.exposed.Tables
 import persistence.mappers.toObjectType
 import utils.toUUID
 
-class ObjectTypesDao : BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
+class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
     table = Tables.ObjectTypes,
-    entityClass = EntityObjectType
+    entityClass = EntityObjectType,
+    columnMapper = columnMappersFactory.getColumnMapper(ObjectType::class)
 ) {
     override fun mapToEntity(exposedEntity: EntityObjectType): ObjectType = exposedEntity.toObjectType()
 

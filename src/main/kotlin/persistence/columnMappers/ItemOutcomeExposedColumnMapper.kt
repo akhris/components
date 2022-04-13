@@ -4,20 +4,21 @@ import domain.entities.ItemOutcome
 import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.IDBColumnMapper
 import domain.entities.fieldsmappers.ItemOutcomeFieldsMapper
+import org.jetbrains.exposed.sql.Column
 import persistence.dto.exposed.Tables
 
 class ItemOutcomeExposedColumnMapper : IDBColumnMapper<ItemOutcome> {
-    override fun getColumnName(fieldID: EntityFieldID): String? {
+    override fun getColumn(fieldID: EntityFieldID): Column<Any>? {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    ItemOutcomeFieldsMapper.tag_item -> Tables.ItemOutcomes.item.name
-                    ItemOutcomeFieldsMapper.tag_container -> Tables.ItemOutcomes.container.name
+                    ItemOutcomeFieldsMapper.tag_item -> Tables.ItemOutcomes.item
+                    ItemOutcomeFieldsMapper.tag_container -> Tables.ItemOutcomes.container
                     else -> null
                 }
             }
-            is EntityFieldID.DateTimeID -> Tables.ItemOutcomes.dateTime.name
+            is EntityFieldID.DateTimeID -> Tables.ItemOutcomes.dateTime
             else -> null
-        }
+        } as? Column<Any>
     }
 }

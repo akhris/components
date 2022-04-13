@@ -1,6 +1,8 @@
 package ui.screens.entities_screen.entities_filter
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -11,6 +13,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import domain.entities.fieldsmappers.EntityFieldID
 import ui.composable.ChipGroup
 import ui.composable.FilterChip
+import ui.composable.Icons
 import utils.replace
 
 @Composable
@@ -19,8 +22,13 @@ fun EntitiesFilterUi(component: IEntitiesFilter) {
 
     Column {
 
-        Text(modifier = Modifier.padding(8.dp), text = "filter", style = MaterialTheme.typography.subtitle2)
-
+        Row {
+            Text(modifier = Modifier.padding(8.dp).weight(1f), text = "filter", style = MaterialTheme.typography.subtitle2)
+            Icons.ClearIcon(modifier = Modifier.clickable {
+                //clear filters
+                component.clearFilters()
+            })
+        }
         var openedParentChips by remember { mutableStateOf(listOf<EntityFieldID>()) }
 
         ChipGroup {
@@ -71,7 +79,7 @@ fun RenderFilterValues(
         ChipGroup {
             filter.fieldsList.forEach { ff ->
                 FilterChip(
-                    text = ff.value.toString(),
+                    text = ff.value.toString().ifEmpty { "..." },
                     withCheckIcon = true,
                     withBorder = false,
                     color = MaterialTheme.colors.primaryVariant,

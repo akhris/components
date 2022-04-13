@@ -4,13 +4,15 @@ import domain.entities.Unit
 import domain.entities.fieldsmappers.EntityField
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityUnit
 import persistence.dto.exposed.Tables
 import persistence.mappers.toUnit
 
-class UnitsDao : BaseUUIDDao<Unit, EntityUnit, Tables.Units>(
+class UnitsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Unit, EntityUnit, Tables.Units>(
     table = Tables.Units,
-    entityClass = EntityUnit
+    entityClass = EntityUnit,
+    columnMapper = columnMappersFactory.getColumnMapper(domain.entities.Unit::class)
 ) {
 
 

@@ -35,10 +35,6 @@ class EntitiesFilterComponent<T : IEntity<*>>(
 
     override fun setFilter(filter: IEntitiesFilter.Filter) {
         _state.reduce { model ->
-
-
-//            val isFilterPresented = model.filters.find { it.fieldID == filterSettings.fieldID } != null
-
             model.copy(
                 filters = model.filters.replace(
                     when (filter) {
@@ -53,25 +49,22 @@ class EntitiesFilterComponent<T : IEntity<*>>(
             )
         }
         onFiltersChange(_state.value.filters)
-//        onFilterModelChanged(_state.value)
     }
 
-    override fun removeFilter(filter: IEntitiesFilter.Filter) {
-//        _state.reduce { model ->
-//            val filterPresented =
-//                model.filters.find { it.fieldID == filter.fieldID } ?: IEntitiesFilter.Filter(
-//                    filter.fieldID
-//                )
-//
-//            model.copy(
-//                filters = model.filters.replace(filterPresented.copy(isActive = false)) { fs ->
-//                    fs.fieldID == filter.fieldID
-//                }
-//            )
-//        }
-//        onFilterModelChanged(_state.value)
+    override fun clearFilters() {
+        _state.reduce {
+            it.copy(filters = it.filters.map { filter ->
+                when (filter) {
+                    is IEntitiesFilter.Filter.Range -> filter.copy(from = null, to = null)
+                    is IEntitiesFilter.Filter.Values -> {
+                        val checksOff = filter.fieldsList.map { fv -> fv.copy(isFiltered = false) }
+                        filter.copy(fieldsList = checksOff)
+                    }
+                }
+            })
+        }
+        onFiltersChange(_state.value.filters)
     }
-
 
     private suspend fun updateFilters() {
         //0. for updating filters we need ISlicingRepository
@@ -83,9 +76,10 @@ class EntitiesFilterComponent<T : IEntity<*>>(
 
 
         val filters = fieldIDs.mapNotNull { fieldID ->
-            val columnName = columnMapper?.getColumnName(fieldID)
+
+            val columnName = columnMapper?.getColumn(fieldID)
             columnName?.let { cn ->
-                val columnValues = repo.getSlice(cn)
+                val columnValues = repo.getSlice(cn.name)
                 IEntitiesFilter.Filter.Values(
                     fieldID,
                     fieldsList = columnValues.map { IEntitiesFilter.FilteringValue(it) }
@@ -96,28 +90,6 @@ class EntitiesFilterComponent<T : IEntity<*>>(
         _state.reduce { m ->
             m.copy(filters = filters)
         }
-//        //2. get fieldIDs for entity:
-//        val fieldIDs = entities.fir
-//
-//        //3. for each column get filtered values by column name:
-//        val sliceValues = table.columns.map {
-//            val valuesInTable = repo.getSlice(it.name)
-//            IEntitiesFilter.FilterSettings(
-//                fieldID = it,
-//                fieldsList = valuesInTable.map { IEntitiesFilter.FilteredField(field = mapper.getFieldByID()) })
-//
-//        }
-
-//        log("fieldIDs: $fieldIDs")
-//        _state.reduce { m ->
-//            m.copy(filters = fieldIDs.map { fId ->
-//                val fields =
-//                    entities.mapNotNull { e -> mapper.getFieldByID(e, fId) }.toSet()
-//                IEntitiesFilter.FilterSettings(
-//                    fieldID = fId,
-//                    fieldsList = fields.map { f -> IEntitiesFilter.FilteredField(field = f, isFiltered = false) })
-//            })
-//        }
     }
 
     init {

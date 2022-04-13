@@ -3,15 +3,17 @@ package persistence.datasources.exposed
 import domain.entities.ItemOutcome
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityItemOutcome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemOutcome
 import utils.set
 import utils.toUUID
 
-class ItemsOutcomeDao : BaseUUIDDao<ItemOutcome, EntityItemOutcome, Tables.ItemOutcomes>(
+class ItemsOutcomeDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<ItemOutcome, EntityItemOutcome, Tables.ItemOutcomes>(
     table = Tables.ItemOutcomes,
-    entityClass = EntityItemOutcome
+    entityClass = EntityItemOutcome,
+    columnMapper = columnMappersFactory.getColumnMapper(ItemOutcome::class)
 ) {
     override fun mapToEntity(exposedEntity: EntityItemOutcome): ItemOutcome = exposedEntity.toItemOutcome()
 

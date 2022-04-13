@@ -6,6 +6,7 @@ import domain.entities.fieldsmappers.ItemIncomeFieldsMapper
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityItemIncome
 import persistence.dto.exposed.Tables
 import persistence.mappers.toItemIncome
@@ -13,9 +14,10 @@ import utils.set
 import utils.toUUID
 
 
-class ItemsIncomeDao : BaseUUIDDao<ItemIncome, EntityItemIncome, Tables.ItemIncomes>(
+class ItemsIncomeDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<ItemIncome, EntityItemIncome, Tables.ItemIncomes>(
     table = Tables.ItemIncomes,
-    entityClass = EntityItemIncome
+    entityClass = EntityItemIncome,
+    columnMapper = columnMappersFactory.getColumnMapper(ItemIncome::class)
 ) {
     override fun mapToEntity(exposedEntity: EntityItemIncome): ItemIncome = exposedEntity.toItemIncome()
 
