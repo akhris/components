@@ -132,7 +132,7 @@ abstract class BaseDao<
                         .selectAll()
 
                 existedSlices.forEach {
-                    query.andWhere { it.column eq it.value }
+                    query.orWhere { it.column eq it.value }
                 }
 
                 query.withDistinct(true) // select only distinct values
