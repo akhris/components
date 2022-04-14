@@ -2,6 +2,7 @@ package ui.screens.entities_screen.entities_filter
 
 import com.arkivanov.decompose.value.Value
 import domain.entities.fieldsmappers.EntityFieldID
+import persistence.datasources.SliceValue
 import ui.screens.entities_screen.entities_filter.IEntitiesFilter.Filter
 
 /**
@@ -53,6 +54,6 @@ interface IEntitiesFilter {
         ) : Filter()
     }
 
-    data class FilteringValue(val value: Any, val isFiltered: Boolean = false)
+    data class FilteringValue(val value: SliceValue<*>, val isFiltered: Boolean = false)
 }
 

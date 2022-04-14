@@ -79,7 +79,7 @@ fun RenderFilterValues(
         ChipGroup {
             filter.fieldsList.forEach { ff ->
                 FilterChip(
-                    text = ff.value.toString().ifEmpty { "..." },
+                    text = ff.value.name.toString().ifEmpty { "..." },
                     withCheckIcon = true,
                     withBorder = false,
                     color = MaterialTheme.colors.primaryVariant,

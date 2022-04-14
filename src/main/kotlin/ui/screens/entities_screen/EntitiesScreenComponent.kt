@@ -153,16 +153,17 @@ class EntitiesScreenComponent constructor(
                     entityClass = entitiesFilterConfig.entityClass,
                     getEntities = entitiesFilterConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                     fieldsMapperFactory = fieldsMapperFactory,
-                    columnMapperFactory = columnMappersFactory
-                ) { newFilters ->
-                    val currentClass = listRouter.activeChild.configuration.entityClass
-                    listRouter.replaceCurrent(
-                        EntitiesListConfig.EntitiesList(
-                            entityClass = currentClass,
-                            filterSpecification = newFilters.toSpec(currentClass)
+                    columnMapperFactory = columnMappersFactory,
+                    onFiltersChange = { newFilters ->
+                        val currentClass = listRouter.activeChild.configuration.entityClass
+                        listRouter.replaceCurrent(
+                            EntitiesListConfig.EntitiesList(
+                                entityClass = currentClass,
+                                filterSpecification = newFilters.toSpec(currentClass)
+                            )
                         )
-                    )
-                }
+                    }
+                )
             )
         }
     }

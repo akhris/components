@@ -10,6 +10,7 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import kotlinx.coroutines.*
 import persistence.columnMappers.ColumnMappersFactory
+import persistence.datasources.SliceValue
 import persistence.repository.ISlicingRepository
 import utils.replace
 import kotlin.reflect.KClass
@@ -49,6 +50,9 @@ class EntitiesFilterComponent<T : IEntity<*>>(
             )
         }
         onFiltersChange(_state.value.filters)
+        scope.launch {
+            updateFilters()
+        }
     }
 
     override fun clearFilters() {
@@ -77,12 +81,35 @@ class EntitiesFilterComponent<T : IEntity<*>>(
 
         val filters = fieldIDs.mapNotNull { fieldID ->
 
+            val existedOtherSlices =
+                _state
+                    .value
+                    .filters
+                    .filter { it.fieldID != fieldID }
+                    .flatMap { f ->
+                        when (f) {
+                            is IEntitiesFilter.Filter.Range -> TODO()
+                            is IEntitiesFilter.Filter.Values -> f.fieldsList.filter { it.isFiltered }.map { it.value }
+                        }
+                    }
+                        as? List<SliceValue<Any>>
+
+
             val columnName = columnMapper?.getColumn(fieldID)
             columnName?.let { cn ->
-                val columnValues = repo.getSlice(cn.name)
+                val columnValues = repo.getSlice(cn.name, otherSlices = existedOtherSlices ?: listOf())
+
                 IEntitiesFilter.Filter.Values(
                     fieldID,
-                    fieldsList = columnValues.map { IEntitiesFilter.FilteringValue(it) }
+                    fieldsList = columnValues.map { sv ->
+                        val wasFiltered =
+                            (_state
+                                .value
+                                .filters
+                                .find { it.fieldID == fieldID } as? IEntitiesFilter.Filter.Values)?.fieldsList?.find { it.value == sv }?.isFiltered
+                                ?: false
+                        IEntitiesFilter.FilteringValue(sv, wasFiltered)
+                    }
                 )
             }
         }

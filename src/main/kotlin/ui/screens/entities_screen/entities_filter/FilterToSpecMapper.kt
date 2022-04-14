@@ -1,6 +1,7 @@
 package ui.screens.entities_screen.entities_filter
 
 import com.akhris.domain.core.entities.IEntity
+import persistence.datasources.SliceValue
 import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import kotlin.reflect.KClass
@@ -15,7 +16,7 @@ fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): S
                 fieldID = filterSettings.fieldID
             )
             is IEntitiesFilter.Filter.Values -> FilterSpec.Values(
-                filteredValues = filterSettings.fieldsList.mapNotNull { if (it.isFiltered) it.value else null },
+                filteredValues = filterSettings.fieldsList.mapNotNull { if (it.isFiltered) it.value as? SliceValue<Any> else null },
                 entityClass = entityClass,
                 fieldID = filterSettings.fieldID
             )

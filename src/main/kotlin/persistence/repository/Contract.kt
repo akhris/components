@@ -5,13 +5,14 @@ import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
+import persistence.datasources.SliceValue
 
 interface IPagingRepository {
     suspend fun getItemsCount(specification: ISpecification): Long
 }
 
 interface ISlicingRepository {
-    suspend fun getSlice(columnName: String): List<Any>
+    suspend fun getSlice(columnName: String, otherSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
 }
 
 

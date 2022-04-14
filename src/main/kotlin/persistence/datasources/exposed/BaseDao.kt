@@ -5,16 +5,16 @@ import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.IDBColumnMapper
-import org.jetbrains.exposed.dao.DaoEntityID
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
-import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IBaseDao
+import persistence.datasources.SliceValue
 import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
@@ -117,40 +117,53 @@ abstract class BaseDao<
     /**
      * returns distinct values for the single column for the whole table.
      * The column is given by it's name. If the name is not found - empty list is returned and message is sent to log.
-     *
-     * fixme return List of Pair <Value in this column, String name>
-     *     if value is the reference UUID then get name from target table
-     *     maybe use data class SliceValue(val value: Any, val name: String)
      */
-    override suspend fun slice(columnName: String): List<Any> {
+    override suspend fun slice(columnName: String, existedSlices: List<SliceValue<Any>>): List<SliceValue<*>> {
         return newSuspendedTransaction {
-            val column = table.columns.find { it.name == columnName }
+            // 1. find column for given [columnName]:
+            val column = table.columns.find { it.name == columnName } as? Column<Any>
 
+            // 2. if column is found:
             column?.let { c ->
-                c.foreignKey?.let {
-                    log("column $c has foreign key: $it")
-                    log("from table: ${it.fromTable} target table: ${it.targetTable}")
+                // 3. create a slice containing column value for [columnName]:
+                val query =
+                    table
+                        .slice(c)
+                        .selectAll()
+
+                existedSlices.forEach {
+                    query.andWhere { it.column eq it.value }
                 }
 
-                table
-                    .slice(c)
-                    .selectAll()
-                    .withDistinct(true)
+                query.withDistinct(true) // select only distinct values
                     .mapNotNull { rr ->
-                        val value = rr[column]
-                        //check if it's reference:
-                        val targetTable = c.foreignKey?.targetTable as? UUIDTable
-                        val uuid = ((value as? DaoEntityID<*>)?.value as? UUID)
-                        val nameColumn =
-                            targetTable?.columns?.find { it.name == "name" || it.columnType is TextColumnType }
-                        log("trying to get name from foreign table for $value: $targetTable nameColumn: $nameColumn uuid: $uuid")
-                        if (targetTable != null && uuid != null && nameColumn != null) {
-                            targetTable.select { targetTable.id eq uuid }.map { it[nameColumn] }
-                        } else {
-                            value
+                        val value = rr.getOrNull(column)  //may be nullable
+                        value?.let {
+                            // if column has foreign key:
+                            // then it's reference. get target table:
+                            val refTable = c.foreignKey?.targetTable as? IdTable<Comparable<Any>>
+                            // then value is reference id:
+                            val refID = value as? EntityID<Comparable<Any>>
+                            // find readable name as ref.table's column with name == "name" or any text column type:
+                            val refNameColumn =
+                                refTable?.columns?.find { it.name == "name" || it.columnType is TextColumnType } as? Column<Any>
+
+                            log("trying to get name from foreign table for $value: $refTable nameColumn: $refNameColumn uuid: $refID")
+                            val refName = if (refTable != null && refID != null && refNameColumn != null) {
+                                // if given column is reference - slice ref.table for given ID and get first result (it has to be one result here):
+                                refTable
+                                    .select { refTable.id eq refID }
+                                    .firstNotNullOfOrNull { result ->
+                                        // save id in reference table, readable name and column
+                                        result[refNameColumn]
+                                    }
+                            } else {
+                                null
+                            }
+                            SliceValue(refName ?: value, value, c)
                         }
                     }
-            } ?: listOf()
+            }.orEmpty()
         }
     }
 
@@ -196,9 +209,9 @@ abstract class BaseDao<
                                 //add where clause to
                             }
                         }
-                        is FilterSpec.Values<*> -> {
-                            fs.filteredValues.filterNotNull().forEach {
-                                orWhere { column eq it }
+                        is FilterSpec.Values -> {
+                            fs.filteredValues.forEach {
+                                orWhere { it.column eq it.value }
                             }
                         }
                     }

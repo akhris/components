@@ -5,6 +5,7 @@ import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
 import kotlinx.coroutines.flow.SharedFlow
 import persistence.datasources.IBaseDao
+import persistence.datasources.SliceValue
 
 
 class BaseRepository<ENTITY : IEntity<String>>(
@@ -88,8 +89,8 @@ class BaseRepository<ENTITY : IEntity<String>>(
         repoCallbacks.onItemUpdated(t)
     }
 
-    override suspend fun getSlice(columnName: String): List<Any> {
-        return baseDao.slice(columnName)
+    override suspend fun getSlice(columnName: String, otherSlices: List<SliceValue<Any>>): List<SliceValue<*>> {
+        return baseDao.slice(columnName, otherSlices)
     }
 
 //    override suspend fun getItemsCount(specification: ISpecification): Long {

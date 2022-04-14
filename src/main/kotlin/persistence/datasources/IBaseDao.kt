@@ -2,10 +2,7 @@ package persistence.datasources
 
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.ISpecification
-import domain.entities.ItemIncome
-import domain.entities.ItemOutcome
-import domain.entities.Parameter
-import domain.entities.Unit
+import org.jetbrains.exposed.sql.Column
 
 interface IBaseDao<T : IEntity<*>> {
     suspend fun getByID(id: String): T?
@@ -27,5 +24,8 @@ interface IBaseDao<T : IEntity<*>> {
         pagingSpec: ISpecification? = null
     ): Long
 
-    suspend fun slice(columnName: String): List<Any>
+    suspend fun slice(columnName: String, existedSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
 }
+
+
+data class SliceValue<VALUETYPE>(val name: Any, val value: VALUETYPE, val column: Column<VALUETYPE>)
