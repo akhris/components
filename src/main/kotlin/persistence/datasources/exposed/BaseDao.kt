@@ -48,20 +48,32 @@ abstract class BaseDao<
     override suspend fun getItemsCount(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
+        pagingSpec: ISpecification?,
+        searchSpec: ISpecification?
     ): Long {
         return newSuspendedTransaction {
-            getNotGroupedQuery(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec).count()
+            getNotGroupedQuery(
+                filterSpec = filterSpec,
+                sortingSpec = sortingSpec,
+                pagingSpec = pagingSpec,
+                searchSpec = searchSpec
+            ).count()
         }
     }
 
     override suspend fun query(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
+        pagingSpec: ISpecification?,
+        searchSpec: ISpecification?
     ): List<ENTITY> {
         return newSuspendedTransaction {
-            val query = getNotGroupedQuery(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+            val query = getNotGroupedQuery(
+                filterSpec = filterSpec,
+                sortingSpec = sortingSpec,
+                pagingSpec = pagingSpec,
+                searchSpec = searchSpec
+            )
             entityClass.wrapRows(query).map { mapToEntity(it) }
         }
     }
@@ -170,9 +182,13 @@ abstract class BaseDao<
     private fun Transaction.getNotGroupedQuery(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
-        pagingSpec: ISpecification?
+        pagingSpec: ISpecification?,
+        searchSpec: ISpecification?
     ): Query {
         val query = table.selectAll()
+        (searchSpec as? Specification.Search)?.let {
+            query.addSearching(it)
+        }
         (filterSpec as? Specification.Filtered)?.let {
             query.addFiltering(it)
         }
@@ -187,6 +203,18 @@ abstract class BaseDao<
     }
 
     protected open val filter: ((EntityField) -> ExposedFilter<Any>?)? = null
+
+    private fun Query.addSearching(searchSpec: Specification.Search) {
+        if (searchSpec.searchString.isBlank())
+            return
+
+        table.columns.forEach { c ->
+            //search if it's text
+            (c as? Column<String>)?.let {
+                orWhere { it.lowerCase() like "%${searchSpec.searchString}%" }
+            }
+        }
+    }
 
     private fun Query.addFiltering(filterSpec: Specification.Filtered) {
         log("add filtering for query. filterSpec: $filterSpec")

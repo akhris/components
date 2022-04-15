@@ -24,6 +24,7 @@ import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_filter.toSpec
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
+import ui.screens.entities_screen.entities_search.EntitiesSearchComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsComponent
 import kotlin.reflect.KClass
@@ -73,6 +74,14 @@ class EntitiesScreenComponent constructor(
             childFactory = ::createViewSettingsChild
         )
 
+    private val searchRouter =
+        router(
+            initialConfiguration = EntitiesSearchConfig.EntitiesSearch,
+            key = "search_router",
+            childFactory = ::createSearchChild
+        )
+
+
     override val listRouterState: Value<RouterState<*, IEntitiesScreen.ListChild>> = listRouter.state
 
     override val selectorRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>> =
@@ -85,6 +94,7 @@ class EntitiesScreenComponent constructor(
     override val viewSettingsRouterState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>> =
         viewSettingsRouter.state
 
+    override val searchRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>> = searchRouter.state
 
     private fun createListChild(
         entitiesListConfig: EntitiesListConfig,
@@ -98,6 +108,7 @@ class EntitiesScreenComponent constructor(
                     component = EntitiesListComponent(
                         componentContext = componentContext,
                         fSpec = entitiesListConfig.filterSpecification,
+                        sSpec = entitiesListConfig.searchSpecification,
                         getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                         updateEntity = entitiesListConfig.entityClass?.let { updateUseCaseFactory.getUpdateUseCase(it) },
                         removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
@@ -157,10 +168,29 @@ class EntitiesScreenComponent constructor(
                     onFiltersChange = { newFilters ->
                         val currentClass = listRouter.activeChild.configuration.entityClass
                         listRouter.replaceCurrent(
-                            EntitiesListConfig.EntitiesList(
-                                entityClass = currentClass,
-                                filterSpecification = newFilters.toSpec(currentClass)
+                            listRouter.activeChild.configuration.copy(
+                                filterSpecification = newFilters.toSpec(
+                                    currentClass
+                                )
                             )
+                        )
+                    }
+                )
+            )
+        }
+    }
+
+    private fun createSearchChild(
+        searchConfig: EntitiesSearchConfig,
+        componentContext: ComponentContext
+    ): IEntitiesScreen.EntitiesSearchChild {
+        return when (searchConfig) {
+            EntitiesSearchConfig.EntitiesSearch -> IEntitiesScreen.EntitiesSearchChild.EntitiesSearch(
+                component = EntitiesSearchComponent(
+                    componentContext = componentContext,
+                    onSearchChange = {newSearchString->
+                        listRouter.replaceCurrent(
+                            listRouter.activeChild.configuration.copy(searchSpecification = Specification.Search(newSearchString))
                         )
                     }
                 )
@@ -205,7 +235,8 @@ class EntitiesScreenComponent constructor(
         @Parcelize
         data class EntitiesList(
             val entityClass: KClass<out IEntity<*>>?,
-            val filterSpecification: Specification.Filtered = Specification.Filtered()
+            val filterSpecification: Specification.Filtered = Specification.Filtered(),
+            val searchSpecification: Specification.Search = Specification.Search()
         ) : EntitiesListConfig()
     }
 
@@ -227,7 +258,10 @@ class EntitiesScreenComponent constructor(
         object ViewSettings : EntitiesViewSettingsConfig()
     }
 
-
+    sealed class EntitiesSearchConfig : Parcelable {
+        @Parcelize
+        object EntitiesSearch : EntitiesSearchConfig()
+    }
 }
 
 val KClass<out IEntity<*>>.title: StringsIDs?

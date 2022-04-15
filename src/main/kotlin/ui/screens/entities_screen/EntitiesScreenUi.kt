@@ -21,6 +21,7 @@ import com.arkivanov.decompose.value.Value
 import strings.LocalizedStrings
 import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
+import ui.screens.entities_screen.entities_search.EntitiesSearchUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
@@ -46,6 +47,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
     val viewSettingsRouterState = remember(component){component.viewSettingsRouterState}
     val selectorRouterState = remember(component){component.selectorRouterState}
     val filterRouterState = remember(component){component.filterRouterState}
+    val searchRouterState = remember(component){component.searchRouterState}
 
     log("composing EntitiesScreenUi. component: $component localizedStrings: $localizedStrings")
     ScreenWithFilterSheet(
@@ -58,6 +60,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
                 ViewModeSelector(viewSettingsRouterState)
                 SelectorPanel(selectorRouterState, localizedStrings = localizedStrings)
+                SearchPanel(searchRouterState)
                 FilterPanel(filterRouterState)
             }
         },
@@ -111,6 +114,18 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesFilterChild.EntitiesFilter -> {
                 EntitiesFilterUi(component = child.component)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalDecomposeApi::class)
+@Composable
+private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>>){
+    Children(routerState, animation = crossfade()){
+        when(val child = it.instance){
+            is IEntitiesScreen.EntitiesSearchChild.EntitiesSearch -> {
+                EntitiesSearchUi(component = child.component)
             }
         }
     }

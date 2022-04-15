@@ -32,15 +32,13 @@ interface IEntitiesFilter {
      */
     sealed class Filter {
         abstract val fieldID: EntityFieldID
-        abstract val isActive: Boolean
 
         /**
          * Filter type that has a list of filtering values
          */
         data class Values(
             override val fieldID: EntityFieldID,
-            val fieldsList: List<FilteringValue> = listOf(),
-            override val isActive: Boolean = false
+            val fieldsList: List<FilteringValue> = listOf()
         ) : Filter()
 
         /**
@@ -49,11 +47,10 @@ interface IEntitiesFilter {
         data class Range(
             override val fieldID: EntityFieldID,
             val from: Any? = null,
-            val to: Any? = null,
-            override val isActive: Boolean = false
+            val to: Any? = null
         ) : Filter()
     }
 
-    data class FilteringValue(val value: SliceValue<*>, val isFiltered: Boolean = false)
+    data class FilteringValue constructor(val value: SliceValue<*>, val isFiltered: Boolean = false)
 }
 

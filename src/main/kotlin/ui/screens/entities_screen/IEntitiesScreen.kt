@@ -6,6 +6,7 @@ import com.arkivanov.decompose.value.Value
 import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.IEntitiesFilter
 import ui.screens.entities_screen.entities_list.IEntitiesList
+import ui.screens.entities_screen.entities_search.IEntitiesSearch
 import ui.screens.entities_screen.entities_selector.IEntitiesSelector
 import ui.screens.entities_screen.entities_view_settings.IEntitiesViewSettings
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
@@ -33,6 +34,7 @@ interface IEntitiesScreen {
     val selectorRouterState: Value<RouterState<*, EntitiesSelectorChild>>
     val filterRouterState: Value<RouterState<*, EntitiesFilterChild>>
     val viewSettingsRouterState: Value<RouterState<*, ViewSettingsChild>>
+    val searchRouterState: Value<RouterState<*, EntitiesSearchChild>>
 
     sealed class ListChild {
         data class List<T : IEntity<*>>(val component: IEntitiesList<T>) : ListChild()
@@ -44,6 +46,10 @@ interface IEntitiesScreen {
 
     sealed class EntitiesFilterChild {
         data class EntitiesFilter(val component: IEntitiesFilter) : EntitiesFilterChild()
+    }
+
+    sealed class EntitiesSearchChild {
+        data class EntitiesSearch(val component: IEntitiesSearch) : EntitiesSearchChild()
     }
 
     sealed class ViewSettingsChild {

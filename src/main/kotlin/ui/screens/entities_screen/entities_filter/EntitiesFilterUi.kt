@@ -23,30 +23,41 @@ fun EntitiesFilterUi(component: IEntitiesFilter) {
     Column {
 
         Row {
-            Text(modifier = Modifier.padding(8.dp).weight(1f), text = "filter", style = MaterialTheme.typography.subtitle2)
-            Icons.ClearIcon(modifier = Modifier.clickable {
-                //clear filters
-                component.clearFilters()
-            })
+            Text(
+                modifier = Modifier.padding(8.dp).weight(1f),
+                text = "filter",
+                style = MaterialTheme.typography.subtitle2
+            )
+            if (state.filters.find {
+                    when (it) {
+                        is IEntitiesFilter.Filter.Range -> (it.from != null || it.to != null)
+                        is IEntitiesFilter.Filter.Values -> it.fieldsList.find { it.isFiltered } != null
+                    }
+                } != null) {
+                Icons.ClearIcon(modifier = Modifier.clickable {
+                    //clear filters
+                    component.clearFilters()
+                })
+            }
         }
         var openedParentChips by remember { mutableStateOf(listOf<EntityFieldID>()) }
 
         ChipGroup {
-            state.filters.forEach { fs ->
-                when (fs) {
-                    is IEntitiesFilter.Filter.Range -> RenderFilterRange(fs)
+            state.filters.forEach { filter ->
+                when (filter) {
+                    is IEntitiesFilter.Filter.Range -> RenderFilterRange(filter)
                     is IEntitiesFilter.Filter.Values -> RenderFilterValues(
-                        fs,
-                        showFilters = fs.fieldID in openedParentChips,
+                        filter,
+                        showFilters = filter.fieldID in openedParentChips,
                         onTitleChipClicked = {
-                            openedParentChips = if (fs.fieldID in openedParentChips) {
-                                openedParentChips - fs.fieldID
+                            openedParentChips = if (filter.fieldID in openedParentChips) {
+                                openedParentChips - filter.fieldID
                             } else {
-                                openedParentChips + fs.fieldID
+                                openedParentChips + filter.fieldID
                             }
                         },
                         onFilterChipClicked = { ff ->
-                            component.setFilter(fs.copy(fieldsList = fs.fieldsList.replace(ff.copy(isFiltered = !ff.isFiltered)) {
+                            component.setFilter(filter.copy(fieldsList = filter.fieldsList.replace(ff.copy(isFiltered = !ff.isFiltered)) {
                                 it.value == ff.value
                             }))
                         })

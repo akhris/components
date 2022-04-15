@@ -16,6 +16,7 @@ import persistence.repository.Specification
 class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
     private val fSpec: Specification.Filtered,
+    private val sSpec: Specification.Search,
     private val getEntities: GetEntities<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
@@ -104,9 +105,8 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
-        val filterParams = fSpec
 
-        val filterSpec = Specification.Filtered(filterParams.filters)
+        val filterSpec = Specification.Filtered(fSpec.filters)
         val pagingSpec = pagingParams?.let {
             Specification.Paginated(
                 pageNumber = it.currentPage,
@@ -114,7 +114,7 @@ class EntitiesListComponent<T : IEntity<*>>(
             )
         }
 
-        val specification = Specification.CombinedSpecification(listOfNotNull(filterSpec, pagingSpec))
+        val specification = Specification.CombinedSpecification(listOfNotNull(filterSpec, pagingSpec, sSpec))
 
         val entitiesResult = getEntities?.invoke(GetEntities.GetBySpecification(specification))
 

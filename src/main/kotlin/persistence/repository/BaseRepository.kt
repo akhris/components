@@ -44,7 +44,13 @@ class BaseRepository<ENTITY : IEntity<String>>(
                 val sortingSpec = specification.specs.find { it is Specification.Sorted } as? Specification.Sorted
                 val filterSpec = specification.specs.find { it is Specification.Filtered } as? Specification.Filtered
                 val pagingSpec = specification.specs.find { it is Specification.Paginated } as? Specification.Paginated
-                baseDao.query(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+                val searchSpec = specification.specs.find { it is Specification.Search } as? Specification.Search
+                baseDao.query(
+                    filterSpec = filterSpec,
+                    sortingSpec = sortingSpec,
+                    pagingSpec = pagingSpec,
+                    searchSpec = searchSpec
+                )
             }
             is Specification.Sorted -> baseDao.query(sortingSpec = specification)
         }
@@ -63,7 +69,13 @@ class BaseRepository<ENTITY : IEntity<String>>(
                 val sortingSpec = specification.specs.find { it is Specification.Sorted } as? Specification.Sorted
                 val filterSpec = specification.specs.find { it is Specification.Filtered } as? Specification.Filtered
                 val pagingSpec = specification.specs.find { it is Specification.Paginated } as? Specification.Paginated
-                baseDao.getItemsCount(filterSpec = filterSpec, sortingSpec = sortingSpec, pagingSpec = pagingSpec)
+                val searchSpec = specification.specs.find { it is Specification.Search } as? Specification.Search
+                baseDao.getItemsCount(
+                    filterSpec = filterSpec,
+                    sortingSpec = sortingSpec,
+                    pagingSpec = pagingSpec,
+                    searchSpec = searchSpec
+                )
             }
             is Specification.Sorted -> baseDao.getItemsCount(sortingSpec = specification)
         }

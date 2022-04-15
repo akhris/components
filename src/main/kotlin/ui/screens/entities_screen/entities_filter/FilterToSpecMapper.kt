@@ -21,16 +21,6 @@ fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): S
                 fieldID = filterSettings.fieldID
             )
         }
-
-//        val filteredValuesForFieldID = filterSettings.fieldsList.filter { it.isFiltered }.map { it.field }
-//        if (filteredValuesForFieldID.isEmpty()) {
-//            null
-//        } else
-//            FilterSpec(
-//                entityClass = entityClass,
-//                fieldID = filterSettings.fieldID,
-//                filteredValues = filteredValuesForFieldID
-//            )
     }
 
     return Specification.Filtered(filterSpecs)

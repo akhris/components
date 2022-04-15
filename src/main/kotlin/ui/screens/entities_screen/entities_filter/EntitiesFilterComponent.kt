@@ -37,16 +37,9 @@ class EntitiesFilterComponent<T : IEntity<*>>(
     override fun setFilter(filter: IEntitiesFilter.Filter) {
         _state.reduce { model ->
             model.copy(
-                filters = model.filters.replace(
-                    when (filter) {
-                        is IEntitiesFilter.Filter.Range -> filter.copy(isActive = true)
-                        is IEntitiesFilter.Filter.Values -> filter.copy(isActive = true)
-                    }
-
-                ) { fs ->
+                filters = model.filters.replace(filter) { fs ->
                     fs.fieldID == filter.fieldID
                 }
-
             )
         }
         onFiltersChange(_state.value.filters)
@@ -75,33 +68,41 @@ class EntitiesFilterComponent<T : IEntity<*>>(
         val repo = (getEntities?.repo as? ISlicingRepository) ?: return
 
         //1. get field ids of given entity:
-
         val fieldIDs = fieldsMapper?.getEntityIDs().orEmpty()
 
+        //get already filtered values:
+        val existedOtherSlices =
+            _state
+                .value
+                .filters
+                .flatMap { f ->
+                    when (f) {
+                        is IEntitiesFilter.Filter.Range -> TODO()
+                        is IEntitiesFilter.Filter.Values -> f.fieldsList.filter { it.isFiltered }.map { it.value }
+                    }
+                }
+                    as? List<SliceValue<Any>>
 
+
+        //2. for each field id make Filter
         val filters = fieldIDs.mapNotNull { fieldID ->
 
-            val existedOtherSlices =
-                _state
-                    .value
-                    .filters
-                    .filter { it.fieldID != fieldID }
-                    .flatMap { f ->
-                        when (f) {
-                            is IEntitiesFilter.Filter.Range -> TODO()
-                            is IEntitiesFilter.Filter.Values -> f.fieldsList.filter { it.isFiltered }.map { it.value }
-                        }
-                    }
-                        as? List<SliceValue<Any>>
+            // get column for given fieldID:
+            val column = columnMapper?.getColumn(fieldID)
 
+            // if column is not null -> slice values for this column
+            column?.let { cn ->
+                //get slice values constrained by existed slice:
+                val columnValues =
+                    repo.getSlice(cn.name
+//                        otherSlices = existedOtherSlices?.filter { it.column != column } ?: listOf()
 
-            val columnName = columnMapper?.getColumn(fieldID)
-            columnName?.let { cn ->
-                val columnValues = repo.getSlice(cn.name, otherSlices = existedOtherSlices ?: listOf())
+                    )
 
                 IEntitiesFilter.Filter.Values(
                     fieldID,
                     fieldsList = columnValues.map { sv ->
+
                         val wasFiltered =
                             (_state
                                 .value

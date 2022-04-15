@@ -15,13 +15,15 @@ interface IBaseDao<T : IEntity<*>> {
     suspend fun query(
         filterSpec: ISpecification? = null,
         sortingSpec: ISpecification? = null,
-        pagingSpec: ISpecification? = null
+        pagingSpec: ISpecification? = null,
+        searchSpec: ISpecification? = null
     ): List<T>
 
     suspend fun getItemsCount(
         filterSpec: ISpecification? = null,
         sortingSpec: ISpecification? = null,
-        pagingSpec: ISpecification? = null
+        pagingSpec: ISpecification? = null,
+        searchSpec: ISpecification? = null
     ): Long
 
     suspend fun slice(columnName: String, existedSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
