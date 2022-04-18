@@ -22,7 +22,8 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = (fieldParams.entity as? String) ?: "",
-                    description = fieldParams.description
+                    description = fieldParams.description,
+                    isPlaceholder = (fieldParams as? DescriptiveFieldValue.CommonField)?.isAlternative ?: false
                 )
             }
             is EntityFieldID.BooleanID -> {
@@ -123,7 +124,11 @@ sealed class DescriptiveFieldValue {
     abstract val entity: Any?
     abstract val description: String
 
-    data class CommonField(override val entity: Any? = null, override val description: String = "") :
+    data class CommonField(
+        override val entity: Any? = null,
+        override val description: String = "",
+        val isAlternative: Boolean = false
+    ) :
         DescriptiveFieldValue()
 
     data class CountableField(

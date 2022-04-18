@@ -115,9 +115,8 @@ class EntitiesScreenComponent constructor(
                         insertEntity = entitiesListConfig.entityClass?.let { insertUseCaseFactory.getInsertUseCase(it) },
                         onEntitiesLoaded = { entities ->
                             val prevClass =
-                                (filterRouter.state.value.activeChild.configuration as? EntitiesFilterConfig.EntitiesFilter)?.entityClass
+                                (filterRouter.activeChild.configuration as? EntitiesFilterConfig.EntitiesFilter)?.entityClass
                             val currentClass = entitiesListConfig.entityClass
-                            // TODO: 4/7/22 update filter's here: disable values that are already filtered out! maybe use entitiesListConfig.filterSpecification?
 
                             if (prevClass != currentClass) {
                                 log("navigating to new filter router. prevClass: $prevClass currentClass: $currentClass")

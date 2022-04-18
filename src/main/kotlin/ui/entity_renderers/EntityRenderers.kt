@@ -6,6 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -15,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.utils.log
@@ -28,6 +33,7 @@ import ui.dialogs.TimePickerDialog
 import utils.DateTimeConverter
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters
+import java.util.*
 import kotlin.math.sign
 
 
@@ -78,22 +84,42 @@ fun RenderFloatField(field: EntityField.FloatField, onValueChange: (Float) -> Un
 
 @Composable
 fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> Unit) {
+
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = field.value,
-        label = { Text(text = field.fieldID.name) },
-        onValueChange = onValueChange,
-        trailingIcon = {
-            ui.composable.Icons.ClearIcon(
-                modifier = Modifier.clickable { onValueChange("") }
-            )
-        }
+        label = if (field.isPlaceholder) null else {
+            {
+                Text(
+                    text = field.fieldID.name
+                )
+            }
+        },
+        onValueChange = {
+            if (field.isPlaceholder) {
+                onValueChange(it.replace(field.value, ""))
+            } else
+                onValueChange(it)
+        },
+        trailingIcon = if (field.value.isNotEmpty() && !field.isPlaceholder) {
+            {
+                ui.composable.Icons.ClearIcon(
+                    modifier = Modifier.clickable { onValueChange("") }
+                )
+            }
+        } else null,
+        textStyle = if (field.isPlaceholder) TextStyle(
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.75f),
+            fontStyle = FontStyle.Italic
+        ) else LocalTextStyle.current
     )
+
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun RenderEntityLink(
+    modifier: Modifier = Modifier,
     field: EntityField.EntityLink,
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: ((EntityField.EntityLink) -> Unit)? = null,
@@ -268,15 +294,18 @@ private fun RenderCommonEntityLink(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun RenderEntityLinksList(
     field: EntityField.EntityLinksList,
     onEntityLinkAdd: () -> Unit,
     onEntityLinkClear: (EntityField.EntityLink) -> Unit,
-    onEntityLinkChanged: (EntityField.EntityLink) -> Unit
+    onEntityLinkChanged: (EntityField.EntityLink) -> Unit,
+    onListChanged: ((List<EntityField.EntityLink>) -> Unit)? = null
 ) {
+
     Column {
+
         ListItem(
             text = {
                 Text(
@@ -288,12 +317,40 @@ fun RenderEntityLinksList(
             secondaryText = { Text(text = field.description, textAlign = TextAlign.Center) }
         )
 
-        field.entities.forEach { link ->
-            RenderEntityLink(
-                link,
-                onEntityLinkChanged = onEntityLinkChanged,
-                onEntityLinkClear = { onEntityLinkClear(link) },
-                onEntityLinkSelect = {})
+
+        field.entities.forEachIndexed { index, link ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.padding(8.dp)) {
+                    if (index > 0)
+                        Icon(
+                            modifier = Modifier.clickable {
+                                val mutableList = field.entities.toMutableList()
+                                Collections.swap(mutableList, index, index - 1)
+                                onListChanged?.invoke(mutableList)
+                            },
+                            imageVector = Icons.Rounded.KeyboardArrowUp,
+                            contentDescription = "drag to top",
+                            tint = MaterialTheme.colors.onBackground.copy(alpha = 0.5f)
+                        )
+                    if (index < field.entities.size - 1)
+                        Icon(
+                            modifier = Modifier.clickable {
+                                val mutableList = field.entities.toMutableList()
+                                Collections.swap(mutableList, index, index + 1)
+                                onListChanged?.invoke(mutableList)
+                            },
+                            imageVector = Icons.Rounded.KeyboardArrowDown,
+                            contentDescription = "drag to bottom",
+                            tint = MaterialTheme.colors.onBackground.copy(alpha = 0.5f)
+                        )
+                }
+                RenderEntityLink(
+                    modifier = Modifier.weight(1f),
+                    field = link,
+                    onEntityLinkChanged = onEntityLinkChanged,
+                    onEntityLinkClear = { onEntityLinkClear(link) },
+                    onEntityLinkSelect = {})
+            }
         }
 
         Box(modifier = Modifier.fillMaxWidth()) {

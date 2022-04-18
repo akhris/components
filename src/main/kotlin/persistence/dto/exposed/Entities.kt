@@ -25,6 +25,7 @@ class EntityItemValue(id: EntityID<Int>) : IntEntity(id) {
     var parameter by EntityParameter referencedOn Tables.ItemValues.parameter
     var value by Tables.ItemValues.value
     var factor by Tables.ItemValues.factor
+    var position by Tables.ItemValues.position
 }
 
 class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
@@ -109,7 +110,7 @@ class EntityItemOutcome(id: EntityID<UUID>) : UUIDEntity(id) {
 
 //    var item by Tables.ItemOutcomes.item
 
-    var item by EntityItem referencedOn  (Tables.ItemOutcomes.item)
+    var item by EntityItem referencedOn (Tables.ItemOutcomes.item)
     var count by Tables.ItemOutcomes.count
 //    var container by Tables.ItemOutcomes.container
 

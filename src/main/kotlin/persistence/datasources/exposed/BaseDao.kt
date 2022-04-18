@@ -224,9 +224,6 @@ abstract class BaseDao<
                 val column = columnMapper.getColumn(fs.fieldID)
 
                 if (column != null) {
-//                    column.foreignKey?.targetTable?.let { tt ->
-//                        //todo
-//                    }
 
                     when (fs) {
                         is FilterSpec.Range<*> -> {

@@ -19,7 +19,6 @@ class ItemsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Item, E
     columnMappersFactory.getColumnMapper(Item::class)
 ) {
 
-
     override fun mapToEntity(exposedEntity: EntityItem): Item {
         return exposedEntity.toItem()
     }
@@ -30,11 +29,12 @@ class ItemsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Item, E
     }
 
     override fun Transaction.doAfterInsert(entity: Item) {
-        Tables.ItemValues.batchInsert(entity.values) { v ->
+        Tables.ItemValues.batchInsert(entity.values.mapIndexed { i, p -> i to p }) { (index, v) ->
             this[Tables.ItemValues.item] = entity.id.toUUID()
             this[Tables.ItemValues.parameter] = v.entity.id.toUUID()
             this[Tables.ItemValues.value] = v.value
             this[Tables.ItemValues.factor] = v.factor
+            this[Tables.ItemValues.position] = index
         }
     }
 
@@ -53,11 +53,12 @@ class ItemsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Item, E
         //batch insert all new values
         Tables
             .ItemValues
-            .batchInsert(entity.values) { v ->
+            .batchInsert(entity.values.mapIndexed { i, p -> i to p }) { (index, v) ->
                 this[Tables.ItemValues.item] = entity.id.toUUID()
                 this[Tables.ItemValues.value] = v.value
                 this[Tables.ItemValues.factor] = v.factor
                 this[Tables.ItemValues.parameter] = v.entity.id.toUUID()
+                this[Tables.ItemValues.position] = index
             }
     }
 }

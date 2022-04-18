@@ -18,7 +18,8 @@ sealed class EntityField {
     data class StringField(
         override val fieldID: EntityFieldID,
         override val description: String,
-        val value: String
+        val value: String,
+        val isPlaceholder: Boolean = false
     ) :
         EntityField() {
         override fun toString(): String = value
@@ -92,7 +93,7 @@ sealed class EntityField {
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?
-        ) : EntityLink(){
+        ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
 
@@ -101,7 +102,7 @@ sealed class EntityField {
             override val description: String = "",
             override val entity: IEntity<*>?,
             val count: Long? = null
-        ) : EntityLink(){
+        ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
 
@@ -112,7 +113,7 @@ sealed class EntityField {
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null
-        ) : EntityLink(){
+        ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
 

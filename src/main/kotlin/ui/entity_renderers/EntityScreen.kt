@@ -329,7 +329,7 @@ private fun RenderField(
                 field,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
             is EntityField.EntityLink -> RenderEntityLink(
-                field,
+                field = field,
                 onEntityLinkSelect = {
                     //on entity select clicked
                     println("going to select entity of type:")
@@ -357,7 +357,10 @@ private fun RenderField(
                 onEntityLinkClear = {
                     onFieldChange(field.copy(entities = field.entities.minus(it)))
                 },
-                onEntityLinkChanged = onFieldChange
+                onEntityLinkChanged = onFieldChange,
+                onListChanged = {
+                    onFieldChange(field.copy(entities = it))
+                }
             )
             is EntityField.StringField -> RenderTextField(
                 field,

@@ -4,6 +4,7 @@ import domain.entities.EntityValuable
 import domain.entities.Item
 import domain.entities.ObjectType
 import domain.entities.Parameter
+import domain.valueobjects.Factor
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
@@ -14,13 +15,6 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
             EntityFieldID.EntitiesListID(
                 tag = tag_values,
                 name = "values",
-//                entitiesIDs = entity.values.mapIndexed { index, v ->
-//                    EntityFieldID.EntityID(
-//                        tag = "${tag_values}${index}",
-//                        name = "value ${index + 1}",
-//                        entityClass = Parameter::class
-//                    )
-//                },
                 entityClass = Parameter::class
             )
         )
@@ -52,7 +46,33 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
                 entity = entity.values,
                 description = "values"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.name, description = "name")
+            is EntityFieldID.StringID -> {
+                DescriptiveFieldValue.CommonField(
+                    entity = entity.name.ifEmpty {
+                        val builder = StringBuilder()
+                        entity.type?.let {
+                            builder.append(it.name)
+                            builder.append(" ·")
+                        }
+                        entity.values.forEachIndexed { index, par ->
+                            builder.append(" ")
+                            builder.append(par.value)
+                            if (index < entity.values.size - 1 && par.entity.unit != null)
+                                builder.append(" ")
+                            par.entity.unit?.let { u ->
+                                if (u.isMultipliable && par.factor != null && par.factor != 1 && par.factor != 0)
+                                    builder.append(Factor.parse(par.factor).prefix)
+                                builder.append(u.unit)
+                            }
+                            if (index < entity.values.size - 1)
+                                builder.append(" · ")
+                        }
+                        builder.toString()
+                    },
+                    description = "name",
+                    isAlternative = entity.name.isEmpty()
+                )
+            }
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
@@ -104,7 +124,7 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
         )
     }
 
-    companion object{
+    companion object {
         const val tag_values = "tag_values"
         const val tag_type = "tag_type"
 

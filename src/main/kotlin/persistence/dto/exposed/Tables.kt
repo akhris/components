@@ -1,15 +1,10 @@
 package persistence.dto.exposed
 
-import com.akhris.domain.core.entities.IEntity
-import domain.entities.*
-import domain.entities.Unit
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.ColumnSet
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
-import kotlin.reflect.KClass
 
 object Tables {
 
@@ -57,13 +52,6 @@ object Tables {
         val name = text(name = "name")
     }
 
-//    object Values : UUIDTable() {
-//        val parameter = reference(name = "parameter", foreign = Parameters).nullable()
-//        val value = text(name = "value")
-//        val factor = float(name = "factor").nullable()
-//    }
-
-
     object Parameters : UUIDTable() {
         val name = text(name = "name")
         val description = text(name = "description")
@@ -87,16 +75,10 @@ object Tables {
         val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
     }
 
-    object ObjectTypeToObjectTypes : Table(){
+    object ObjectTypeToObjectTypes : Table() {
         val parent = reference(name = "parent", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
         val child = reference(name = "child", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
     }
-
-//    object ValuesToItem : Table() {
-//        val item = reference(name = "item", foreign = Items)
-//        val value = reference(name = "value", foreign = Values)
-//        override val primaryKey: PrimaryKey = PrimaryKey(item, value)
-//    }
 
     object ParametersToObjectType : Table() {
         val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)
@@ -116,23 +98,8 @@ object Tables {
         val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)
         val value = text(name = "value").nullable()
         val factor = integer(name = "factor").nullable()
+        val position = integer(name = "position")
     }
 
-
-    fun <T : IEntity<*>> getTable(entityClass: KClass<out T>): ColumnSet? {
-        return when (entityClass) {
-            Unit::class -> Units
-            Parameter::class -> Parameters
-            ObjectType::class -> ObjectTypes
-            Item::class -> Items
-            Container::class -> Containers
-            Supplier::class -> Suppliers
-            ItemIncome::class -> ItemIncomes
-            ItemOutcome::class -> ItemOutcomes
-            Project::class -> Projects
-            WarehouseItem::class -> null
-            else -> null
-        }
-    }
 
 }

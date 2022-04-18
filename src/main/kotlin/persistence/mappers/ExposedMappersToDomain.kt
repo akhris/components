@@ -32,7 +32,7 @@ fun EntityItem.toItem(): Item {
         id = id.value.toString(),
         name = name,
         type = type?.toObjectType(),
-        values = values.map { it.toValue() }
+        values = values.sortedBy { it.position }.map { it.toValue() }
     )
 }
 
