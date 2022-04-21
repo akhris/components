@@ -68,7 +68,8 @@ data class ItemIncome(
     val item: EntityCountable<Item>? = null,
     val container: Container? = null,
     val dateTime: LocalDateTime? = null,
-    val supplier: Supplier? = null
+    val supplier: Supplier? = null,
+    val invoice: Invoice? = null
 ) : IEntity<String>
 
 data class ItemOutcome(
@@ -102,6 +103,19 @@ data class Project(
     val items: List<EntityCountable<Item>> = listOf()
 ) : IEntity<String>
 
+data class Invoice(
+    override val id: String = IDUtils.newID(),
+    val orderID: String = "",
+    val supplier: Supplier? = null,
+    val receiver: String = "",
+    val dateTime: LocalDateTime? = null,
+    val totalPrice: Float = 0f,
+    val currency: String = ""
+) : IEntity<String>{
+    override fun toString(): String {
+        return "$supplier $orderID $dateTime"
+    }
+}
 
 data class EntityCountable<T : IEntity<*>> constructor(
     val entity: T,
@@ -113,3 +127,4 @@ data class EntityValuable<T : IEntity<*>> constructor(
     val value: String? = null,
     val factor: Int? = null
 )
+

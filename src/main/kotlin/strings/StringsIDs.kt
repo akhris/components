@@ -32,5 +32,7 @@ enum class StringsIDs {
     itemOutcome_title,
     itemOutcome_description,
     warehouseItem_title,
-    warehouseItem_description
+    warehouseItem_description,
+    invoice_title,
+    invoice_description
 }

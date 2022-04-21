@@ -62,10 +62,13 @@ sealed class Type(val name: StringsIDs?, val description: StringsIDs?) : Parcela
     object Suppliers : Type(StringsIDs.suppliers_title, StringsIDs.suppliers_description)
 
     @Parcelize
+    object Invoices : Type(StringsIDs.invoice_title, StringsIDs.invoice_description)
+
+    @Parcelize
     object None : Type(null, null)
 
     companion object {
-        fun getAllTypes() = listOf(ObjectType, Parameters, Units, Items, Containers, Suppliers)
+        fun getAllTypes() = listOf(ObjectType, Parameters, Units, Items, Containers, Suppliers, Invoices)
         fun getDefaultHomeType(): Type = ObjectType
     }
 }

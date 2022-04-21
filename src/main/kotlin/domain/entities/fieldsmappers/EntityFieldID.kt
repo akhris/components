@@ -9,14 +9,14 @@ import kotlin.reflect.KClass
 sealed class EntityFieldID {
 
     abstract val name: String
-    abstract val tag: String
+    open val tag: String? = null
     abstract val isReadOnly: Boolean
 
     /**
      * Field represents another Entity of class [entityClass]
      */
     data class EntityID constructor(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false,
         val entityClass: KClass<out IEntity<*>>
@@ -27,7 +27,7 @@ sealed class EntityFieldID {
      * Field represents list of Entities of class [entityClass]
      */
     data class EntitiesListID constructor(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false,
 //        val entitiesIDs: List<EntityID> = listOf(),
@@ -39,7 +39,7 @@ sealed class EntityFieldID {
      * Field represents String value
      */
     data class StringID(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false
     ) :
@@ -49,7 +49,7 @@ sealed class EntityFieldID {
      * Field represents Date/Time value
      */
     data class DateTimeID(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false
     ) :
@@ -59,7 +59,7 @@ sealed class EntityFieldID {
      * Field represents Float value
      */
     data class FloatID(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false
     ) :
@@ -69,7 +69,7 @@ sealed class EntityFieldID {
      * Field represents Long value
      */
     data class LongID(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false
     ) :
@@ -79,7 +79,7 @@ sealed class EntityFieldID {
      * Field represents Boolean value
      */
     data class BooleanID(
-        override val tag: String,
+        override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false
     ) :

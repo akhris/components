@@ -23,6 +23,7 @@ val di = DI {
     import(itemOutcomeModule)
     import(projectModule)
     import(warehouseItemModule)
+    import(invoicesModule)
 //    import(valuesModule)
 
 
@@ -41,8 +42,8 @@ val di = DI {
             instance(),
             instance(),
             instance(),
+            instance(),
             instance()
-//            instance()
         )
     }
 
@@ -57,14 +58,15 @@ val di = DI {
             instance(),
             instance(),
             instance(),
+            instance(),
             instance()
-//            instance()
         )
 
     }
 
     bindSingleton<IGetUseCaseFactory> {
         GetUseCaseFactory(
+            instance(),
             instance(),
             instance(),
             instance(),
@@ -81,6 +83,7 @@ val di = DI {
 
     bindSingleton<IInsertUseCaseFactory> {
         InsertUseCaseFactory(
+            instance(),
             instance(),
             instance(),
             instance(),
@@ -111,8 +114,6 @@ val di = DI {
 
     bindSingleton { FieldsMapperFactory() }
     bindSingleton { ColumnMappersFactory() }
-
-
 
 
 }

@@ -14,7 +14,8 @@ fun EntityItemIncome.toItemIncome(): ItemIncome {
         item = EntityCountable(item.toItem(), count ?: 0L),
         container = container?.toContainer(),
         dateTime = dateTime,
-        supplier = supplier?.toSupplier()
+        supplier = supplier?.toSupplier(),
+        invoice = invoice?.toInvoice()
     )
 }
 
@@ -89,5 +90,17 @@ fun EntityItemValue.toValue(): EntityValuable<Parameter> {
         entity = this.parameter.toParameter(),
         factor = this.factor,
         value = this.value
+    )
+}
+
+fun EntityInvoice.toInvoice(): Invoice {
+    return Invoice(
+        id = id.value.toString(),
+        orderID = orderID,
+        supplier = supplier?.toSupplier(),
+        receiver = receiver,
+        dateTime = dateTime,
+        totalPrice = totalPrice,
+        currency = currency
     )
 }

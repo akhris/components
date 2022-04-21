@@ -80,6 +80,7 @@ class NavHostComponent constructor(
                         Item::class,
                         Container::class,
                         Supplier::class,
+                        Invoice::class,
                         Project::class
                     )
                     else -> throw UnsupportedOperationException("unknown root: ${config.route}")

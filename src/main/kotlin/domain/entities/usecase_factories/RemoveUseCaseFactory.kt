@@ -17,7 +17,7 @@ class RemoveUseCaseFactory(
     private val removeItemIncome: RemoveItemIncome,
     private val removeItemOutcome: RemoveItemOutcome,
     private val removeProject: RemoveProject,
-    private val removeWarehouseItem: RemoveWarehouseItem
+    private val removeInvoice: RemoveInvoice
 ) : IRemoveUseCaseFactory {
 
     override fun <T : IEntity<*>> getRemoveUseCase(entityClass: KClass<out T>): RemoveEntity<*, T>? {
@@ -31,7 +31,7 @@ class RemoveUseCaseFactory(
             ItemIncome::class -> removeItemIncome
             ItemOutcome::class -> removeItemOutcome
             Project::class -> removeProject
-//            WarehouseItem::class -> removeWarehouseItem
+            Invoice::class -> removeInvoice
             else -> null
         }
         return a as? RemoveEntity<*, T>

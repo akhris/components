@@ -15,6 +15,7 @@ class ItemIncomeExposedColumnMapper : IDBColumnMapper<ItemIncome> {
                     ItemIncomeFieldsMapper.tag_container -> Tables.ItemIncomes.container
                     ItemIncomeFieldsMapper.tag_supplier -> Tables.ItemIncomes.supplier
                     ItemIncomeFieldsMapper.tag_item -> Tables.ItemIncomes.item
+                    ItemIncomeFieldsMapper.tag_invoice -> Tables.ItemIncomes.invoice
                     else -> null
                 }
             }

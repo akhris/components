@@ -10,7 +10,7 @@ interface IEntitiesList<T : IEntity<*>> {
 
     //methods to change the state:
     //set entities list:
-    fun setEntitiesList(entities: List<T>)
+//    fun setEntitiesList(entities: List<T>)
 
     //    fun setTotalPages(totalPages: Int)
     fun setCurrentPage(currentPage: Long)

@@ -125,3 +125,14 @@ val unitsModule = getEntityModule(
             }
         }
     })
+
+val invoicesModule = getEntityModule("invoices module", getRepo = {
+    BaseRepository<Invoice>(baseDao = instance())
+}, additionalBindings = {
+    bindSingleton<IBaseDao<Invoice>> { InvoicesDao(instance()) }
+    bindSingleton<Copier<Invoice>> {
+        {
+            it.copy(id = IDUtils.newID())
+        }
+    }
+})

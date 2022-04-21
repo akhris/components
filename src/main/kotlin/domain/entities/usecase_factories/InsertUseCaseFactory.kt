@@ -16,7 +16,8 @@ class InsertUseCaseFactory(
     private val insertSupplier: InsertSupplier,
     private val insertItemIncome: InsertItemIncome,
     private val insertItemOutcome: InsertItemOutcome,
-    private val insertProject: InsertProject
+    private val insertProject: InsertProject,
+    private val insertInvoice: InsertInvoice
 ) : IInsertUseCaseFactory {
 
     override fun <T : IEntity<*>> getInsertUseCase(entityClass: KClass<out T>): InsertEntity<*, T>? {
@@ -30,6 +31,7 @@ class InsertUseCaseFactory(
             ItemIncome::class -> insertItemIncome
             ItemOutcome::class -> insertItemOutcome
             Project::class -> insertProject
+            Invoice::class -> insertInvoice
             else -> null
         }
         return a as? InsertEntity<*, T>

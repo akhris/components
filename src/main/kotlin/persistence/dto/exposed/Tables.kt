@@ -26,6 +26,7 @@ object Tables {
         val container = reference(name = "container", foreign = Containers).nullable()
         val dateTime = datetime(name = "dateTime").nullable()
         val supplier = reference(name = "supplier", foreign = Suppliers).nullable()
+        val invoice = reference(name = "invoice", foreign = Invoices).nullable()
     }
 
     object ItemOutcomes : UUIDTable() {
@@ -61,6 +62,16 @@ object Tables {
     object Projects : UUIDTable() {
         val name = text(name = "name")
         val description = text(name = "description")
+    }
+
+
+    object Invoices : UUIDTable() {
+        val orderID = text(name = "orderID")
+        val supplier = reference(name = "supplier", foreign = Suppliers).nullable()
+        val receiver = text(name = "receiver")
+        val dateTime = datetime(name = "dateTime").nullable()
+        val totalPrice = float(name = "totalPrice")
+        val currency = text(name = "currency")
     }
 
     //Additional tables for relations:

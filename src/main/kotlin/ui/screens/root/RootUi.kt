@@ -70,6 +70,7 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
                 Type.Parameters -> Parameter()
                 Type.Suppliers -> Supplier()
                 Type.Units -> Unit()
+                Type.Invoices -> Invoice()
             }
         }, onDismiss = {
             if (addEntity == null)

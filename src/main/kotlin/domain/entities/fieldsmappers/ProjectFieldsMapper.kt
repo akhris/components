@@ -33,7 +33,8 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
         log("get field params for id: $fieldID")
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
-                val index = fieldID.tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
+                val tag = fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")
+                val index = tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
                 val item = entity.items.getOrNull(index)
                 log("item: $item")
                 DescriptiveFieldValue.CountableField(
@@ -84,7 +85,7 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
 
     private fun setItem(project: Project, field: EntityField): Project? {
         val fieldID = field.fieldID
-        val itemIndex = fieldID.tag.substring(startIndex = tag_items.length).toIntOrNull() ?: return null
+        val itemIndex = fieldID.tag?.substring(startIndex = tag_items.length)?.toIntOrNull() ?: return null
         if (project.items.getOrNull(itemIndex) == null) {
             return null
         }

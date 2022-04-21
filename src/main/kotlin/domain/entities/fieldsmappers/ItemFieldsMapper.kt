@@ -8,24 +8,23 @@ import domain.valueobjects.Factor
 
 class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
-    override fun getEntityIDs(): List<EntityFieldID> {
-        return listOf(
-            EntityFieldID.StringID(tag = "tag_name", name = "name"),
-            EntityFieldID.EntityID(tag = tag_type, name = "object type", entityClass = ObjectType::class),
-            EntityFieldID.EntitiesListID(
-                tag = tag_values,
-                name = "values",
-                entityClass = Parameter::class
-            )
+    override fun getEntityIDs(): List<EntityFieldID> = listOf(
+        EntityFieldID.StringID(tag = "tag_name", name = "name"),
+        EntityFieldID.EntityID(tag = tag_type, name = "object type", entityClass = ObjectType::class),
+        EntityFieldID.EntitiesListID(
+            tag = tag_values,
+            name = "values",
+            entityClass = Parameter::class
         )
-    }
+    )
 
     override fun getFieldParamsByFieldID(entity: Item, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> when (fieldID.tag) {
+            is EntityFieldID.EntityID -> when (val tag = fieldID.tag) {
                 tag_type -> DescriptiveFieldValue.CommonField(entity = entity.type, description = "type of the object")
+                null -> throw IllegalArgumentException("tag cannot be null for fieldID: $fieldID")
                 else -> {
-                    val valueParameterIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
+                    val valueParameterIndex = tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
                     val item = entity.values.getOrNull(valueParameterIndex)
 
                     DescriptiveFieldValue.ValuableField(
@@ -105,7 +104,8 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
     private fun setItem(item: Item, field: EntityField): Item? {
         val fieldID = field.fieldID
-        val valueIndex = fieldID.tag.substring(startIndex = tag_values.length).toIntOrNull() ?: return null
+        val fieldTag = fieldID.tag ?: return null
+        val valueIndex = fieldTag.substring(startIndex = tag_values.length).toIntOrNull() ?: return null
         if (item.values.getOrNull(valueIndex) == null) {
             return null
         }

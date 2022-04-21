@@ -50,11 +50,6 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
                 EntityField.EntityLinksList(
                     fieldID = fieldID,
                     entities = entities,
-//                    entities = fieldID.entitiesIDs.map { entityID ->
-//                        val entityField = getFieldParamsByFieldID(entity, entityID)
-//                        mapEntity(entityID, entityField)
-////                        mapEntity(entityID, entityField)
-//                    },
                     description = fieldParams.description,
                     entityClass = fieldID.entityClass
                 )

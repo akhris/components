@@ -33,12 +33,12 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     override val state: Value<IEntitiesList.Model<T>> = _state
 
-    override fun setEntitiesList(entities: List<T>) {
-        _state.reduce {
-            it.copy(entities = entities)
-        }
-//        onListModelChanged(_state.value)
-    }
+//    override fun setEntitiesList(entities: List<T>) {
+//        _state.reduce {
+//            it.copy(entities = entities)
+//        }
+////        onListModelChanged(_state.value)
+//    }
 
     override fun setCurrentPage(currentPage: Long) {
         _state.reduce {

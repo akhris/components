@@ -187,9 +187,13 @@ class EntitiesScreenComponent constructor(
             EntitiesSearchConfig.EntitiesSearch -> IEntitiesScreen.EntitiesSearchChild.EntitiesSearch(
                 component = EntitiesSearchComponent(
                     componentContext = componentContext,
-                    onSearchChange = {newSearchString->
+                    onSearchChange = { newSearchString ->
                         listRouter.replaceCurrent(
-                            listRouter.activeChild.configuration.copy(searchSpecification = Specification.Search(newSearchString))
+                            listRouter.activeChild.configuration.copy(
+                                searchSpecification = Specification.Search(
+                                    newSearchString
+                                )
+                            )
                         )
                     }
                 )
@@ -276,6 +280,7 @@ val KClass<out IEntity<*>>.title: StringsIDs?
             Container::class -> StringsIDs.containers_title
             Supplier::class -> StringsIDs.suppliers_title
             Project::class -> StringsIDs.projects_title
+            Invoice::class -> StringsIDs.invoice_title
             else -> null
         }
     }
@@ -293,6 +298,7 @@ val KClass<out IEntity<*>>.description: StringsIDs?
             Container::class -> StringsIDs.containers_description
             Supplier::class -> StringsIDs.suppliers_description
             Project::class -> StringsIDs.projects_description
+            Invoice::class -> StringsIDs.invoice_description
             else -> null
         }
     }

@@ -103,6 +103,7 @@ class EntityItemIncome(id: EntityID<UUID>) : UUIDEntity(id) {
     //    var supplier by Tables.ItemIncomes.supplier
     var supplier by EntitySupplier optionalReferencedOn Tables.ItemIncomes.supplier
 
+    var invoice by EntityInvoice optionalReferencedOn Tables.ItemIncomes.invoice
 }
 
 class EntityItemOutcome(id: EntityID<UUID>) : UUIDEntity(id) {
@@ -133,5 +134,17 @@ class EntityProjectItem(id: EntityID<Int>) : IntEntity(id) {
     var project by EntityProject referencedOn Tables.ProjectItems.project
     var item by EntityItem referencedOn Tables.ProjectItems.item
     var count by Tables.ProjectItems.count
+}
+
+class EntityInvoice(id: EntityID<UUID>) : UUIDEntity(id) {
+    companion object : UUIDEntityClass<EntityInvoice>(Tables.Invoices)
+
+    val orderID by Tables.Invoices.orderID
+    val supplier by EntitySupplier optionalReferencedOn Tables.Invoices.supplier
+    val receiver by Tables.Invoices.receiver
+    val dateTime by Tables.Invoices.dateTime
+    val totalPrice by Tables.Invoices.totalPrice
+    val currency by Tables.Invoices.currency
+
 }
 

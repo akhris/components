@@ -20,6 +20,7 @@ class ColumnMappersFactory {
             ItemOutcome::class -> ItemOutcomeExposedColumnMapper()
             Project::class -> ProjectExposedColumnMapper()
             WarehouseItem::class -> WarehouseItemExposedColumnMapper()
+            Invoice::class -> InvoiceExposedColumnMapper()
             else -> throw IllegalArgumentException("$this cannot get column mapper factory for $entityClass")
         } as IDBColumnMapper<T>
     }

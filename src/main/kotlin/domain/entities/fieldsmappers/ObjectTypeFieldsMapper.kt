@@ -27,7 +27,8 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
     override fun getFieldParamsByFieldID(entity: ObjectType, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> when (fieldID.tag) {
+            is EntityFieldID.EntityID -> when (val tag =
+                fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
                 "parent_object_type" -> {
                     DescriptiveFieldValue.CommonField(
                         entity = entity.parentObjectType,
@@ -35,7 +36,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                     )
                 }
                 else -> {
-                    val index = fieldID.tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: -1
+                    val index = tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: -1
                     val parameter = entity.parameters.getOrNull(index)
                     DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
                 }
@@ -72,7 +73,9 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
     private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType? {
         val fieldID = field.fieldID
-        val paramIndex = fieldID.tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: return null
+        val tag = fieldID.tag?:return null
+        val paramIndex =
+            tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: return null
         if (objectType.parameters.getOrNull(paramIndex) == null) {
             return null
         }

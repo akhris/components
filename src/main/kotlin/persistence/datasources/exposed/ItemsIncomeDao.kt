@@ -14,11 +14,12 @@ import utils.set
 import utils.toUUID
 
 
-class ItemsIncomeDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<ItemIncome, EntityItemIncome, Tables.ItemIncomes>(
-    table = Tables.ItemIncomes,
-    entityClass = EntityItemIncome,
-    columnMapper = columnMappersFactory.getColumnMapper(ItemIncome::class)
-) {
+class ItemsIncomeDao(columnMappersFactory: ColumnMappersFactory) :
+    BaseUUIDDao<ItemIncome, EntityItemIncome, Tables.ItemIncomes>(
+        table = Tables.ItemIncomes,
+        entityClass = EntityItemIncome,
+        columnMapper = columnMappersFactory.getColumnMapper(ItemIncome::class)
+    ) {
     override fun mapToEntity(exposedEntity: EntityItemIncome): ItemIncome = exposedEntity.toItemIncome()
 
     override fun insertStatement(entity: ItemIncome): Tables.ItemIncomes.(InsertStatement<Number>) -> Unit = {
@@ -28,6 +29,7 @@ class ItemsIncomeDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<I
         it[container] = entity.container?.id?.toUUID()
         it[dateTime] = entity.dateTime
         it[supplier] = entity.supplier?.id?.toUUID()
+        it[invoice] = entity.invoice?.id?.toUUID()
     }
 
     override fun updateStatement(entity: ItemIncome): Tables.ItemIncomes.(UpdateStatement) -> Unit = {
@@ -36,6 +38,7 @@ class ItemsIncomeDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<I
         it[item] = entity.item?.entity?.id?.toUUID()
         it[count] = entity.item?.count
         it[supplier] = entity.supplier?.id?.toUUID()
+        it[invoice] = entity.invoice?.id?.toUUID()
     }
 
     override val filter: ((EntityField) -> ExposedFilter<Any>?)?

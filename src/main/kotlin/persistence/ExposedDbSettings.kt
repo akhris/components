@@ -35,7 +35,8 @@ object ExposedDbSettings {
                 Tables.ItemValues,
                 Tables.ParametersToObjectType,
                 Tables.Projects,
-                Tables.ProjectItems
+                Tables.ProjectItems,
+                Tables.Invoices
             )
         }
         db
