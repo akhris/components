@@ -88,7 +88,7 @@ fun <T : IEntity<*>> EntityPickerSingleDialog(
 
         val spec = when (searchString.isBlank()) {
             true -> Specification.QueryAll
-            false -> Specification.Search(searchString)
+            false -> Specification.CombinedSpecification(listOf(Specification.Search(searchString)))
         }
         entities = useCase(GetEntities.GetBySpecification(specification = spec)).unpack()
 

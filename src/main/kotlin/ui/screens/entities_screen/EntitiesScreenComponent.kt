@@ -127,6 +127,11 @@ class EntitiesScreenComponent constructor(
                                     )
                                 )
                             }
+                        },
+                        onItemsCountLoaded = { c ->
+                            _state.reduce {
+                                it.copy(itemsCount = c)
+                            }
                         }
                     )
                 )

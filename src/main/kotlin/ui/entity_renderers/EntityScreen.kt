@@ -100,7 +100,8 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     initialEntity: T,
     onEntitySaveClicked: (T) -> Unit,
     onEntityCopyClicked: ((T) -> Unit)? = null,
-    onEntityRemoved: ((T) -> Unit)? = null
+    onEntityRemoved: ((T) -> Unit)? = null,
+    expanded: Boolean = false
 ) {
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
@@ -108,7 +109,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
     var objectTypeField by remember { mutableStateOf<EntityField.EntityLink?>(null) }
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember(expanded) { mutableStateOf(expanded) }
 
     val fields =
         remember(mapper, entity) {
@@ -117,6 +118,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
 
     Card(
         modifier = Modifier
+            .wrapContentHeight()
             .align(Alignment.Center)
             .widthIn(min = ContentSettings.contentCardMinWidth, max = ContentSettings.contentCardMaxWidth)
             .padding(8.dp),
@@ -126,7 +128,6 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
 
 
         Column {
-
             fields
                 .take(if (isExpanded) fields.size else 1)
                 .forEach {

@@ -14,7 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.utils.log
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.Children
-import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.childAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
@@ -42,12 +43,13 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
 
     val state by remember(component) { component.state }.subscribeAsState()
 
+    val itemsCount = remember(state) { state.itemsCount }
     val itemRepresentationType = remember(state) { state.itemRepresentationType }
-    val listRouterState = remember(component){component.listRouterState}
-    val viewSettingsRouterState = remember(component){component.viewSettingsRouterState}
-    val selectorRouterState = remember(component){component.selectorRouterState}
-    val filterRouterState = remember(component){component.filterRouterState}
-    val searchRouterState = remember(component){component.searchRouterState}
+    val listRouterState = remember(component) { component.listRouterState }
+    val viewSettingsRouterState = remember(component) { component.viewSettingsRouterState }
+    val selectorRouterState = remember(component) { component.selectorRouterState }
+    val filterRouterState = remember(component) { component.filterRouterState }
+    val searchRouterState = remember(component) { component.searchRouterState }
 
     log("composing EntitiesScreenUi. component: $component localizedStrings: $localizedStrings")
     ScreenWithFilterSheet(
@@ -55,6 +57,11 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
         isModal = true,
         content = {
             ListPane(listRouterState, itemRepresentationType = itemRepresentationType)
+        },
+        filterSheetTitle = itemsCount?.let {
+            {
+                Text(modifier = Modifier.padding(8.dp), text = "total: $itemsCount")
+            }
         },
         filterContent = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -98,7 +105,7 @@ private fun SelectorPanel(
     routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>,
     localizedStrings: LocalizedStrings
 ) {
-    Children(routerState, animation = crossfade()) {
+    Children(routerState, animation = childAnimation(fade())) {
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesSelectorChild.EntitiesSelector -> {
                 EntitiesSelectorUi(component = child.component, localizedStrings = localizedStrings)
@@ -110,7 +117,7 @@ private fun SelectorPanel(
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>>) {
-    Children(routerState, animation = crossfade()) {
+    Children(routerState, animation = childAnimation(fade())) {
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesFilterChild.EntitiesFilter -> {
                 EntitiesFilterUi(component = child.component)
@@ -121,9 +128,9 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
 
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
-private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>>){
-    Children(routerState, animation = crossfade()){
-        when(val child = it.instance){
+private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>>) {
+    Children(routerState, animation = childAnimation(fade())) {
+        when (val child = it.instance) {
             is IEntitiesScreen.EntitiesSearchChild.EntitiesSearch -> {
                 EntitiesSearchUi(component = child.component)
             }
@@ -135,7 +142,7 @@ private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
 @OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun ViewModeSelector(routerState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>>) {
-    Children(routerState, animation = crossfade()) {
+    Children(routerState, animation = childAnimation(fade())) {
         when (val child = it.instance) {
             is IEntitiesScreen.ViewSettingsChild.ViewSettings -> {
                 EntitiesViewSettingsUi(component = child.component)

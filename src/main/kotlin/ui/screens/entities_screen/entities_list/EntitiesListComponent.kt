@@ -21,13 +21,14 @@ class EntitiesListComponent<T : IEntity<*>>(
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
     private val insertEntity: InsertEntity<*, out T>?,  //used for copying
-    private val onEntitiesLoaded: (List<T>) -> Unit
+    private val onEntitiesLoaded: (List<T>) -> Unit,
+    private val onItemsCountLoaded: (Long) -> Unit
 ) :
     IEntitiesList<T>,
     ComponentContext by componentContext {
 
     private val scope =
-        CoroutineScope(Dispatchers.Main + SupervisorJob())
+        CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     private val _state = MutableValue(IEntitiesList.Model<T>(listOf()))
 
@@ -70,12 +71,19 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     private suspend fun setupPagination() {
         val repo = (getEntities?.repo as? IPagingRepository) ?: return
+
+        val filterSpec = Specification.Filtered(fSpec.filters)
+
+
         val totalItems = try {
-            repo.getItemsCount(Specification.QueryAll)  //todo get spec from filter
+            repo.getItemsCount(Specification.CombinedSpecification(listOf(filterSpec)))
         } catch (e: Exception) {
             null
         }
-        totalItems?.let { setTotalItems(it) }
+        totalItems?.let {
+            setTotalItems(it)
+            onItemsCountLoaded(it)
+        }
     }
 
     override fun onEntityUpdated(entity: T) {
@@ -135,6 +143,7 @@ class EntitiesListComponent<T : IEntity<*>>(
 
     }
 
+
     init {
         lifecycle.subscribe(onDestroy = {
             scope.coroutineContext.cancelChildren()
@@ -143,7 +152,7 @@ class EntitiesListComponent<T : IEntity<*>>(
         val repoCallback = (getEntities?.repo as? IRepositoryCallback<T>)
         log("initial entities invalidate:")
         scope.launch {
-//            setupPagination()
+            setupPagination()
 
             invalidateEntities()    //todo subscribe to pagination parameters change
             repoCallback?.updates?.collect {

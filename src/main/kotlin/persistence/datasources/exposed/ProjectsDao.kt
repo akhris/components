@@ -22,6 +22,8 @@ class ProjectsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Proj
     override fun insertStatement(entity: Project): Tables.Projects.(InsertStatement<Number>) -> Unit = {
         it[name] = entity.name
         it[description] = entity.description
+        it[dateTime] = entity.dateTime
+        it[extFile] = entity.extFile
     }
 
     override fun Transaction.doAfterInsert(entity: Project) {
@@ -35,6 +37,8 @@ class ProjectsDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<Proj
     override fun updateStatement(entity: Project): Tables.Projects.(UpdateStatement) -> Unit = {
         it[name] = entity.name
         it[description] = entity.description
+        it[dateTime] = entity.dateTime
+        it[extFile] = entity.extFile
     }
 
     override fun Transaction.doAfterUpdate(entity: Project) {

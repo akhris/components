@@ -109,77 +109,78 @@ private fun <T : IEntity<*>> EntityMultiSelectDialogContent(
     val checksMap = remember { initialSelection.map { it to true }.toMutableStateMap() }
 
 
-
-    Column(modifier = Modifier.fillMaxHeight()) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            stickyHeader {
-                Surface {
-                    OutlinedTextField(
-                        label = { Text(text = "search") },
-                        modifier = Modifier.fillMaxWidth(),
-                        value = searchString,
-                        onValueChange = onSearchStringChanged,
-                        trailingIcon = { Icon(Icons.Rounded.Search, "search field") }
-                    )
-                }
-            }
-
-
-            items(entities) { entity ->
-                val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs() }
-                val fields =
-                    remember(fieldsMapper, entityIDs) {
-                        entityIDs.flatMap { fieldID ->
-                            when (val field = fieldsMapper.getFieldByID(entity, fieldID)) {
-                                is EntityField.EntityLinksList -> field.entities
-                                else -> listOfNotNull(field)
-                            }
-
-                        }
-                    }
-
-                val textString = remember(fields) {
-                    val builder = StringBuilder()
-                    fields.forEach {
-                        builder.append(it.fieldID.name)
-                        builder.append(": ")
-                        builder.append(
-                            when (it) {
-                                is EntityField.BooleanField -> it.value
-                                is EntityField.DateTimeField -> it.value ?: ""
-                                is EntityField.EntityLink -> it.entity?.toString() ?: ""
-                                is EntityField.EntityLinksList -> ""
-                                is EntityField.FloatField -> it.value
-                                is EntityField.LongField -> it.value
-                                is EntityField.StringField -> it.value
-                            }
+    Surface {
+        Column(modifier = Modifier.fillMaxHeight()) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                stickyHeader {
+                    Surface {
+                        OutlinedTextField(
+                            label = { Text(text = "search") },
+                            modifier = Modifier.fillMaxWidth(),
+                            value = searchString,
+                            onValueChange = onSearchStringChanged,
+                            trailingIcon = { Icon(Icons.Rounded.Search, "search field") }
                         )
-                        builder.append(" ")
                     }
-                    builder.toString()
                 }
-                ListItem(
-                    text = { Text(textString) },
-                    icon = {
-                        Checkbox(
-                            checked = checksMap[entity] ?: false,
-                            onCheckedChange = { checksMap[entity] = it })
-                    })
-            }
-        }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            TextButton(modifier = Modifier.padding(4.dp), onClick = onCancelClicked) {
-                Text(text = "cancel")
+
+                items(entities) { entity ->
+                    val entityIDs = remember(fieldsMapper, entity) { fieldsMapper.getEntityIDs() }
+                    val fields =
+                        remember(fieldsMapper, entityIDs) {
+                            entityIDs.flatMap { fieldID ->
+                                when (val field = fieldsMapper.getFieldByID(entity, fieldID)) {
+                                    is EntityField.EntityLinksList -> field.entities
+                                    else -> listOfNotNull(field)
+                                }
+
+                            }
+                        }
+
+                    val textString = remember(fields) {
+                        val builder = StringBuilder()
+                        fields.forEach {
+                            builder.append(it.fieldID.name)
+                            builder.append(": ")
+                            builder.append(
+                                when (it) {
+                                    is EntityField.BooleanField -> it.value
+                                    is EntityField.DateTimeField -> it.value ?: ""
+                                    is EntityField.EntityLink -> it.entity?.toString() ?: ""
+                                    is EntityField.EntityLinksList -> ""
+                                    is EntityField.FloatField -> it.value
+                                    is EntityField.LongField -> it.value
+                                    is EntityField.StringField -> it.value
+                                }
+                            )
+                            builder.append(" ")
+                        }
+                        builder.toString()
+                    }
+                    ListItem(
+                        text = { Text(textString) },
+                        icon = {
+                            Checkbox(
+                                checked = checksMap[entity] ?: false,
+                                onCheckedChange = { checksMap[entity] = it })
+                        })
+                }
             }
 
-            Button(modifier = Modifier.padding(4.dp), onClick = {
-                onEntitiesSelected(checksMap.filterValues { it }.keys.toList()) //return only selected fixme initial order not preserved!
-            }) {
-                Text(text = "ok")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(modifier = Modifier.padding(4.dp), onClick = onCancelClicked) {
+                    Text(text = "cancel")
+                }
+
+                Button(modifier = Modifier.padding(4.dp), onClick = {
+                    onEntitiesSelected(checksMap.filterValues { it }.keys.toList()) //return only selected fixme initial order not preserved!
+                }) {
+                    Text(text = "ok")
+                }
             }
         }
     }

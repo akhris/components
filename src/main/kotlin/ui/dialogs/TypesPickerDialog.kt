@@ -36,7 +36,8 @@ fun TypesPickerDialog(
             )
         },
         onItemPicked = onItemPicked,
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        autoPick = true
 
     )
 }

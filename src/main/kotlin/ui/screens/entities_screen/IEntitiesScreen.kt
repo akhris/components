@@ -27,6 +27,7 @@ interface IEntitiesScreen {
     data class Model(
         val screenTitle: StringsIDs? = null,
         val screenDescription: StringsIDs? = null,
+        val itemsCount: Long? = null,
         val itemRepresentationType: ItemRepresentationType = ItemRepresentationType.default
     )
 

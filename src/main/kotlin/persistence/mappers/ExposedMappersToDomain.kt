@@ -79,6 +79,8 @@ fun EntityProject.toProject(): Project {
         id = id.value.toString(),
         name = name,
         description = description,
+        dateTime = dateTime,
+        extFile = extFile,
         items = items.map {
             EntityCountable(entity = it.item.toItem(), count = it.count)
         }

@@ -13,16 +13,11 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.StringID(EntityFieldID.tag_description, "description"),
+            EntityFieldID.DateTimeID(name = "date"),
+            EntityFieldID.StringID(extFile, name = "file"),
             EntityFieldID.EntitiesListID(
                 tag = tag_items,
                 name = "items",
-//                entitiesIDs = List(entity.items.size) { index ->
-//                    EntityFieldID.EntityID(
-//                        tag = "$tag_items$index",
-//                        name = "item ${index + 1}",
-//                        entityClass = Item::class
-//                    )
-//                },
                 entityClass = Item::class
             )
         )
@@ -57,9 +52,16 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                         entity = entity.description,
                         description = "project's description"
                     )
+                    extFile -> DescriptiveFieldValue.CommonField(
+                        entity = entity.extFile,
+                        description = "external file attached"
+                    )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
-
+            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(
+                entity = entity.dateTime,
+                description = "project's created date"
+            )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
@@ -68,8 +70,11 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
         return when (val fieldID = field.fieldID) {
             is EntityFieldID.StringID ->
                 when (fieldID.tag) {
-                    EntityFieldID.tag_name -> entity.copy(name = (field as EntityField.StringField).value)
-                    EntityFieldID.tag_description -> entity.copy(description = (field as EntityField.StringField).value)
+                    EntityFieldID.tag_name -> entity.copy(name = (field as? EntityField.StringField)?.value ?: "")
+                    EntityFieldID.tag_description -> entity.copy(
+                        description = (field as? EntityField.StringField)?.value ?: ""
+                    )
+                    extFile -> entity.copy(extFile = (field as? EntityField.StringField)?.value)
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             is EntityFieldID.EntityID -> setItem(entity, field)
@@ -79,6 +84,7 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                     EntityCountable(i, count = (link as? EntityField.EntityLink.EntityLinkCountable)?.count ?: 1L)
                 }
             })
+            is EntityFieldID.DateTimeID -> entity.copy(dateTime = (field as? EntityField.DateTimeField)?.value)
             else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
         }
     }
@@ -99,6 +105,10 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
                 } else itemCountable
             }
         )
+    }
+
+    companion object {
+        const val extFile = "external_file"
     }
 
 }

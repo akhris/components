@@ -3,7 +3,7 @@ package di
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.usecase_factories.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.GlobalScope
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
@@ -27,7 +27,7 @@ val di = DI {
 //    import(valuesModule)
 
 
-    bindSingleton<CoroutineScope> { MainScope() }
+    bindSingleton<CoroutineScope> { GlobalScope }
     bindSingleton { AppSettingsRepository(instance()) }
 
     bindSingleton { SettingsMapper() }

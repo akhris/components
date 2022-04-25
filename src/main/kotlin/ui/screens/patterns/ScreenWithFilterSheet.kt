@@ -6,6 +6,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ fun ScreenWithFilterSheet(
                 elevation = 1.dp
             ) {
                 Column {
-                    Row {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         //title row
                         Box(modifier = Modifier.weight(1f)) {
                             filterSheetTitle?.invoke(this)

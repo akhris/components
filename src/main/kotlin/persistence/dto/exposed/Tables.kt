@@ -62,6 +62,8 @@ object Tables {
     object Projects : UUIDTable() {
         val name = text(name = "name")
         val description = text(name = "description")
+        val dateTime = datetime(name = "dateTime").nullable()
+        val extFile = text(name = "extFile").nullable()
     }
 
 

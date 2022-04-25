@@ -125,6 +125,8 @@ class EntityProject(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by Tables.Projects.name
     var description by Tables.Projects.description
+    var dateTime by Tables.Projects.dateTime
+    val extFile by Tables.Projects.extFile
     val items by EntityProjectItem referrersOn Tables.ProjectItems.project
 }
 

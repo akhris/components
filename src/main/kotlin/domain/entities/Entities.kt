@@ -100,6 +100,8 @@ data class Project(
     override val id: String = IDUtils.newID(),
     val name: String = "",
     val description: String = "",
+    val dateTime: LocalDateTime? = null,
+    val extFile: String? = null,
     val items: List<EntityCountable<Item>> = listOf()
 ) : IEntity<String>
 
@@ -111,7 +113,7 @@ data class Invoice(
     val dateTime: LocalDateTime? = null,
     val totalPrice: Float = 0f,
     val currency: String = ""
-) : IEntity<String>{
+) : IEntity<String> {
     override fun toString(): String {
         return "$supplier $orderID $dateTime"
     }

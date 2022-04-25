@@ -49,8 +49,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
 
     //decompose:
-    implementation("com.arkivanov.decompose:decompose:0.5.2")
-    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
+    implementation("com.arkivanov.decompose:decompose:0.6.0")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.6.0")
 
     //annotation processing:
 //    compileOnly("com.squareup:kotlinpoet:1.10.2")

@@ -1,8 +1,6 @@
 package ui.screens.settings
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.operator.map
 import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +20,7 @@ class SettingsComponent(
     ComponentContext by componentContext {
 
     private val scope =
-        CoroutineScope(Dispatchers.Main + SupervisorJob())
+        CoroutineScope(Dispatchers.Default  + SupervisorJob())
 
     override val state: Flow<ISettings.Model> =
         appSettingsRepository

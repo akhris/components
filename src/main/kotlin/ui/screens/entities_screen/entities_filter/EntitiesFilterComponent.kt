@@ -29,7 +29,7 @@ class EntitiesFilterComponent<T : IEntity<*>>(
     override val state: Value<IEntitiesFilter.Model> = _state
 
     private val scope =
-        CoroutineScope(Dispatchers.Main + SupervisorJob())
+        CoroutineScope(Dispatchers.Default  + SupervisorJob())
 
     private val columnMapper = entityClass?.let { columnMapperFactory.getColumnMapper(it) }
     private val fieldsMapper = entityClass?.let { fieldsMapperFactory.getFieldsMapper(it) }

@@ -1,8 +1,11 @@
 package ui.entity_renderers
 
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
@@ -22,7 +25,7 @@ fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
     val state = rememberDialogState(
         size = DpSize(
             width = DialogSettings.defaultWideDialogWidth,
-            height = DialogSettings.defaultWideDialogHeight
+            height = Dp.Unspecified
         )
     )
 
@@ -34,12 +37,13 @@ fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
         onCloseRequest = onDismiss,
         content = {
             Surface {
-                BoxWithConstraints {
+                Box(modifier = Modifier.wrapContentHeight()) {
                     RenderCardEntity(
                         initialEntity = entity,
                         onEntitySaveClicked = {
                             entityToSave = it
-                        }
+                        },
+                        expanded = true
                     )
                 }
             }

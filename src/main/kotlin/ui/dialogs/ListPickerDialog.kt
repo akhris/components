@@ -2,6 +2,8 @@ package ui.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -20,6 +22,7 @@ fun <T> ListPickerDialog(
     title: String,
     mapper: @Composable BoxScope.(T) -> Unit,
     initSelection: T? = null,
+    autoPick: Boolean = false,
     onItemPicked: (T) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -41,12 +44,11 @@ fun <T> ListPickerDialog(
                 items = items,
                 initSelection = initSelection,
                 mapper = mapper,
-                onItemPicked = {
-                    onItemPicked(it)
-                    onDismiss()
-                },
-                onDismiss
-            )
+                autoPick = autoPick
+            ) {
+                onItemPicked(it)
+                onDismiss()
+            }
         })
 }
 
@@ -54,37 +56,47 @@ fun <T> ListPickerDialog(
 private fun <T> PickerDialogContent(
     items: List<T>,
     initSelection: T?,
-    mapper: @Composable BoxScope.(T) -> Unit,
-    onItemPicked: (T) -> Unit,
-    onDismiss: () -> Unit
+    mapper: @Composable (BoxScope.(T) -> Unit),
+    autoPick: Boolean = false,
+    onItemPicked: (T) -> Unit
 ) {
     var selectedEntity by remember(initSelection) { mutableStateOf<T?>(initSelection) }
-
-    Column {
-        items.forEach {
-            Surface(
-                modifier = Modifier.clickable {
-                    selectedEntity = it
-                },
-                color = when (it == selectedEntity) {
-                    true -> MaterialTheme.colors.primary
-                    false -> MaterialTheme.colors.surface
-                }
-            ) {
-                Box {
-                    mapper(it)
+    Surface {
+        Column(modifier = Modifier.fillMaxHeight()) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(items) {
+                    Surface(
+                        modifier = Modifier.clickable {
+                            selectedEntity = it
+                        },
+                        color = when (it == selectedEntity) {
+                            true -> MaterialTheme.colors.primary
+                            false -> MaterialTheme.colors.surface
+                        }
+                    ) {
+                        Box {
+                            mapper(it)
+                        }
+                    }
                 }
             }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
 
-            Button(
-                modifier = Modifier.padding(8.dp),
-                onClick = {
-                    selectedEntity?.let { onItemPicked(it) }
-                },
-                content = { Text("ok") }
-            )
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        selectedEntity?.let { onItemPicked(it) }
+                    },
+                    content = { Text("ok") }
+                )
+            }
         }
     }
+
+    LaunchedEffect(autoPick, selectedEntity) {
+        if (autoPick && (selectedEntity != initSelection)) {
+            selectedEntity?.let { onItemPicked(it) }
+        }
+    }
+
 }
