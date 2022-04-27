@@ -61,7 +61,7 @@ fun EntityObjectType.toObjectType(level: Int = 1): ObjectType {
         id = id.value.toString(),
         name = name,
         parameters = parameters.map { it.toParameter() },
-        parentEntity = if (level <= 0) null else parents.firstOrNull()?.toObjectType(level - 1)
+        parentEntity = if (level <= 0) null else parent?.toObjectType(level - 1)
     )
 }
 

@@ -54,6 +54,7 @@ object Tables {
 
     object ObjectTypes : UUIDTable() {
         val name = text(name = "name")
+        val parent = reference(name = "parent", foreign = ObjectTypes).nullable()
     }
 
     object Parameters : UUIDTable() {

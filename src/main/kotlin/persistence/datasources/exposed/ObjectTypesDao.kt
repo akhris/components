@@ -14,30 +14,32 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) :
     BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
         table = Tables.ObjectTypes,
         entityClass = EntityObjectType,
-        columnMapper = columnMappersFactory.getColumnMapper(ObjectType::class),
-        parentChildTable = Tables.ObjectTypeToObjectTypes
+        columnMapper = columnMappersFactory.getColumnMapper(ObjectType::class)
+//        parentChildTable = Tables.ObjectTypeToObjectTypes
     ) {
     override fun mapToEntity(exposedEntity: EntityObjectType): ObjectType = exposedEntity.toObjectType()
 
     override fun insertStatement(entity: ObjectType): Tables.ObjectTypes.(InsertStatement<Number>) -> Unit = {
         it[name] = entity.name
+        it[parent] = entity.parentEntity?.id?.toUUID()
     }
 
-    override fun Transaction.doAfterInsert(entity: ObjectType) {
-        Tables.ParametersToObjectType.batchInsert(entity.parameters) { p ->
-            this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
-            this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
-        }
-        entity.parentEntity?.let { pot ->
-            Tables.ObjectTypeToObjectTypes.insert { statement ->
-                statement[parent] = pot.id.toUUID()
-                statement[child] = entity.id.toUUID()
-            }
-        }
-    }
+//    override fun Transaction.doAfterInsert(entity: ObjectType) {
+//        Tables.ParametersToObjectType.batchInsert(entity.parameters) { p ->
+//            this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
+//            this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
+//        }
+//        entity.parentEntity?.let { pot ->
+//            Tables.ObjectTypeToObjectTypes.insert { statement ->
+//                statement[parent] = pot.id.toUUID()
+//                statement[child] = entity.id.toUUID()
+//            }
+//        }
+//    }
 
     override fun updateStatement(entity: ObjectType): Tables.ObjectTypes.(UpdateStatement) -> Unit = {
         it[name] = entity.name
+        it[parent] = entity.parentEntity?.id?.toUUID()
     }
 
     override fun Transaction.doAfterUpdate(entity: ObjectType) {
@@ -55,31 +57,31 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) :
         }
 
 
-        //3. update children-parent reference:
-        if (entity.parentEntity == null) {
-            //delete reference:
-            Tables
-                .ObjectTypeToObjectTypes
-                .deleteWhere { Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }
-        } else {
-            //update reference
-            val rowsUpdated = Tables
-                .ObjectTypeToObjectTypes
-                .update({ Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }) {
-                    it[parent] = entity.parentEntity.id.toUUID()
-                }
-            //if nothing was updated - insert new row
-            if (rowsUpdated == 0) {
-                Tables
-                    .ObjectTypeToObjectTypes
-                    .insert { statement ->
-                        statement[child] = entity.id.toUUID()
-                        statement[parent] = entity.parentEntity.id.toUUID()
-                    }
-            } else {
-                //do nothing
-            }
-        }
+//        //3. update children-parent reference:
+//        if (entity.parentEntity == null) {
+//            //delete reference:
+//            Tables
+//                .ObjectTypeToObjectTypes
+//                .deleteWhere { Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }
+//        } else {
+//            //update reference
+//            val rowsUpdated = Tables
+//                .ObjectTypeToObjectTypes
+//                .update({ Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }) {
+//                    it[parent] = entity.parentEntity.id.toUUID()
+//                }
+//            //if nothing was updated - insert new row
+//            if (rowsUpdated == 0) {
+//                Tables
+//                    .ObjectTypeToObjectTypes
+//                    .insert { statement ->
+//                        statement[child] = entity.id.toUUID()
+//                        statement[parent] = entity.parentEntity.id.toUUID()
+//                    }
+//            } else {
+//                //do nothing
+//            }
+//        }
     }
 
 }

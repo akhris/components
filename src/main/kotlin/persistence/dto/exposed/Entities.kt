@@ -29,14 +29,16 @@ class EntityItemValue(id: EntityID<Int>) : IntEntity(id) {
     var position by Tables.ItemValues.position
 }
 
-class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id), IParentableEntity<EntityObjectType> {
+class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityObjectType>(Tables.ObjectTypes)
 
     var name by Tables.ObjectTypes.name
     val parameters by EntityParameter via Tables.ParametersToObjectType
 
-    override var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
-    override var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
+    val parent by EntityObjectType optionalReferencedOn (Tables.ObjectTypes.parent)
+
+//    override var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
+//    override var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
 }
 
 

@@ -72,6 +72,7 @@ abstract class BaseDao<
     ): List<ENTITY> {
         return newSuspendedTransaction {
 
+
             val query = if (parentChildTable != null) {
                 getGroupedByParentsEntities(parentChildTable, filterSpec, sortingSpec, pagingSpec, searchSpec)
             } else {
