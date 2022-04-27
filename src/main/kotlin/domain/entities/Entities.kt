@@ -21,8 +21,8 @@ data class ObjectType constructor(
     override val id: String = IDUtils.newID(),
     val name: String = "",
     val parameters: List<Parameter> = listOf(),
-    val parentObjectType: ObjectType? = null
-) : IEntity<String> {
+    override val parentEntity: ObjectType? = null
+) : IEntity<String>, IParentableEntity<ObjectType> {
     override fun toString(): String = name
 }
 
@@ -130,3 +130,7 @@ data class EntityValuable<T : IEntity<*>> constructor(
     val factor: Int? = null
 )
 
+
+interface IParentableEntity<T> {
+    val parentEntity: T?
+}

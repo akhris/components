@@ -31,7 +31,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                 fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
                 "parent_object_type" -> {
                     DescriptiveFieldValue.CommonField(
-                        entity = entity.parentObjectType,
+                        entity = entity.parentEntity,
                         description = "parent type"
                     )
                 }
@@ -58,7 +58,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
             is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
             is EntityFieldID.EntityID -> when (fieldID.tag) {
                 "parent_object_type" -> {
-                    entity.copy(parentObjectType = (field as EntityField.EntityLink).entity as? ObjectType)
+                    entity.copy(parentEntity = (field as EntityField.EntityLink).entity as? ObjectType)
                 }
                 else -> {
                     setParameter(entity, field)

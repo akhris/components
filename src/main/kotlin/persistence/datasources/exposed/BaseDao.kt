@@ -12,9 +12,11 @@ import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IBaseDao
 import persistence.datasources.SliceValue
+import persistence.dto.exposed.ParentChildTable
 import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
@@ -27,7 +29,8 @@ abstract class BaseDao<
         >(
     protected val table: EXPOSED_TABLE,
     private val entityClass: EntityClass<EXPOSED_ID, EXPOSED_ENTITY>,
-    private val columnMapper: IDBColumnMapper<ENTITY>
+    private val columnMapper: IDBColumnMapper<ENTITY>,
+    private val parentChildTable: ParentChildTable<EXPOSED_ID>? = null
 ) :
     IBaseDao<ENTITY> {
 
@@ -68,12 +71,18 @@ abstract class BaseDao<
         searchSpec: ISpecification?
     ): List<ENTITY> {
         return newSuspendedTransaction {
-            val query = getNotGroupedQuery(
-                filterSpec = filterSpec,
-                sortingSpec = sortingSpec,
-                pagingSpec = pagingSpec,
-                searchSpec = searchSpec
-            )
+
+            val query = if (parentChildTable != null) {
+                getGroupedByParentsEntities(parentChildTable, filterSpec, sortingSpec, pagingSpec, searchSpec)
+            } else {
+                getNotGroupedQuery(
+                    filterSpec = filterSpec,
+                    sortingSpec = sortingSpec,
+                    pagingSpec = pagingSpec,
+                    searchSpec = searchSpec
+                )
+
+            }
             entityClass.wrapRows(query).map { mapToEntity(it) }
         }
     }
@@ -179,7 +188,62 @@ abstract class BaseDao<
         }
     }
 
-    private fun Transaction.getNotGroupedQuery(
+    private class ParentChild<ID : Comparable<ID>>(val parent: EntityID<ID>, val child: EntityID<ID>)
+
+    private fun getGroupedByParentsEntities(
+        pcTable: ParentChildTable<EXPOSED_ID>,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?,
+        searchSpec: ISpecification?
+    ): Query {
+
+
+
+        //get parentIDs from ParentChildTable:
+        val childrenIDs =
+            pcTable
+                .slice(pcTable.child)
+                .selectAll()
+                .map { it[pcTable.child] }
+
+
+        // select top entities if it's id not in childrenIDs list
+        val topEntitiesIDsQuery =
+            table
+                .slice(table.id)
+                .select { table.id notInList childrenIDs }
+
+
+        (pagingSpec as? Specification.Paginated)?.let {
+            topEntitiesIDsQuery.addPaging(it)
+        }
+
+
+
+        val topEntitiesIDs =
+            topEntitiesIDsQuery
+                .map { it[table.id] }
+
+        log("top entities ids: $topEntitiesIDs")
+
+        val query = table.select { table.id inList topEntitiesIDs }
+
+        (searchSpec as? Specification.Search)?.let {
+            query.addSearching(it)
+        }
+        (filterSpec as? Specification.Filtered)?.let {
+            query.addFiltering(it)
+        }
+        (sortingSpec as? Specification.Sorted)?.let {
+            query.addSorting(it)
+        }
+
+        return query
+
+    }
+
+    private fun getNotGroupedQuery(
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?,
@@ -260,19 +324,31 @@ abstract class BaseDao<
 
 }
 
+internal object AdditionalParentColumn : Table() {
+    val parent = uuid("parent entity").nullable()
+}
+
 abstract class BaseUUIDDao<ENTITY : IEntity<*>,
         EXPOSED_ENTITY : Entity<UUID>,
         EXPOSED_TABLE : IdTable<UUID>>(
     table: EXPOSED_TABLE,
     entityClass: EntityClass<UUID, EXPOSED_ENTITY>,
-    columnMapper: IDBColumnMapper<ENTITY>
+    columnMapper: IDBColumnMapper<ENTITY>,
+    parentChildTable: ParentChildTable<UUID>? = null
 ) :
-    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper) {
+    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper, parentChildTable) {
     override fun mapToID(id: Any): UUID {
         return if (id is String) {
             UUID.fromString(id)
         } else {
             throw IllegalArgumentException("ID must be String")
         }
+    }
+}
+
+// https://stackoverflow.com/a/70577972/7635275
+class SubQueryExpression<T>(private val aliasQuery: QueryAlias) : Expression<T>() {
+    override fun toQueryBuilder(queryBuilder: QueryBuilder) {
+        aliasQuery.describe(TransactionManager.current(), queryBuilder)
     }
 }

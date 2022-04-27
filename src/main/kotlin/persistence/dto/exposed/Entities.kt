@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.SizedIterable
 import java.util.*
 
 
@@ -28,14 +29,14 @@ class EntityItemValue(id: EntityID<Int>) : IntEntity(id) {
     var position by Tables.ItemValues.position
 }
 
-class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
+class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id), IParentableEntity<EntityObjectType> {
     companion object : UUIDEntityClass<EntityObjectType>(Tables.ObjectTypes)
 
     var name by Tables.ObjectTypes.name
     val parameters by EntityParameter via Tables.ParametersToObjectType
 
-    var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
-    var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
+    override var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
+    override var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
 }
 
 
@@ -150,3 +151,7 @@ class EntityInvoice(id: EntityID<UUID>) : UUIDEntity(id) {
 
 }
 
+interface IParentableEntity<T> {
+    val parents: SizedIterable<T>
+    val children: SizedIterable<T>
+}

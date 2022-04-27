@@ -2,19 +2,15 @@ package ui.screens.entities_screen.entities_list
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.OffsetMapping
@@ -42,29 +39,93 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
 
     val state by remember(component) { component.state }.subscribeAsState()
 
+    val listState = rememberLazyListState()
+
+    var scrollToItem by remember { mutableStateOf<Int?>(null) }
+
+    var bottomPadding by remember { mutableStateOf(0.dp) }
+
+
     Box(modifier = Modifier.fillMaxHeight()) {
         EntityScreenContent(
             itemRepresentationType = itemRepresentationType,
             entities = state.entities,
+            listState = listState,
+            bottomPadding = bottomPadding,
             onEntityRemoved = component.onEntityRemovedCallback?.let { rc -> { rc(it) } },
             onEntityUpdated = component::onEntityUpdated,
             onEntityCopied = component.onEntityCopiedCallback?.let { cc -> { cc(it) } }
         )
 
-        state.pagingParameters?.let { pagingParams ->
-            if (pagingParams.totalPages > 1) {
-                //show paging control:
-                PagingControl(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    currentPage = pagingParams.currentPage,
-                    maxPages = pagingParams.totalPages,
-                    onPageChanged = {
-                        component.setCurrentPage(it)
-                    })
+        Column(
+            modifier = Modifier
+                .onSizeChanged {
+                    bottomPadding = it.height.dp
+                }
+                .padding(16.dp)
+                .align(Alignment.BottomCenter)
+                ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (listState.firstVisibleItemIndex > 0) {
+                //show scroll up button
+                ScrollUpButton(
+                    onScrollUpClicked = {
+                        scrollToItem = 0
+                    }
+                )
             }
+            state.pagingParameters?.let { pagingParams ->
+                if (pagingParams.totalPages > 1) {
+                    //show paging control:
+                    PagingControl(
+                        currentPage = pagingParams.currentPage,
+                        maxPages = pagingParams.totalPages,
+                        onPageChanged = {
+                            component.setCurrentPage(it)
+                        })
+                }
+            }
+
+
         }
 
+
     }
+
+
+    LaunchedEffect(scrollToItem) {
+        scrollToItem?.let {
+            listState.animateScrollToItem(it)
+            scrollToItem = null
+        }
+    }
+
+}
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun ScrollUpButton(
+    modifier: Modifier = Modifier,
+    onScrollUpClicked: () -> Unit
+) {
+    var isHovered by remember { mutableStateOf(false) }
+
+    val alpha by animateFloatAsState(
+        when (isHovered) {
+            true -> 1f
+            false -> 0.1f
+        }
+    )
+
+    ExtendedFloatingActionButton(modifier = modifier
+        .alpha(alpha)
+        .onPointerEvent(PointerEventType.Enter) { isHovered = true }
+        .onPointerEvent(PointerEventType.Exit) { isHovered = false },
+        text = { Text("scroll to the top") },
+        onClick = onScrollUpClicked,
+        icon = { Icon(imageVector = Icons.Rounded.KeyboardArrowUp, contentDescription = "scroll to the top") })
 
 }
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,18 +41,16 @@ import kotlin.reflect.KClass
 /**
  * Entity screen content - renders list of Entities in a way that depends on [itemRepresentationType] parameter.
  */
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
     entities: List<T>,
+    bottomPadding: Dp = 0.dp,
+    listState: LazyListState = rememberLazyListState(),
     onEntityRemoved: ((T) -> Unit)? = null,
     onEntityUpdated: ((T) -> Unit)? = null,
     onEntityCopied: ((T) -> Unit)? = null
 ) {
-
-    val lazyColumnState = rememberLazyListState()
-
     val di = localDI()
     val factory: FieldsMapperFactory by di.instance()
 
@@ -61,7 +60,7 @@ fun <T : IEntity<*>> EntityScreenContent(
     when (itemRepresentationType) {
         //cards
         ItemRepresentationType.Card -> {
-            LazyColumn(state = lazyColumnState) {
+            LazyColumn(state = listState) {
                 items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
                     Box(modifier = Modifier.fillMaxWidth()) {
                         RenderCardEntity(
@@ -75,6 +74,12 @@ fun <T : IEntity<*>> EntityScreenContent(
                         )
                     }
                 })
+
+                if (entities.isNotEmpty() && bottomPadding != 0.dp) {
+                    item {
+                        Spacer(modifier = Modifier.height(bottomPadding))
+                    }
+                }
             }
         }
 

@@ -10,11 +10,13 @@ import persistence.dto.exposed.Tables
 import persistence.mappers.toObjectType
 import utils.toUUID
 
-class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
-    table = Tables.ObjectTypes,
-    entityClass = EntityObjectType,
-    columnMapper = columnMappersFactory.getColumnMapper(ObjectType::class)
-) {
+class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) :
+    BaseUUIDDao<ObjectType, EntityObjectType, Tables.ObjectTypes>(
+        table = Tables.ObjectTypes,
+        entityClass = EntityObjectType,
+        columnMapper = columnMappersFactory.getColumnMapper(ObjectType::class),
+        parentChildTable = Tables.ObjectTypeToObjectTypes
+    ) {
     override fun mapToEntity(exposedEntity: EntityObjectType): ObjectType = exposedEntity.toObjectType()
 
     override fun insertStatement(entity: ObjectType): Tables.ObjectTypes.(InsertStatement<Number>) -> Unit = {
@@ -26,7 +28,7 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<O
             this[Tables.ParametersToObjectType.objectType] = entity.id.toUUID()
             this[Tables.ParametersToObjectType.parameter] = p.id.toUUID()
         }
-        entity.parentObjectType?.let { pot ->
+        entity.parentEntity?.let { pot ->
             Tables.ObjectTypeToObjectTypes.insert { statement ->
                 statement[parent] = pot.id.toUUID()
                 statement[child] = entity.id.toUUID()
@@ -54,7 +56,7 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<O
 
 
         //3. update children-parent reference:
-        if (entity.parentObjectType == null) {
+        if (entity.parentEntity == null) {
             //delete reference:
             Tables
                 .ObjectTypeToObjectTypes
@@ -64,7 +66,7 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<O
             val rowsUpdated = Tables
                 .ObjectTypeToObjectTypes
                 .update({ Tables.ObjectTypeToObjectTypes.child eq entity.id.toUUID() }) {
-                    it[parent] = entity.parentObjectType.id.toUUID()
+                    it[parent] = entity.parentEntity.id.toUUID()
                 }
             //if nothing was updated - insert new row
             if (rowsUpdated == 0) {
@@ -72,7 +74,7 @@ class ObjectTypesDao(columnMappersFactory: ColumnMappersFactory) : BaseUUIDDao<O
                     .ObjectTypeToObjectTypes
                     .insert { statement ->
                         statement[child] = entity.id.toUUID()
-                        statement[parent] = entity.parentObjectType.id.toUUID()
+                        statement[parent] = entity.parentEntity.id.toUUID()
                     }
             } else {
                 //do nothing

@@ -1,10 +1,13 @@
 package persistence.dto.exposed
 
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
+import java.util.*
 
 object Tables {
 
@@ -83,14 +86,14 @@ object Tables {
      * Table for parent-child references
      * https://github.com/JetBrains/Exposed/wiki/DAO#parent-child-reference
      */
-    object ContainerToContainers : Table() {
-        val parent = reference(name = "parent", foreign = Containers, onDelete = ReferenceOption.CASCADE)
-        val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
+    object ContainerToContainers : ParentChildTable<UUID>() {
+        override val parent = reference(name = "parent", foreign = Containers, onDelete = ReferenceOption.CASCADE)
+        override val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
     }
 
-    object ObjectTypeToObjectTypes : Table() {
-        val parent = reference(name = "parent", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
-        val child = reference(name = "child", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
+    object ObjectTypeToObjectTypes : ParentChildTable<UUID>() {
+        override val parent = reference(name = "parent", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
+        override val child = reference(name = "child", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
     }
 
     object ParametersToObjectType : Table() {
@@ -115,4 +118,9 @@ object Tables {
     }
 
 
+}
+
+abstract class ParentChildTable<ID : Comparable<ID>>(name: String = "") : Table(name = name) {
+    abstract val parent: Column<EntityID<ID>>
+    abstract val child: Column<EntityID<ID>>
 }
