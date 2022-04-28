@@ -29,5 +29,4 @@ interface IBaseDao<T : IEntity<*>> {
     suspend fun slice(columnName: String, existedSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
 }
 
-
-data class SliceValue<VALUETYPE>(val name: Any, val value: VALUETYPE, val column: Column<VALUETYPE>)
+data class SliceValue<VALUETYPE>(val name: Any, val value: VALUETYPE?, val column: Column<VALUETYPE?>)

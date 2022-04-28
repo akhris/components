@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
-import java.util.*
 
 object Tables {
 
@@ -42,6 +41,7 @@ object Tables {
     object Containers : UUIDTable() {
         val name = text(name = "name")
         val description = text(name = "description")
+        val parent = reference(name = "parent", foreign = Containers).nullable()
     }
 
 
@@ -87,15 +87,10 @@ object Tables {
      * Table for parent-child references
      * https://github.com/JetBrains/Exposed/wiki/DAO#parent-child-reference
      */
-    object ContainerToContainers : ParentChildTable<UUID>() {
-        override val parent = reference(name = "parent", foreign = Containers, onDelete = ReferenceOption.CASCADE)
-        override val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
-    }
-
-    object ObjectTypeToObjectTypes : ParentChildTable<UUID>() {
-        override val parent = reference(name = "parent", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
-        override val child = reference(name = "child", foreign = ObjectTypes, onDelete = ReferenceOption.CASCADE)
-    }
+//    object ContainerToContainers : ParentChildTable<UUID>() {
+//        override val parent = reference(name = "parent", foreign = Containers, onDelete = ReferenceOption.CASCADE)
+//        override val child = reference(name = "child", foreign = Containers, onDelete = ReferenceOption.CASCADE)
+//    }
 
     object ParametersToObjectType : Table() {
         val parameter = reference(name = "parameter", foreign = Parameters, onDelete = ReferenceOption.CASCADE)

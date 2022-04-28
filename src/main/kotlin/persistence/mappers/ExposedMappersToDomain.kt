@@ -42,7 +42,7 @@ fun EntityContainer.toContainer(level: Int = 1): Container {
         id = id.value.toString(),
         name = name,
         description = description,
-        parentContainer = if (level <= 0) null else parents.firstOrNull()?.toContainer(level - 1)
+        parentContainer = if (level <= 0) null else parent?.toContainer(level - 1)
     )
 }
 

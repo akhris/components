@@ -143,7 +143,7 @@ abstract class BaseDao<
     override suspend fun slice(columnName: String, existedSlices: List<SliceValue<Any>>): List<SliceValue<*>> {
         return newSuspendedTransaction {
             // 1. find column for given [columnName]:
-            val column = table.columns.find { it.name == columnName } as? Column<Any>
+            val column = table.columns.find { it.name == columnName } as? Column<Any?>
 
             // 2. if column is found:
             column?.let { c ->

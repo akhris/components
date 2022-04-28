@@ -3,12 +3,8 @@ package persistence.datasources.exposed
 import domain.entities.Container
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
-import org.jetbrains.exposed.sql.update
 import persistence.columnMappers.ColumnMappersFactory
 import persistence.dto.exposed.EntityContainer
 import persistence.dto.exposed.Tables
@@ -28,49 +24,16 @@ class ContainersDao(columnMappersFactory: ColumnMappersFactory) :
     override fun insertStatement(entity: Container): Tables.Containers.(InsertStatement<Number>) -> Unit = {
         it[name] = entity.name
         it[description] = entity.description
+        it[parent] = entity.parentContainer?.id?.toUUID()
     }
 
-    override fun Transaction.doAfterInsert(entity: Container) {
-        entity.parentContainer?.let { pC ->
-            Tables.ContainerToContainers.insert { statement ->
-                statement[parent] = pC.id.toUUID()
-                statement[child] = entity.id.toUUID()
-            }
-        }
-    }
 
     override fun updateStatement(entity: Container): Tables.Containers.(UpdateStatement) -> Unit = {
         it[name] = entity.name
         it[description] = entity.description
+        it[parent] = entity.parentContainer?.id?.toUUID()
     }
 
-    override fun Transaction.doAfterUpdate(entity: Container) {
-        //3. update children-parent reference:
-        if (entity.parentContainer == null) {
-            //delete reference:
-            Tables
-                .ContainerToContainers
-                .deleteWhere { Tables.ContainerToContainers.child eq entity.id.toUUID() }
-        } else {
-            //update reference
-            val rowsUpdated = Tables
-                .ContainerToContainers
-                .update({ Tables.ContainerToContainers.child eq entity.id.toUUID() }) {
-                    it[parent] = entity.parentContainer.id.toUUID()
-                }
-            //if nothing was updated - insert new row
-            if (rowsUpdated == 0) {
-                Tables
-                    .ContainerToContainers
-                    .insert { statement ->
-                        statement[child] = entity.id.toUUID()
-                        statement[parent] = entity.parentContainer.id.toUUID()
-                    }
-            } else {
-                //do nothing
-            }
-        }
-    }
 
     override val filter: ((EntityField) -> ExposedFilter<Any>?)
         get() = { entityField ->
