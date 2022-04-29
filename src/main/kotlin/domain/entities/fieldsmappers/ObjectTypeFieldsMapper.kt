@@ -11,13 +11,6 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
             EntityFieldID.EntitiesListID(
                 tag = Companion.tag_parameters,
                 name = "parameters",
-//                entitiesIDs = List(entity.parameters.size) { index ->
-//                    EntityFieldID.EntityID(
-//                        tag = "$tag_parameters$index",
-//                        name = "parameter ${index + 1}",
-//                        entityClass = Parameter::class
-//                    )
-//                },
                 entityClass = Parameter::class
             ),
             EntityFieldID.EntityID(tag = "parent_object_type", name = "parent type", entityClass = ObjectType::class)

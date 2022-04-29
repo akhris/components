@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalDecomposeApi::class)
+
 package ui.screens.entities_screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import com.arkivanov.decompose.value.Value
 import strings.LocalizedStrings
 import strings.defaultLocalizedStrings
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
+import ui.screens.entities_screen.entities_grouping.EntitiesGroupingUi
 import ui.screens.entities_screen.entities_search.EntitiesSearchUi
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorUi
 import ui.screens.entities_screen.entities_view_settings.EntitiesViewSettingsUi
@@ -50,6 +53,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
     val selectorRouterState = remember(component) { component.selectorRouterState }
     val filterRouterState = remember(component) { component.filterRouterState }
     val searchRouterState = remember(component) { component.searchRouterState }
+    val groupingRouterState = remember(component) { component.groupingRouterState }
 
     log("composing EntitiesScreenUi. component: $component localizedStrings: $localizedStrings")
     ScreenWithFilterSheet(
@@ -68,6 +72,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
                 ViewModeSelector(viewSettingsRouterState)
                 SelectorPanel(selectorRouterState, localizedStrings = localizedStrings)
                 SearchPanel(searchRouterState)
+                GroupingPanel(groupingRouterState)
                 FilterPanel(filterRouterState)
             }
         },
@@ -78,6 +83,17 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
             )
         }
     )
+}
+
+@Composable
+fun GroupingPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesGroupingChild>>) {
+    Children(routerState) {
+        when (val child = it.instance) {
+            is IEntitiesScreen.EntitiesGroupingChild.EntitiesGrouping -> {
+                EntitiesGroupingUi(component = child.component)
+            }
+        }
+    }
 }
 
 
@@ -99,7 +115,6 @@ private fun ListPane(
     }
 }
 
-@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun SelectorPanel(
     routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>,
@@ -114,7 +129,6 @@ private fun SelectorPanel(
     }
 }
 
-@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesFilterChild>>) {
     Children(routerState, animation = childAnimation(fade())) {
@@ -126,7 +140,6 @@ private fun FilterPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
     }
 }
 
-@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>>) {
     Children(routerState, animation = childAnimation(fade())) {
@@ -139,7 +152,6 @@ private fun SearchPanel(routerState: Value<RouterState<*, IEntitiesScreen.Entiti
 }
 
 
-@OptIn(ExperimentalDecomposeApi::class)
 @Composable
 private fun ViewModeSelector(routerState: Value<RouterState<*, IEntitiesScreen.ViewSettingsChild>>) {
     Children(routerState, animation = childAnimation(fade())) {

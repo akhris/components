@@ -1,10 +1,12 @@
 package persistence.repository
 
+import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
+import persistence.datasources.ListItem
 import persistence.datasources.SliceValue
 
 interface IPagingRepository {
@@ -15,6 +17,9 @@ interface ISlicingRepository {
     suspend fun getSlice(columnName: String, otherSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
 }
 
+interface IGroupingRepository<ID, ENTITY : IEntity<ID>> {
+    suspend fun gQuery(specification: ISpecification): List<ListItem<ENTITY>>
+}
 
 /*
 

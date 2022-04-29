@@ -9,7 +9,7 @@ import persistence.dto.exposed.Tables
 class ContainersExposedColumnMapper : IDBColumnMapper<Container> {
     override fun getColumn(fieldID: EntityFieldID): Column<Any>? {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> null
+            is EntityFieldID.EntityID -> Tables.Containers.parent
             is EntityFieldID.StringID -> when (fieldID.tag) {
                 EntityFieldID.tag_name -> Tables.Containers.name
                 EntityFieldID.tag_description -> Tables.Containers.description

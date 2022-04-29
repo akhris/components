@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import persistence.datasources.IBaseDao
+import persistence.datasources.ListItem
 import persistence.datasources.SliceValue
 import persistence.dto.exposed.ParentChildTable
 import persistence.repository.FilterSpec
@@ -52,15 +53,25 @@ abstract class BaseDao<
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?,
-        searchSpec: ISpecification?
+        searchSpec: ISpecification?,
+        groupingSpec: ISpecification?
     ): Long {
         return newSuspendedTransaction {
-            getNotGroupedQuery(
-                filterSpec = filterSpec,
-                sortingSpec = sortingSpec,
-                pagingSpec = pagingSpec,
-                searchSpec = searchSpec
-            ).count()
+            if (groupingSpec != null) {
+                getGroupsCount(
+                    groupingSpec = groupingSpec,
+                    filterSpec = filterSpec,
+                    sortingSpec = sortingSpec,
+                    pagingSpec = pagingSpec,
+                    searchSpec = searchSpec
+                )
+            } else
+                getNotGroupedQuery(
+                    filterSpec = filterSpec,
+                    sortingSpec = sortingSpec,
+                    pagingSpec = pagingSpec,
+                    searchSpec = searchSpec
+                ).count()
         }
     }
 
@@ -68,23 +79,30 @@ abstract class BaseDao<
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?,
-        searchSpec: ISpecification?
-    ): List<ENTITY> {
+        searchSpec: ISpecification?,
+        groupingSpec: ISpecification?
+    ): List<ListItem<ENTITY>> {
         return newSuspendedTransaction {
-
-
-            val query = if (parentChildTable != null) {
-                getGroupedByParentsEntities(parentChildTable, filterSpec, sortingSpec, pagingSpec, searchSpec)
-            } else {
-                getNotGroupedQuery(
+            if (groupingSpec != null) {
+                getGroupedItems(
+                    groupingSpec = groupingSpec,
                     filterSpec = filterSpec,
                     sortingSpec = sortingSpec,
                     pagingSpec = pagingSpec,
                     searchSpec = searchSpec
                 )
-
+            } else {
+                val query =
+                    getNotGroupedQuery(
+                        filterSpec = filterSpec,
+                        sortingSpec = sortingSpec,
+                        pagingSpec = pagingSpec,
+                        searchSpec = searchSpec
+                    )
+                entityClass
+                    .wrapRows(query)
+                    .map { ListItem.NotGroupedItem(mapToEntity(it)) }
             }
-            entityClass.wrapRows(query).map { mapToEntity(it) }
         }
     }
 
@@ -191,56 +209,65 @@ abstract class BaseDao<
 
     private class ParentChild<ID : Comparable<ID>>(val parent: EntityID<ID>, val child: EntityID<ID>)
 
-    private fun getGroupedByParentsEntities(
-        pcTable: ParentChildTable<EXPOSED_ID>,
+    private fun getGroupedItems(
+        groupingSpec: ISpecification?,
         filterSpec: ISpecification?,
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?,
         searchSpec: ISpecification?
-    ): Query {
+    ): List<ListItem.GroupedItem<ENTITY>> {
+        // get entity field ID to group by from spec:
+        val groupedBy = (groupingSpec as? Specification.Grouped)?.groupingSpec?.fieldID
 
+        // get corresponding column from column mapper. if it's null (or groupedBy is null) - return not grouped query
+        val groupedColumn = groupedBy?.let { columnMapper.getColumn(it) } ?: return listOf()
 
-
-        //get parentIDs from ParentChildTable:
-        val childrenIDs =
-            pcTable
-                .slice(pcTable.child)
-                .selectAll()
-                .map { it[pcTable.child] }
-
-
-        // select top entities if it's id not in childrenIDs list
-        val topEntitiesIDsQuery =
+        // get all keys as distinct values from given column:
+        val groupsKeys =
             table
-                .slice(table.id)
-                .select { table.id notInList childrenIDs }
+                .slice(groupedColumn)
+                .selectAll()
+                .withDistinct(true)
+                .map { it[groupedColumn] }
 
+        //todo apply paging spec here
 
-        (pagingSpec as? Specification.Paginated)?.let {
-            topEntitiesIDsQuery.addPaging(it)
-        }
+        // for each value - get corresponding items:
+        val groupedItems =
+            groupsKeys
+                .map { key ->
+                    key to table
+                        .select { groupedColumn eq key }
+                        .map {
+                            mapToEntity(entityClass.wrapRow(it))
+                        }
+                }.map {
+                    ListItem.GroupedItem(categoryName = groupedBy.name ?: "", key = it.first, items = it.second)
+                }
 
+        return groupedItems
+    }
 
+    private fun getGroupsCount(
+        groupingSpec: ISpecification?,
+        filterSpec: ISpecification?,
+        sortingSpec: ISpecification?,
+        pagingSpec: ISpecification?,
+        searchSpec: ISpecification?
+    ): Long {
+        // get entity field ID to group by from spec:
+        val groupedBy = (groupingSpec as? Specification.Grouped)?.groupingSpec?.fieldID
 
-        val topEntitiesIDs =
-            topEntitiesIDsQuery
-                .map { it[table.id] }
+        // get corresponding column from column mapper. if it's null (or groupedBy is null) - return not grouped query
+        val groupedColumn = groupedBy?.let { columnMapper.getColumn(it) } ?: return 0L
 
-        log("top entities ids: $topEntitiesIDs")
+        // count all keys as distinct values from given column:
+        return table
+            .slice(groupedColumn)
+            .selectAll()
+            .withDistinct(true)
+            .count()
 
-        val query = table.select { table.id inList topEntitiesIDs }
-
-        (searchSpec as? Specification.Search)?.let {
-            query.addSearching(it)
-        }
-        (filterSpec as? Specification.Filtered)?.let {
-            query.addFiltering(it)
-        }
-        (sortingSpec as? Specification.Sorted)?.let {
-            query.addSorting(it)
-        }
-
-        return query
 
     }
 
@@ -325,9 +352,6 @@ abstract class BaseDao<
 
 }
 
-internal object AdditionalParentColumn : Table() {
-    val parent = uuid("parent entity").nullable()
-}
 
 abstract class BaseUUIDDao<ENTITY : IEntity<*>,
         EXPOSED_ENTITY : Entity<UUID>,
@@ -353,3 +377,47 @@ class SubQueryExpression<T>(private val aliasQuery: QueryAlias) : Expression<T>(
         aliasQuery.describe(TransactionManager.current(), queryBuilder)
     }
 }
+
+
+/*  //get parentIDs from ParentChildTable:
+        val childrenIDs =
+            pcTable
+                .slice(pcTable.child)
+                .selectAll()
+                .map { it[pcTable.child] }
+
+
+        // select top entities if it's id not in childrenIDs list
+        val topEntitiesIDsQuery =
+            table
+                .slice(table.id)
+                .select { table.id notInList childrenIDs }
+
+
+        (pagingSpec as? Specification.Paginated)?.let {
+            topEntitiesIDsQuery.addPaging(it)
+        }
+
+
+        val topEntitiesIDs =
+            topEntitiesIDsQuery
+                .map { it[table.id] }
+
+        log("top entities ids: $topEntitiesIDs")
+
+        val query = table.select { table.id inList topEntitiesIDs }
+
+        (searchSpec as? Specification.Search)?.let {
+            query.addSearching(it)
+        }
+        (filterSpec as? Specification.Filtered)?.let {
+            query.addFiltering(it)
+        }
+        (sortingSpec as? Specification.Sorted)?.let {
+            query.addSorting(it)
+        }
+
+        return query
+
+
+       */

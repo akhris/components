@@ -7,3 +7,5 @@ interface IDBColumnMapper<T : IEntity<*>> {
     fun getColumn(fieldID: EntityFieldID): Column<Any>?
 }
 
+//todo return not just a column but a result class that may contain also foreign table info
+// to get, for example, name of the parent container

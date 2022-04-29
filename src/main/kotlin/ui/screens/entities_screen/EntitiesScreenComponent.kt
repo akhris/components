@@ -19,10 +19,13 @@ import domain.entities.usecase_factories.IInsertUseCaseFactory
 import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import persistence.columnMappers.ColumnMappersFactory
+import persistence.datasources.ListItem
+import persistence.repository.GroupingSpec
 import persistence.repository.Specification
 import strings.StringsIDs
 import ui.screens.entities_screen.entities_filter.EntitiesFilterComponent
 import ui.screens.entities_screen.entities_filter.toSpec
+import ui.screens.entities_screen.entities_grouping.EntitiesGroupingComponent
 import ui.screens.entities_screen.entities_list.EntitiesListComponent
 import ui.screens.entities_screen.entities_search.EntitiesSearchComponent
 import ui.screens.entities_screen.entities_selector.EntitiesSelectorComponent
@@ -66,6 +69,13 @@ class EntitiesScreenComponent constructor(
             childFactory = ::createFilterChild
         )
 
+    private val groupingRouter =
+        router(
+            initialConfiguration = EntitiesGroupingConfig.EntitiesGrouping(),
+            key = "grouping_router",
+            childFactory = ::createGroupingChild
+        )
+
 
     private val viewSettingsRouter =
         router(
@@ -96,6 +106,9 @@ class EntitiesScreenComponent constructor(
 
     override val searchRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesSearchChild>> = searchRouter.state
 
+    override val groupingRouterState: Value<RouterState<*, IEntitiesScreen.EntitiesGroupingChild>> =
+        groupingRouter.state
+
     private fun createListChild(
         entitiesListConfig: EntitiesListConfig,
         componentContext: ComponentContext
@@ -109,6 +122,7 @@ class EntitiesScreenComponent constructor(
                         componentContext = componentContext,
                         fSpec = entitiesListConfig.filterSpecification,
                         sSpec = entitiesListConfig.searchSpecification,
+                        gSpec = entitiesListConfig.groupSpecification,
                         getEntities = entitiesListConfig.entityClass?.let { getListUseCaseFactory.getListUseCase(it) },
                         updateEntity = entitiesListConfig.entityClass?.let { updateUseCaseFactory.getUpdateUseCase(it) },
                         removeEntity = entitiesListConfig.entityClass?.let { removeUseCaseFactory.getRemoveUseCase(it) },
@@ -123,6 +137,11 @@ class EntitiesScreenComponent constructor(
                                 filterRouter.replaceCurrent(
                                     EntitiesFilterConfig.EntitiesFilter(
                                         entities = entities,
+                                        entityClass = currentClass
+                                    )
+                                )
+                                groupingRouter.replaceCurrent(
+                                    EntitiesGroupingConfig.EntitiesGrouping(
                                         entityClass = currentClass
                                     )
                                 )
@@ -176,6 +195,28 @@ class EntitiesScreenComponent constructor(
                                 filterSpecification = newFilters.toSpec(
                                     currentClass
                                 )
+                            )
+                        )
+                    }
+                )
+            )
+        }
+    }
+
+    private fun createGroupingChild(
+        groupConfig: EntitiesGroupingConfig,
+        componentContext: ComponentContext
+    ): IEntitiesScreen.EntitiesGroupingChild {
+        return when (groupConfig) {
+            is EntitiesGroupingConfig.EntitiesGrouping -> IEntitiesScreen.EntitiesGroupingChild.EntitiesGrouping(
+                component = EntitiesGroupingComponent(
+                    componentContext = componentContext,
+                    entityClass = groupConfig.entityClass,
+                    fieldsMapperFactory = fieldsMapperFactory,
+                    onGroupingChange = { newGroupBy ->
+                        listRouter.replaceCurrent(
+                            listRouter.activeChild.configuration.copy(
+                                groupSpecification = newGroupBy?.let { Specification.Grouped(GroupingSpec(it)) }
                             )
                         )
                     }
@@ -244,6 +285,7 @@ class EntitiesScreenComponent constructor(
         data class EntitiesList(
             val entityClass: KClass<out IEntity<*>>?,
             val filterSpecification: Specification.Filtered = Specification.Filtered(),
+            val groupSpecification: Specification.Grouped? = null,
             val searchSpecification: Specification.Search = Specification.Search()
         ) : EntitiesListConfig()
     }
@@ -257,8 +299,15 @@ class EntitiesScreenComponent constructor(
         @Parcelize
         data class EntitiesFilter(
             val entityClass: KClass<out IEntity<*>>? = null,
-            val entities: List<IEntity<*>>
+            val entities: List<ListItem<out IEntity<*>>>
         ) : EntitiesFilterConfig()
+    }
+
+    sealed class EntitiesGroupingConfig : Parcelable {
+        @Parcelize
+        data class EntitiesGrouping(
+            val entityClass: KClass<out IEntity<*>>? = null,
+            ) : EntitiesGroupingConfig()
     }
 
     sealed class EntitiesViewSettingsConfig : Parcelable {
