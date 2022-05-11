@@ -93,7 +93,7 @@ class EntitiesFilterComponent<T : IEntity<*>> constructor(
             column?.let { cn ->
                 //get slice values constrained by existed slice:
                 val columnValues =
-                    repo.getSlice(cn.name
+                    repo.getSlice(cn.column.name
 //                        otherSlices = existedOtherSlices?.filter { it.column != column } ?: listOf()
 
                     )

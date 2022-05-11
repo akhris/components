@@ -179,35 +179,14 @@ abstract class BaseDao<
                     .mapNotNull { rr ->
                         val value = rr.getOrNull(column)  //may be nullable
                         value?.let {
-                            // if column has foreign key:
-                            // then it's reference. get target table:
-                            val refTable = c.foreignKey?.targetTable as? IdTable<Comparable<Any>>
-                            // then value is reference id:
-                            val refID = value as? EntityID<Comparable<Any>>
-                            // find readable name as ref.table's column with name == "name" or any text column type:
-                            val refNameColumn =
-                                refTable?.columns?.find { it.name == "name" || it.columnType is TextColumnType } as? Column<Any>
+                            val refName = getNameFromForeignTable(c, value)
 
-                            log("trying to get name from foreign table for $value: $refTable nameColumn: $refNameColumn uuid: $refID")
-                            val refName = if (refTable != null && refID != null && refNameColumn != null) {
-                                // if given column is reference - slice ref.table for given ID and get first result (it has to be one result here):
-                                refTable
-                                    .select { refTable.id eq refID }
-                                    .firstNotNullOfOrNull { result ->
-                                        // save id in reference table, readable name and column
-                                        result[refNameColumn]
-                                    }
-                            } else {
-                                null
-                            }
                             SliceValue(refName ?: value, value, c)
                         }
                     }
             }.orEmpty()
         }
     }
-
-    private class ParentChild<ID : Comparable<ID>>(val parent: EntityID<ID>, val child: EntityID<ID>)
 
     private fun getGroupedItems(
         groupingSpec: ISpecification?,
@@ -219,8 +198,10 @@ abstract class BaseDao<
         // get entity field ID to group by from spec:
         val groupedBy = (groupingSpec as? Specification.Grouped)?.groupingSpec?.fieldID
 
+        val groupedResult = groupedBy?.let { columnMapper.getColumn(it) } ?: return listOf()
+
         // get corresponding column from column mapper. if it's null (or groupedBy is null) - return not grouped query
-        val groupedColumn = groupedBy?.let { columnMapper.getColumn(it) } ?: return listOf()
+        val groupedColumn = groupedResult.column
 
         // get all keys as distinct values from given column:
         val groupsKeys =
@@ -242,11 +223,13 @@ abstract class BaseDao<
                             mapToEntity(entityClass.wrapRow(it))
                         }
                 }.map {
-                    ListItem.GroupedItem(categoryName = groupedBy.name ?: "", key = it.first, items = it.second)
+                    val keyName = it.first?.let{k->getNameFromForeignTable(groupedColumn, k)}?.toString()
+                    ListItem.GroupedItem(categoryName = groupedBy.name, key = it.first, keyName = keyName, items = it.second)
                 }
 
         return groupedItems
     }
+
 
     private fun getGroupsCount(
         groupingSpec: ISpecification?,
@@ -259,7 +242,7 @@ abstract class BaseDao<
         val groupedBy = (groupingSpec as? Specification.Grouped)?.groupingSpec?.fieldID
 
         // get corresponding column from column mapper. if it's null (or groupedBy is null) - return not grouped query
-        val groupedColumn = groupedBy?.let { columnMapper.getColumn(it) } ?: return 0L
+        val groupedColumn = groupedBy?.let { columnMapper.getColumn(it) }?.column ?: return 0L
 
         // count all keys as distinct values from given column:
         return table
@@ -338,7 +321,7 @@ abstract class BaseDao<
 
 
     private fun Query.addSorting(sortingSpec: Specification.Sorted) {
-        val column = columnMapper.getColumn(sortingSpec.spec.fieldID) ?: return
+        val column = columnMapper.getColumn(sortingSpec.spec.fieldID)?.column ?: return
         orderBy(
             column,
             order = if (sortingSpec.spec.isAscending) SortOrder.ASC else SortOrder.DESC
@@ -348,6 +331,40 @@ abstract class BaseDao<
 
     private fun Query.addPaging(pagingSpec: Specification.Paginated) {
         limit(n = pagingSpec.itemsPerPage.toInt(), offset = pagingSpec.itemsPerPage * (pagingSpec.pageNumber - 1))
+    }
+
+
+    /**
+     * Try to get name for current value from foreign table for given column and it's value.
+     *  @param column - column that can be the reference to another table
+     *  @param value - if the [column] is reference, than it should be ID value
+     *  @return value of column with name "name" or other text type if it's valid or null if not
+     *  (no text type column was found, given [column] is not reference column or given [value] is not valid ID
+     */
+    private fun getNameFromForeignTable(column: Column<Any?>, value: Any): Any? {
+        // if column has foreign key:
+        // then it's reference. get target table:
+        val refTable = column.foreignKey?.targetTable as? IdTable<Comparable<Any>>
+        // then value is reference id:
+        val refID = value as? EntityID<Comparable<Any>>
+        // find readable name as ref.table's column with name == "name" or any text column type:
+        val refNameColumn =
+            refTable?.columns?.find { it.name.lowercase() == "name" || it.columnType is TextColumnType } as? Column<Any>
+
+        log("trying to get name from foreign table for $value: $refTable nameColumn: $refNameColumn uuid: $refID")
+        val refName = if (refTable != null && refID != null && refNameColumn != null) {
+            // if given column is reference - slice ref.table for given ID and get first result (it has to be one result here):
+            refTable
+                .select { refTable.id eq refID }
+                .firstNotNullOfOrNull { result ->
+                    // save id in reference table, readable name and column
+                    result[refNameColumn]
+                }
+        } else {
+            null
+        }
+
+        return refName
     }
 
 }

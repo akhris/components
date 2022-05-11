@@ -8,8 +8,8 @@ import org.jetbrains.exposed.sql.Column
 import persistence.dto.exposed.Tables
 
 class ItemIncomeExposedColumnMapper : IDBColumnMapper<ItemIncome> {
-    override fun getColumn(fieldID: EntityFieldID): Column<Any>? {
-        return when (fieldID) {
+    override fun getColumn(fieldID: EntityFieldID): IDBColumnMapper.Result? {
+        val column = when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
                     ItemIncomeFieldsMapper.tag_container -> Tables.ItemIncomes.container
@@ -21,6 +21,9 @@ class ItemIncomeExposedColumnMapper : IDBColumnMapper<ItemIncome> {
             }
             is EntityFieldID.DateTimeID -> Tables.ItemIncomes.dateTime
             else -> null
-        } as? Column<Any>
+        } as? Column<Any?>
+
+        return column?.let { IDBColumnMapper.Result(column = column) }
+
     }
 }

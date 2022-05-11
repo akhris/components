@@ -7,8 +7,8 @@ import org.jetbrains.exposed.sql.Column
 import persistence.dto.exposed.Tables
 
 class ProjectExposedColumnMapper : IDBColumnMapper<Project> {
-    override fun getColumn(fieldID: EntityFieldID): Column<Any>? {
-        return when (fieldID) {
+    override fun getColumn(fieldID: EntityFieldID): IDBColumnMapper.Result? {
+        val column = when (fieldID) {
             is EntityFieldID.EntityID -> null
             is EntityFieldID.EntitiesListID -> null
             is EntityFieldID.StringID ->
@@ -19,6 +19,9 @@ class ProjectExposedColumnMapper : IDBColumnMapper<Project> {
                 }
 
             else -> null
-        } as? Column<Any>
+        } as? Column<Any?>
+
+        return column?.let { IDBColumnMapper.Result(column = column) }
+
     }
 }

@@ -2,10 +2,12 @@ package persistence.repository
 
 import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.repository.ISpecification
+import com.akhris.domain.core.utils.log
 import domain.entities.EntityCountable
 import domain.entities.ItemIncome
 import domain.entities.ItemOutcome
 import domain.entities.WarehouseItem
+import persistence.datasources.ListItem
 
 /**
  * repository that handles items in warehouse.
@@ -14,29 +16,9 @@ import domain.entities.WarehouseItem
  * This repo is read-only, so only query function is overriden.
  */
 class WarehouseItemRepository(
-    private val incomeRepository: IRepository<String, ItemIncome>, private val outcomeRepository: IRepository<String, ItemOutcome>
+    private val incomeRepository: IGroupingRepository<String, ItemIncome>,
+    private val outcomeRepository: IGroupingRepository<String, ItemOutcome>
 ) : IWarehouseItemRepository {
-
-
-//    private val _mergedUpdates = merge(
-//        incomeRepository.updates.map {
-//            when (it) {
-//                is RepoResult.ItemUpdated -> RepoResult.ItemUpdated(it.item.toWarehouseItem())
-//                is RepoResult.ItemRemoved -> RepoResult.ItemRemoved(it.item.toWarehouseItem())
-//                is RepoResult.ItemInserted -> RepoResult.ItemInserted(it.item.toWarehouseItem())
-//            }
-//        },
-//        outcomeRepository.updates.map {
-//            when (it) {
-//                is RepoResult.ItemUpdated -> RepoResult.ItemUpdated(it.item.toWarehouseItem())
-//                is RepoResult.ItemRemoved -> RepoResult.ItemRemoved(it.item.toWarehouseItem())
-//                is RepoResult.ItemInserted -> RepoResult.ItemInserted(it.item.toWarehouseItem())
-//            }
-//        }
-//    )
-//
-//    val updates = _mergedUpdates
-
 
     override suspend fun getByID(id: String): WarehouseItem {
         throw UnsupportedOperationException(errorText)
@@ -69,15 +51,28 @@ class WarehouseItemRepository(
 
     private suspend fun queryList(specification: Specification): List<WarehouseItem> {
         //get all incomes by specification
-        val incomes = kotlin.runCatching { incomeRepository.query(specification) }.getOrElse { listOf() }
-            .filter { it.item != null }.groupBy(keySelector = { it.item?.entity!! },
-                valueTransform = { income -> income.container to (income.item?.count ?: 0L) })
+        val incomes =
+            kotlin
+                .runCatching { incomeRepository.gQuery(specification) }
+                .getOrElse { listOf() }
+//                .filter {
+//                    when (it) {
+//                        is ListItem.GroupedItem -> it.
+//                        is ListItem.NotGroupedItem -> it.item != null
+//                    }
+//                    it.item != null
+//                }
+                .groupBy(keySelector = { it.item?.entity!! },
+                    valueTransform = { income -> income.container to (income.item?.count ?: 0L) })
 
 
         //get all outcomes by specification
-        val outcomes = kotlin.runCatching { outcomeRepository.query(specification) }.getOrElse { listOf() }
+        val outcomes = kotlin.runCatching { outcomeRepository.gQuery(specification) }.getOrElse { listOf() }
             .filter { it.item != null }.groupBy(keySelector = { it.item?.entity!! },
                 valueTransform = { income -> income.container to -(income.item?.count ?: 0L) })
+
+        log("got incomes size: ${incomes.size}")
+        log("got outcomes size: ${outcomes.size}")
 
         //merge maps like here: https://stackoverflow.com/questions/54232530/merge-values-in-map-kotlin
         //also count overall presence of item using fold

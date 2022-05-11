@@ -10,7 +10,7 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
             EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
             EntityFieldID.DateTimeID(name = "date"),
             EntityFieldID.EntityID(tag = tag_supplier, name = "supplier", entityClass = Supplier::class),
-            EntityFieldID.EntityID(tag = tag_invoice, name = "inovice", entityClass = Invoice::class)
+            EntityFieldID.EntityID(tag = tag_invoice, name = "invoice", entityClass = Invoice::class)
         )
     }
 

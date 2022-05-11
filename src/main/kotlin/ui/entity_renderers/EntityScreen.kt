@@ -78,7 +78,6 @@ fun <T : IEntity<*>> EntityScreenContent(
                     itemContent = { listItem ->
                         when (listItem) {
                             is ListItem.GroupedItem -> {
-
                                 val onClick: () -> Unit = {
                                     if (isExpandedIDs.contains(listItem.key)) {
                                         isExpandedIDs.remove(listItem.key)
@@ -94,7 +93,7 @@ fun <T : IEntity<*>> EntityScreenContent(
                                     }) {
                                         Text(
                                             modifier = Modifier.padding(8.dp).weight(1f),
-                                            text = "${listItem.categoryName}: ${listItem.key} (${listItem.items.size})",
+                                            text = "${listItem.categoryName}: ${listItem.keyName ?: listItem.key} (${listItem.items.size})",
                                             style = MaterialTheme.typography.subtitle1
                                         )
                                         IconButton(
