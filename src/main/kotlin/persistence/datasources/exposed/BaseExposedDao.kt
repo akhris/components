@@ -22,7 +22,7 @@ import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
 
-abstract class BaseDao<
+abstract class BaseExposedDao<
         ENTITY : IEntity<*>,
         EXPOSED_ID : Comparable<EXPOSED_ID>,
         EXPOSED_ENTITY : Entity<EXPOSED_ID>,
@@ -378,7 +378,7 @@ abstract class BaseUUIDDao<ENTITY : IEntity<*>,
     columnMapper: IDBColumnMapper<ENTITY>,
     parentChildTable: ParentChildTable<UUID>? = null
 ) :
-    BaseDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper, parentChildTable) {
+    BaseExposedDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper, parentChildTable) {
     override fun mapToID(id: Any): UUID {
         return if (id is String) {
             UUID.fromString(id)

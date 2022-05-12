@@ -1,5 +1,7 @@
 package persistence.repository
 
+import domain.entities.ItemIncome
+import domain.entities.ItemOutcome
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -8,14 +10,12 @@ import test.Outcomes
 
 internal class WarehouseItemRepositoryTest {
 
-    lateinit var incomesRepo: IItemIncomeRepository
-    lateinit var outcomesRepo: IItemOutcomeRepository
+    lateinit var incomesRepo: BaseRepository<ItemIncome>
+    lateinit var outcomesRepo: BaseRepository<ItemOutcome>
     lateinit var warehouseRepo: IWarehouseItemRepository
 
     @BeforeEach
     fun setUp() {
-//        incomesRepo = ItemIncomeTestRepository()
-//        outcomesRepo = ItemOutcomeTestRepository()
         warehouseRepo = WarehouseItemRepository(incomesRepo, outcomesRepo)
         runBlocking {
             incomesRepo.insert(Incomes.income1)

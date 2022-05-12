@@ -112,7 +112,11 @@ val objectTypesModule = getEntityModule(
 val warehouseItemModule =
     getEntityModule(
         "warehouse module",
-        getRepo = { WarehouseItemRepository(instance(), instance()) })
+        getRepo = { WarehouseItemRepository(instance(), instance()) },
+    additionalBindings = {
+        bindSingleton<BaseRepository<ItemIncome>> { BaseRepository(baseDao = instance()) }
+        bindSingleton<BaseRepository<ItemOutcome>> { BaseRepository(baseDao = instance()) }
+    })
 
 val unitsModule = getEntityModule(
     "units module",
