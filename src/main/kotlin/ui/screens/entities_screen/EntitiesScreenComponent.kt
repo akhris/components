@@ -19,7 +19,7 @@ import domain.entities.usecase_factories.IInsertUseCaseFactory
 import domain.entities.usecase_factories.IRemoveUseCaseFactory
 import domain.entities.usecase_factories.IUpdateUseCaseFactory
 import persistence.columnMappers.ColumnMappersFactory
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import persistence.repository.GroupingSpec
 import persistence.repository.Specification
 import strings.StringsIDs
@@ -64,7 +64,7 @@ class EntitiesScreenComponent constructor(
 
     private val filterRouter =
         router(
-            initialConfiguration = EntitiesFilterConfig.EntitiesFilter(entities = listOf()),
+            initialConfiguration = EntitiesFilterConfig.EntitiesFilter(entities = EntitiesList.empty()),
             key = "filter_router",
             childFactory = ::createFilterChild
         )
@@ -299,7 +299,7 @@ class EntitiesScreenComponent constructor(
         @Parcelize
         data class EntitiesFilter(
             val entityClass: KClass<out IEntity<*>>? = null,
-            val entities: List<ListItem<out IEntity<*>>>
+            val entities: EntitiesList<out IEntity<*>>
         ) : EntitiesFilterConfig()
     }
 
@@ -307,7 +307,7 @@ class EntitiesScreenComponent constructor(
         @Parcelize
         data class EntitiesGrouping(
             val entityClass: KClass<out IEntity<*>>? = null,
-            ) : EntitiesGroupingConfig()
+        ) : EntitiesGroupingConfig()
     }
 
     sealed class EntitiesViewSettingsConfig : Parcelable {

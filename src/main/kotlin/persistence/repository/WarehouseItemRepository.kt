@@ -1,12 +1,9 @@
 package persistence.repository
 
 import com.akhris.domain.core.repository.ISpecification
-import com.akhris.domain.core.utils.log
-import domain.entities.ItemIncome
-import domain.entities.ItemOutcome
-import domain.entities.WarehouseItem
-import persistence.datasources.ListItem
-import persistence.datasources.getGroupedMap
+import domain.entities.*
+import persistence.datasources.EntitiesList
+import persistence.datasources.GroupedItem
 
 /**
  * repository that handles items in warehouse.
@@ -44,100 +41,46 @@ class WarehouseItemRepository(
         throw UnsupportedOperationException(errorText)
     }
 
-    override suspend fun gQuery(specification: ISpecification): List<ListItem<WarehouseItem>> {
-
-
+    override suspend fun gQuery(specification: ISpecification): EntitiesList<WarehouseItem> {
         return getMergedLists(specification)
-
-        //get all incomes by specification
-        val incomes =
-            kotlin
-                .runCatching { incomeRepository.gQuery(specification) }
-                .getOrElse { listOf() }
-                .getGroupedMap()
-
-        //get all outcomes by specification
-        val outcomes =
-            kotlin.runCatching { outcomeRepository.gQuery(specification) }
-                .getOrElse { listOf() }
-                .getGroupedMap()
-
-
-
-        log("got incomes size: ${incomes.size}")
-        log("got outcomes size: ${outcomes.size}")
-
-        //merge maps like here: https://stackoverflow.com/questions/54232530/merge-values-in-map-kotlin
-        //also count overall presence of item using fold
-        val overall =
-            (incomes.asSequence() + outcomes.asSequence()).groupBy({ it.key }, { entry ->
-                entry.value.mapNotNull {
-                    when (it) {
-                        is ItemOutcome -> WarehouseItem(
-                            item = it.item?.copy(count = -it.item.count),
-                            container = it.container
-                        )
-                        is ItemIncome -> WarehouseItem(item = it.item, container = it.container)
-                        else -> null
-                    }
-                }
-            }).mapValues { it.value.flatten() }
-                .map { entry ->
-                    ListItem.GroupedItem(
-                        key = entry.key,
-                        items = entry.value,
-                        categoryName = entry.key?.toString() ?: ""
-                    )
-                }
-
-
-//                .mapValues { (_, values) ->
-//                    values.flatten().groupBy(keySelector = { p -> p.first }, valueTransform = { p -> p.second })
-//                        .mapValues { (_, values) -> values.fold(0L) { a, c -> a + c } }
-//                }
-
-        //return overall map that is flatten by creating WarehouseItem for each container
-        return overall
-
-
     }
 
-    private suspend fun getMergedLists(specification: ISpecification): List<ListItem<WarehouseItem>> {
+
+    private suspend fun getMergedLists(specification: ISpecification): EntitiesList<WarehouseItem> {
         //get all incomes by specification
-        val incomes =
+
+        val queriedIncomes =
             kotlin
                 .runCatching { incomeRepository.gQuery(specification) }
-                .getOrElse { listOf() }
-//                .map { listItem ->
-//                    when (listItem) {
-//                        is ListItem.GroupedItem -> ListItem.GroupedItem(
-//                            key = listItem.key,
-//                            keyName = listItem.keyName,
-//                            categoryName = listItem.categoryName,
-//                            items = listItem.items.map { it.toWarehouseItem() })
-//                        is ListItem.NotGroupedItem -> ListItem.NotGroupedItem(listItem.item.toWarehouseItem())
-//                    }
-//                }
+                .getOrElse { EntitiesList.empty() }
 
+        val queriedOutcomes =
+            kotlin
+                .runCatching { outcomeRepository.gQuery(specification) }
+                .getOrElse { EntitiesList.empty() }
 
-        //get all outcomes by specification
-        val outcomes =
-            kotlin.runCatching { outcomeRepository.gQuery(specification) }
-                .getOrElse { listOf() }
-//                .map { listItem ->
-//                    when (listItem) {
-//                        is ListItem.GroupedItem -> ListItem.GroupedItem(
-//                            key = listItem.key,
-//                            keyName = listItem.keyName,
-//                            categoryName = listItem.categoryName,
-//                            items = listItem.items.map { it.toWarehouseItem() })
-//                        is ListItem.NotGroupedItem -> ListItem.NotGroupedItem(listItem.item.toWarehouseItem())
-//                    }
-//                }
-
-
-       
-
+        //combine incomes and outcomes:
+        return if (queriedIncomes is EntitiesList.Grouped && queriedOutcomes is EntitiesList.Grouped) {
+            //both are grouped:
+            val groups = (queriedIncomes.items.asSequence() + queriedOutcomes.items.asSequence())
+                .groupBy(keySelector = { it.groupID }, valueTransform = {
+                    it.items
+                })
+                .mapValues { it.value.flatten() }
+                .mapValues { entry ->
+                    val incomes = entry.value.filterIsInstance(ItemIncome::class.java)
+                    val outcomes = entry.value.filterIsInstance(ItemOutcome::class.java)
+                    makeWarehouseList(incomes, outcomes)
+                }
+                .map { entry ->
+                    GroupedItem(entry.key, entry.value)
+                }
+            EntitiesList.Grouped(groups)
+        } else if (queriedIncomes is EntitiesList.NotGrouped && queriedOutcomes is EntitiesList.NotGrouped) {
+            //both are not grouped:
+            val items = makeWarehouseList(queriedIncomes.items, queriedOutcomes.items)
+            EntitiesList.NotGrouped(items = items)
+        } else throw IllegalStateException("both lists: ${queriedIncomes::class.qualifiedName} and ${queriedOutcomes::class.qualifiedName} has to be of the same type (grouped/ungrouped")
 
     }
 
@@ -150,6 +93,47 @@ class WarehouseItemRepository(
 
 }
 
-private fun ItemIncome.toWarehouseItem(): WarehouseItem = WarehouseItem(item = this.item, container = this.container)
-private fun ItemOutcome.toWarehouseItem(): WarehouseItem =
-    WarehouseItem(item = this.item?.copy(count = -this.item.count), container = this.container)
+
+/**
+ * helper class to identify WarehouseItem without count information
+ */
+private data class WarehouseItemID(val container: Container?, val item: Item?)
+
+private fun ItemIncome.toWarehouseItemID(): WarehouseItemID {
+    return WarehouseItemID(container = container, item = item?.entity)
+}
+
+private fun ItemOutcome.toWarehouseItemID(): WarehouseItemID {
+    return WarehouseItemID(container = container, item = item?.entity)
+}
+
+private fun WarehouseItemID.toWarehouseItem(count: Long): WarehouseItem {
+    return WarehouseItem(
+        item = item?.let { EntityCountable(it, count) },
+        container = container
+    )
+}
+
+private fun makeWarehouseList(incomes: List<ItemIncome>, outcomes: List<ItemOutcome>): List<WarehouseItem> {
+    return (incomes.asSequence() + outcomes.asSequence()).groupBy(
+        keySelector = {
+            when (it) {
+                is ItemIncome -> it.toWarehouseItemID()
+                is ItemOutcome -> it.toWarehouseItemID()
+                else -> throw IllegalArgumentException("item $it must be ItemIncome or ItemOutcome")
+            }
+        },
+        valueTransform = {
+            when (it) {
+                is ItemIncome -> it.item?.count ?: 0L
+                is ItemOutcome -> -(it.item?.count ?: 0L)
+                else -> throw IllegalArgumentException("item $it must be ItemIncome or ItemOutcome")
+            }
+        })
+        .mapValues { entry ->
+            entry.value.fold(0L) { acc, l -> acc + l }
+        }
+        .map { entry ->
+            entry.key.toWarehouseItem(entry.value)
+        }
+}

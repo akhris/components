@@ -18,7 +18,7 @@ interface IBaseDao<T : IEntity<*>> {
         pagingSpec: ISpecification? = null,
         searchSpec: ISpecification? = null,
         groupingSpec: ISpecification? = null
-    ): List<ListItem<T>>
+    ): EntitiesList<T>
 
     suspend fun getItemsCount(
         filterSpec: ISpecification? = null,
@@ -33,22 +33,27 @@ interface IBaseDao<T : IEntity<*>> {
 
 data class SliceValue<VALUETYPE>(val name: Any, val value: VALUETYPE?, val column: Column<VALUETYPE?>)
 
-sealed class ListItem<T : IEntity<*>> {
-    data class GroupedItem<T : IEntity<*>>(
-        val categoryName: String,
-        val key: Any?,
-        val keyName: String? = null,
-        val items: List<T>
-    ) : ListItem<T>()
-
-    data class NotGroupedItem<T : IEntity<*>>(val item: T) : ListItem<T>()
-}
-
-fun <T : IEntity<*>> List<ListItem<T>>.getGroupedMap(): Map<Any?, List<T>> {
-    return associate { li ->
-        when (li) {
-            is ListItem.GroupedItem -> li.key to li.items
-            is ListItem.NotGroupedItem -> li.item.id to listOf(li.item)
+sealed class EntitiesList<T> {
+    data class Grouped<T>(val items: List<GroupedItem<T>>) : EntitiesList<T>()
+    data class NotGrouped<T>(val items: List<T>) : EntitiesList<T>()
+    companion object {
+        fun <T : IEntity<*>> empty(): EntitiesList<T> = NotGrouped(listOf())
+    }
+    fun isNotEmpty(): Boolean {
+        return when(this){
+            is Grouped -> items.isNotEmpty()
+            is NotGrouped -> items.isNotEmpty()
         }
     }
 }
+
+data class GroupID(
+    val categoryName: String,
+    val key: Any?,
+    val keyName: String? = null
+)
+
+data class GroupedItem<T>(
+    val groupID: GroupID,
+    val items: List<T>
+)

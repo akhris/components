@@ -7,27 +7,27 @@ import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.repository.ISpecification
 import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.CoroutineDispatcher
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import persistence.repository.IGroupingRepository
 
 class GetListItemsUseCase<ID, ENTITY : IEntity<ID>>(
     val repo: IRepository<ID, ENTITY>,
     @IoDispatcher
     ioDispatcher: CoroutineDispatcher
-) : UseCase<List<ListItem<ENTITY>>, GetListItemsUseCase.Params>(ioDispatcher) {
+) : UseCase<EntitiesList<ENTITY>, GetListItemsUseCase.Params>(ioDispatcher) {
 
-    override suspend fun run(params: Params): List<ListItem<ENTITY>> {
+    override suspend fun run(params: Params): EntitiesList<ENTITY> {
         return when (params) {
             is Params.GetWithSpecification -> getEntitiesWithSpec(params.specification)
         }
     }
 
-    private suspend fun getEntitiesWithSpec(specification: ISpecification): List<ListItem<ENTITY>> {
+    private suspend fun getEntitiesWithSpec(specification: ISpecification): EntitiesList<ENTITY> {
         val gRepo = (repo as? IGroupingRepository<ID, ENTITY>)
         if (gRepo == null)
             log("$repo does not implement IGroupingRepository, so not grouping is allowed")
 
-        return gRepo?.gQuery(specification) ?: repo.query(specification).map { ListItem.NotGroupedItem(it) }
+        return gRepo?.gQuery(specification) ?: EntitiesList.NotGrouped(repo.query(specification))
     }
 
 

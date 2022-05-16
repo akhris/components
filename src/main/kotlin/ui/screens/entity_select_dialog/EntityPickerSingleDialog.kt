@@ -26,7 +26,7 @@ import domain.entities.usecase_factories.IGetListUseCaseFactory
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import persistence.repository.Specification
 import test.Items
 import ui.theme.DialogSettings
@@ -91,13 +91,12 @@ fun <T : IEntity<*>> EntityPickerSingleDialog(
             true -> Specification.QueryAll
             false -> Specification.CombinedSpecification(listOf(Specification.Search(searchString)))
         }
-        entities = useCase(GetListItemsUseCase.Params.GetWithSpecification(specification = spec))
-            .unpack()
-            .mapNotNull { when(it){
-                is ListItem.GroupedItem -> null
-                is ListItem.NotGroupedItem -> it.item
-            } }
-
+        entities = when (val result = useCase(GetListItemsUseCase.Params.GetWithSpecification(specification = spec))
+            .unpack()) {
+            //todo Grouped Items are not supported
+            is EntitiesList.NotGrouped -> result.items
+            else -> listOf()
+        }
     }
 
 }

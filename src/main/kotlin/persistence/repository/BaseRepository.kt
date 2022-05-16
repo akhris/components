@@ -5,8 +5,8 @@ import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
 import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.flow.SharedFlow
+import persistence.datasources.EntitiesList
 import persistence.datasources.IBaseDao
-import persistence.datasources.ListItem
 import persistence.datasources.SliceValue
 
 
@@ -34,7 +34,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
         repoCallbacks.onItemInserted(t)
     }
 
-    override suspend fun gQuery(specification: ISpecification): List<ListItem<ENTITY>> {
+    override suspend fun gQuery(specification: ISpecification): EntitiesList<ENTITY> {
         if (specification !is Specification) {
             throw IllegalArgumentException("unknown specification: $specification")
         }

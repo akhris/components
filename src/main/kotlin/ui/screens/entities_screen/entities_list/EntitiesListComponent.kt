@@ -14,7 +14,7 @@ import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
 import domain.application.GetListItemsUseCase
 import kotlinx.coroutines.*
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 
@@ -27,7 +27,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
     private val insertEntity: InsertEntity<*, out T>?,  //used for copying
-    private val onEntitiesLoaded: (List<ListItem<out T>>) -> Unit,
+    private val onEntitiesLoaded: (EntitiesList<out T>) -> Unit,
     private val onItemsCountLoaded: (Long) -> Unit
 ) :
     IEntitiesList<T>,
@@ -36,7 +36,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val _state = MutableValue(IEntitiesList.Model<T>(listOf()))
+    private val _state = MutableValue(IEntitiesList.Model<T>())
 
     override val state: Value<IEntitiesList.Model<T>> = _state
 

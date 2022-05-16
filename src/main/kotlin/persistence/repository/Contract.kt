@@ -6,7 +6,7 @@ import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import persistence.datasources.SliceValue
 
 interface IPagingRepository {
@@ -18,7 +18,7 @@ interface ISlicingRepository {
 }
 
 interface IGroupingRepository<ID, ENTITY : IEntity<ID>> {
-    suspend fun gQuery(specification: ISpecification): List<ListItem<ENTITY>>
+    suspend fun gQuery(specification: ISpecification): EntitiesList<ENTITY>
 }
 
 /*
@@ -47,4 +47,4 @@ interface ISuppliersRepository : IRepository<String, Supplier>, IRepositoryCallb
 interface IItemIncomeRepository : IRepository<String, ItemIncome>, IRepositoryCallback<ItemIncome>, IPagingRepository
 interface IItemOutcomeRepository : IRepository<String, ItemOutcome>, IRepositoryCallback<ItemOutcome>
 interface IProjectRepository : IRepository<String, Project>, IRepositoryCallback<Project>
-interface IWarehouseItemRepository : IRepository<String, WarehouseItem>,IGroupingRepository<String, WarehouseItem>
+interface IWarehouseItemRepository : IRepository<String, WarehouseItem>, IGroupingRepository<String, WarehouseItem>

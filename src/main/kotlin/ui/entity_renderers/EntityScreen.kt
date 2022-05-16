@@ -32,7 +32,7 @@ import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
-import persistence.datasources.ListItem
+import persistence.datasources.EntitiesList
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.entity_select_dialog.EntityPickerMultiDialog
 import ui.screens.entity_select_dialog.EntityPickerSingleDialog
@@ -47,7 +47,7 @@ import kotlin.reflect.KClass
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
-    items: List<ListItem<out T>>,
+    items: EntitiesList<out T>,
     bottomPadding: Dp = 0.dp,
     listState: LazyListState = rememberLazyListState(),
     onEntityRemoved: ((T) -> Unit)? = null,
@@ -66,23 +66,20 @@ fun <T : IEntity<*>> EntityScreenContent(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-
-                this.items(
-                    items = items,
-                    key = { listItem ->
-                        when (listItem) {
-                            is ListItem.GroupedItem -> listItem.key
-                            is ListItem.NotGroupedItem -> listItem.item.id
-                        } ?: "no_id"
-                    },
-                    itemContent = { listItem ->
-                        when (listItem) {
-                            is ListItem.GroupedItem -> {
+                when (items) {
+                    is EntitiesList.Grouped -> {
+                        //render grouped:
+                        this.items(
+                            items = items.items,
+                            key = {
+                                it.groupID
+                            },
+                            itemContent = { listItem ->
                                 val onClick: () -> Unit = {
-                                    if (isExpandedIDs.contains(listItem.key)) {
-                                        isExpandedIDs.remove(listItem.key)
+                                    if (isExpandedIDs.contains(listItem.groupID)) {
+                                        isExpandedIDs.remove(listItem.groupID)
                                     } else {
-                                        isExpandedIDs.add(listItem.key)
+                                        isExpandedIDs.add(listItem.groupID)
                                     }
                                 }
 
@@ -93,7 +90,7 @@ fun <T : IEntity<*>> EntityScreenContent(
                                     }) {
                                         Text(
                                             modifier = Modifier.padding(8.dp).weight(1f),
-                                            text = "${listItem.categoryName}: ${listItem.keyName ?: listItem.key} (${listItem.items.size})",
+                                            text = "${listItem.groupID.categoryName}: ${listItem.groupID.keyName ?: listItem.groupID.key} (${listItem.items.size})",
                                             style = MaterialTheme.typography.subtitle1
                                         )
                                         IconButton(
@@ -101,16 +98,16 @@ fun <T : IEntity<*>> EntityScreenContent(
                                             content = {
                                                 Icon(
                                                     imageVector = Icons.Rounded.KeyboardArrowUp,
-                                                    contentDescription = if (isExpandedIDs.contains(listItem.key)) "collapse group" else "expand group",
+                                                    contentDescription = if (isExpandedIDs.contains(listItem.groupID.key)) "collapse group" else "expand group",
                                                     modifier = Modifier.rotate(
-                                                        if (isExpandedIDs.contains(listItem.key))
+                                                        if (isExpandedIDs.contains(listItem.groupID.key))
                                                             0f else 180f
                                                     )
                                                 )
                                             }
                                         )
                                     }
-                                    if (isExpandedIDs.contains(listItem.key))
+                                    if (isExpandedIDs.contains(listItem.groupID))
                                         listItem.items.forEach {
                                             RenderCardEntity(
                                                 modifier = Modifier.fillMaxWidth(),
@@ -125,10 +122,21 @@ fun <T : IEntity<*>> EntityScreenContent(
                                         }
                                 }
                             }
-                            is ListItem.NotGroupedItem -> {
+                        )
+
+                    }
+                    is EntitiesList.NotGrouped -> {
+                        //render not grouped:
+
+                        this.items(
+                            items = items.items,
+                            key = {
+                                it.id ?: "no_id"
+                            },
+                            itemContent = { listItem ->
                                 RenderCardEntity(
                                     modifier = Modifier.fillMaxWidth(),
-                                    listItem.item,
+                                    listItem,
                                     onEntitySaveClicked = {
                                         log("entity changed: $it")
                                         onEntityUpdated?.invoke(it)
@@ -136,11 +144,11 @@ fun <T : IEntity<*>> EntityScreenContent(
                                     onEntityRemoved = onEntityRemoved,
                                     onEntityCopyClicked = onEntityCopied
                                 )
-                            }
-                        }
+                            })
+
 
                     }
-                )
+                }
 
                 if (items.isNotEmpty() && bottomPadding != 0.dp) {
                     item {
@@ -152,11 +160,9 @@ fun <T : IEntity<*>> EntityScreenContent(
 
         //render table
         ItemRepresentationType.Table -> {
-            val entities = items.mapNotNull {
-                when (it) {
-                    is ListItem.GroupedItem -> null
-                    is ListItem.NotGroupedItem -> it.item
-                }
+            val entities = when (items) {
+                is EntitiesList.Grouped -> listOf()     //todo grouped table is not yet supported
+                is EntitiesList.NotGrouped -> items.items
             }
 
             val di = localDI()

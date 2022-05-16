@@ -14,10 +14,7 @@ import org.jetbrains.exposed.sql.statements.InsertStatement
 import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import persistence.datasources.IBaseDao
-import persistence.datasources.ListItem
-import persistence.datasources.SliceValue
-import persistence.dto.exposed.ParentChildTable
+import persistence.datasources.*
 import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
@@ -30,8 +27,7 @@ abstract class BaseExposedDao<
         >(
     protected val table: EXPOSED_TABLE,
     private val entityClass: EntityClass<EXPOSED_ID, EXPOSED_ENTITY>,
-    private val columnMapper: IDBColumnMapper<ENTITY>,
-    private val parentChildTable: ParentChildTable<EXPOSED_ID>? = null
+    private val columnMapper: IDBColumnMapper<ENTITY>
 ) :
     IBaseDao<ENTITY> {
 
@@ -81,7 +77,7 @@ abstract class BaseExposedDao<
         pagingSpec: ISpecification?,
         searchSpec: ISpecification?,
         groupingSpec: ISpecification?
-    ): List<ListItem<ENTITY>> {
+    ): EntitiesList<ENTITY> {
         return newSuspendedTransaction {
             if (groupingSpec != null) {
                 getGroupedItems(
@@ -99,9 +95,11 @@ abstract class BaseExposedDao<
                         pagingSpec = pagingSpec,
                         searchSpec = searchSpec
                     )
-                entityClass
-                    .wrapRows(query)
-                    .map { ListItem.NotGroupedItem(mapToEntity(it)) }
+                EntitiesList.NotGrouped(
+                    entityClass
+                        .wrapRows(query)
+                        .map { mapToEntity(it) }
+                )
             }
         }
     }
@@ -194,11 +192,11 @@ abstract class BaseExposedDao<
         sortingSpec: ISpecification?,
         pagingSpec: ISpecification?,
         searchSpec: ISpecification?
-    ): List<ListItem.GroupedItem<ENTITY>> {
+    ): EntitiesList.Grouped<ENTITY> {
         // get entity field ID to group by from spec:
         val groupedBy = (groupingSpec as? Specification.Grouped)?.groupingSpec?.fieldID
 
-        val groupedResult = groupedBy?.let { columnMapper.getColumn(it) } ?: return listOf()
+        val groupedResult = groupedBy?.let { columnMapper.getColumn(it) } ?: return EntitiesList.Grouped(listOf())
 
         // get corresponding column from column mapper. if it's null (or groupedBy is null) - return not grouped query
         val groupedColumn = groupedResult.column
@@ -223,11 +221,18 @@ abstract class BaseExposedDao<
                             mapToEntity(entityClass.wrapRow(it))
                         }
                 }.map {
-                    val keyName = it.first?.let{k->getNameFromForeignTable(groupedColumn, k)}?.toString()
-                    ListItem.GroupedItem(categoryName = groupedBy.name, key = it.first, keyName = keyName, items = it.second)
+                    val keyName = it.first?.let { k -> getNameFromForeignTable(groupedColumn, k) }?.toString()
+                    GroupedItem(
+                        groupID = GroupID(
+                            categoryName = groupedBy.name,
+                            key = it.first,
+                            keyName = keyName
+                        ),
+                        items = it.second
+                    )
                 }
 
-        return groupedItems
+        return EntitiesList.Grouped(groupedItems)
     }
 
 
@@ -375,10 +380,9 @@ abstract class BaseUUIDDao<ENTITY : IEntity<*>,
         EXPOSED_TABLE : IdTable<UUID>>(
     table: EXPOSED_TABLE,
     entityClass: EntityClass<UUID, EXPOSED_ENTITY>,
-    columnMapper: IDBColumnMapper<ENTITY>,
-    parentChildTable: ParentChildTable<UUID>? = null
+    columnMapper: IDBColumnMapper<ENTITY>
 ) :
-    BaseExposedDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper, parentChildTable) {
+    BaseExposedDao<ENTITY, UUID, EXPOSED_ENTITY, EXPOSED_TABLE>(table, entityClass, columnMapper) {
     override fun mapToID(id: Any): UUID {
         return if (id is String) {
             UUID.fromString(id)
