@@ -12,12 +12,10 @@ fun List<IEntitiesFilter.Filter>.toSpec(entityClass: KClass<out IEntity<*>>?): S
             is IEntitiesFilter.Filter.Range -> FilterSpec.Range(
                 fromValue = filterSettings.from,
                 toValue = filterSettings.to,
-                entityClass = entityClass,
                 fieldID = filterSettings.fieldID
             )
             is IEntitiesFilter.Filter.Values -> FilterSpec.Values(
                 filteredValues = filterSettings.fieldsList.mapNotNull { if (it.isFiltered) it.value as? SliceValue<Any> else null },
-                entityClass = entityClass,
                 fieldID = filterSettings.fieldID
             )
         }

@@ -3,7 +3,9 @@ package persistence.repository
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
+import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.flow.SharedFlow
+import persistence.datasources.EntitiesList
 import persistence.datasources.IBaseDao
 import persistence.datasources.SliceValue
 
@@ -14,6 +16,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
     IRepository<String, ENTITY>,
     IRepositoryCallback<ENTITY>,
     IPagingRepository,
+    IGroupingRepository<String, ENTITY>,
     ISlicingRepository {
     private val repoCallbacks: RepositoryCallbacks<ENTITY> = RepositoryCallbacks()
 
@@ -31,7 +34,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
         repoCallbacks.onItemInserted(t)
     }
 
-    override suspend fun query(specification: ISpecification): List<ENTITY> {
+    override suspend fun gQuery(specification: ISpecification): EntitiesList<ENTITY> {
         if (specification !is Specification) {
             throw IllegalArgumentException("unknown specification: $specification")
         }
@@ -45,15 +48,23 @@ class BaseRepository<ENTITY : IEntity<String>>(
                 val filterSpec = specification.specs.find { it is Specification.Filtered } as? Specification.Filtered
                 val pagingSpec = specification.specs.find { it is Specification.Paginated } as? Specification.Paginated
                 val searchSpec = specification.specs.find { it is Specification.Search } as? Specification.Search
+                val groupingSpec = specification.specs.find { it is Specification.Grouped } as? Specification.Grouped
                 baseDao.query(
                     filterSpec = filterSpec,
                     sortingSpec = sortingSpec,
                     pagingSpec = pagingSpec,
-                    searchSpec = searchSpec
+                    searchSpec = searchSpec,
+                    groupingSpec = groupingSpec
                 )
             }
             is Specification.Sorted -> baseDao.query(sortingSpec = specification)
+            is Specification.Grouped -> baseDao.query(groupingSpec = specification)
         }
+    }
+
+    override suspend fun query(specification: ISpecification): List<ENTITY> {
+        log("!!! USING DEPRECATED QUERY METHOD !!! with spec: $specification")
+        return listOf()
     }
 
     override suspend fun getItemsCount(specification: ISpecification): Long {
@@ -78,6 +89,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
                 )
             }
             is Specification.Sorted -> baseDao.getItemsCount(sortingSpec = specification)
+            is Specification.Grouped -> baseDao.getItemsCount(groupingSpec = specification)
         }
     }
 

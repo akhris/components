@@ -1,6 +1,5 @@
 package domain.entities.usecase_factories
 
-import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.entities.IEntity
 import domain.application.*
 import domain.entities.*
@@ -22,7 +21,7 @@ class GetListUseCaseFactory(
 ) :
     IGetListUseCaseFactory {
 
-    override fun <T : IEntity<*>> getListUseCase(entityClass: KClass<out T>): GetEntities<*, out T> {
+    override fun <T : IEntity<*>> getListUseCase(entityClass: KClass<out T>): GetListItemsUseCase<*, out T> {
         val a = when (entityClass) {
             Item::class -> getItemsList
             Parameter::class -> getParametersList
@@ -37,7 +36,7 @@ class GetListUseCaseFactory(
             Invoice::class -> getInvoicesList
             else -> throw IllegalArgumentException("not found get-list-use-case for entity class: $entityClass")
         }
-        return a as GetEntities<*, out T>
+        return a as GetListItemsUseCase<*, out T>
     }
 
 }

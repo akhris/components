@@ -3,10 +3,9 @@ package persistence.columnMappers
 import domain.entities.WarehouseItem
 import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.IDBColumnMapper
-import org.jetbrains.exposed.sql.Column
 
 class WarehouseItemExposedColumnMapper : IDBColumnMapper<WarehouseItem> {
-    override fun getColumn(fieldID: EntityFieldID): Column<Any>? {
+    override fun getColumn(fieldID: EntityFieldID): IDBColumnMapper.Result? {
         return null
 //        return when (fieldID) {
 //            is EntityFieldID.EntityID -> {

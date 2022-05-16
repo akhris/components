@@ -1,8 +1,12 @@
 package di
 
-import com.akhris.domain.core.application.*
+import com.akhris.domain.core.application.GetEntity
+import com.akhris.domain.core.application.InsertEntity
+import com.akhris.domain.core.application.RemoveEntity
+import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
+import domain.application.GetListItemsUseCase
 import kotlinx.coroutines.Dispatchers
 import org.kodein.di.*
 
@@ -23,7 +27,7 @@ inline fun <reified ID, reified ENTITY : IEntity<ID>> getEntityModule(
             ioDispatcher = Dispatchers.IO
         )
     }
-    bindSingleton { GetEntities<ID, ENTITY>(repo = instance(), ioDispatcher = Dispatchers.IO) }
+    bindSingleton { GetListItemsUseCase<ID, ENTITY>(repo = instance(), ioDispatcher = Dispatchers.IO) }
 
     additionalBindings()
 }

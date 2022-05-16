@@ -1,24 +1,23 @@
 package ui.screens.entities_screen.entities_filter
 
-import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
+import domain.application.GetListItemsUseCase
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import kotlinx.coroutines.*
 import persistence.columnMappers.ColumnMappersFactory
-import persistence.datasources.SliceValue
 import persistence.repository.ISlicingRepository
 import utils.replace
 import kotlin.reflect.KClass
 
-class EntitiesFilterComponent<T : IEntity<*>>(
+class EntitiesFilterComponent<T : IEntity<*>> constructor(
     componentContext: ComponentContext,
     entityClass: KClass<out T>?,
-    private val getEntities: GetEntities<*, out T>?,
+    private val getEntities: GetListItemsUseCase<*, out T>?,
     fieldsMapperFactory: FieldsMapperFactory,
     columnMapperFactory: ColumnMappersFactory,
     private val onFiltersChange: (List<IEntitiesFilter.Filter>) -> Unit
@@ -70,18 +69,18 @@ class EntitiesFilterComponent<T : IEntity<*>>(
         //1. get field ids of given entity:
         val fieldIDs = fieldsMapper?.getEntityIDs().orEmpty()
 
-        //get already filtered values:
-        val existedOtherSlices =
-            _state
-                .value
-                .filters
-                .flatMap { f ->
-                    when (f) {
-                        is IEntitiesFilter.Filter.Range -> TODO()
-                        is IEntitiesFilter.Filter.Values -> f.fieldsList.filter { it.isFiltered }.map { it.value }
-                    }
-                }
-                    as? List<SliceValue<Any>>
+//        //get already filtered values:
+//        val existedOtherSlices =
+//            _state
+//                .value
+//                .filters
+//                .flatMap { f ->
+//                    when (f) {
+//                        is IEntitiesFilter.Filter.Range -> TODO()
+//                        is IEntitiesFilter.Filter.Values -> f.fieldsList.filter { it.isFiltered }.map { it.value }
+//                    }
+//                }
+//                    as? List<SliceValue<Any>>
 
 
         //2. for each field id make Filter
@@ -94,7 +93,7 @@ class EntitiesFilterComponent<T : IEntity<*>>(
             column?.let { cn ->
                 //get slice values constrained by existed slice:
                 val columnValues =
-                    repo.getSlice(cn.name
+                    repo.getSlice(cn.column.name
 //                        otherSlices = existedOtherSlices?.filter { it.column != column } ?: listOf()
 
                     )

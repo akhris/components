@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
-import com.akhris.domain.core.application.GetEntities
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.unpack
+import domain.application.GetListItemsUseCase
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import domain.entities.fieldsmappers.IFieldsMapper
@@ -25,6 +25,7 @@ import domain.entities.usecase_factories.IGetListUseCaseFactory
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
+import persistence.datasources.EntitiesList
 import persistence.repository.Specification
 import test.Items
 import ui.theme.DialogSettings
@@ -87,7 +88,13 @@ fun <T : IEntity<*>> EntityPickerMultiDialog(
             true -> Specification.QueryAll
             false -> Specification.Search(searchString)
         }
-        entities = useCase(GetEntities.GetBySpecification(specification = spec)).unpack()
+        entities = when (val result = useCase(GetListItemsUseCase.Params.GetWithSpecification(specification = spec))
+            .unpack()) {
+            //todo Grouped Items are not supported
+            is EntitiesList.NotGrouped -> result.items
+            else -> listOf()
+        }
+
 
     }
 

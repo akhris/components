@@ -29,14 +29,16 @@ class EntityItemValue(id: EntityID<Int>) : IntEntity(id) {
     var position by Tables.ItemValues.position
 }
 
-class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id), IParentableEntity<EntityObjectType> {
+class EntityObjectType(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<EntityObjectType>(Tables.ObjectTypes)
 
     var name by Tables.ObjectTypes.name
     val parameters by EntityParameter via Tables.ParametersToObjectType
 
-    override var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
-    override var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
+    val parent by EntityObjectType optionalReferencedOn (Tables.ObjectTypes.parent)
+
+//    override var parents by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.child, Tables.ObjectTypeToObjectTypes.parent)
+//    override var children by EntityObjectType.via(Tables.ObjectTypeToObjectTypes.parent, Tables.ObjectTypeToObjectTypes.child)
 }
 
 
@@ -75,8 +77,7 @@ class EntityContainer(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by Tables.Containers.name
     var description by Tables.Containers.description
-    var parents by EntityContainer.via(Tables.ContainerToContainers.child, Tables.ContainerToContainers.parent)
-    var children by EntityContainer.via(Tables.ContainerToContainers.parent, Tables.ContainerToContainers.child)
+    val parent by EntityContainer optionalReferencedOn (Tables.Containers.parent)
 }
 
 class EntitySupplier(id: EntityID<UUID>) : UUIDEntity(id) {

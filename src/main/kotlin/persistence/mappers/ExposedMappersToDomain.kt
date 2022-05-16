@@ -42,7 +42,7 @@ fun EntityContainer.toContainer(level: Int = 1): Container {
         id = id.value.toString(),
         name = name,
         description = description,
-        parentContainer = if (level <= 0) null else parents.firstOrNull()?.toContainer(level - 1)
+        parentContainer = if (level <= 0) null else parent?.toContainer(level - 1)
     )
 }
 
@@ -61,7 +61,7 @@ fun EntityObjectType.toObjectType(level: Int = 1): ObjectType {
         id = id.value.toString(),
         name = name,
         parameters = parameters.map { it.toParameter() },
-        parentEntity = if (level <= 0) null else parents.firstOrNull()?.toObjectType(level - 1)
+        parentEntity = if (level <= 0) null else parent?.toObjectType(level - 1)
     )
 }
 

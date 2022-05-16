@@ -30,7 +30,6 @@ sealed class EntityFieldID {
         override val tag: String? = null,
         override val name: String,
         override val isReadOnly: Boolean = false,
-//        val entitiesIDs: List<EntityID> = listOf(),
         val entityClass: KClass<out IEntity<*>>
     ) : EntityFieldID()
 

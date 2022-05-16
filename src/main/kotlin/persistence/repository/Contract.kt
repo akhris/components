@@ -1,10 +1,12 @@
 package persistence.repository
 
+import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepository
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.repository.ISpecification
 import domain.entities.*
 import domain.entities.Unit
+import persistence.datasources.EntitiesList
 import persistence.datasources.SliceValue
 
 interface IPagingRepository {
@@ -15,6 +17,9 @@ interface ISlicingRepository {
     suspend fun getSlice(columnName: String, otherSlices: List<SliceValue<Any>> = listOf()): List<SliceValue<*>>
 }
 
+interface IGroupingRepository<ID, ENTITY : IEntity<ID>> {
+    suspend fun gQuery(specification: ISpecification): EntitiesList<ENTITY>
+}
 
 /*
 
@@ -42,4 +47,4 @@ interface ISuppliersRepository : IRepository<String, Supplier>, IRepositoryCallb
 interface IItemIncomeRepository : IRepository<String, ItemIncome>, IRepositoryCallback<ItemIncome>, IPagingRepository
 interface IItemOutcomeRepository : IRepository<String, ItemOutcome>, IRepositoryCallback<ItemOutcome>
 interface IProjectRepository : IRepository<String, Project>, IRepositoryCallback<Project>
-interface IWarehouseItemRepository : IRepository<String, WarehouseItem>
+interface IWarehouseItemRepository : IRepository<String, WarehouseItem>, IGroupingRepository<String, WarehouseItem>

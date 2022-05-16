@@ -47,9 +47,10 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
 
 
     Box(modifier = Modifier.fillMaxHeight()) {
+
         EntityScreenContent(
             itemRepresentationType = itemRepresentationType,
-            entities = state.entities,
+            items = state.entities,
             listState = listState,
             bottomPadding = bottomPadding,
             onEntityRemoved = component.onEntityRemovedCallback?.let { rc -> { rc(it) } },
@@ -63,8 +64,7 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
                     bottomPadding = it.height.dp
                 }
                 .padding(16.dp)
-                .align(Alignment.BottomCenter)
-                ,
+                .align(Alignment.BottomCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (listState.firstVisibleItemIndex > 0) {

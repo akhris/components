@@ -1,6 +1,5 @@
 package ui.entity_renderers
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
@@ -37,15 +36,14 @@ fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
         onCloseRequest = onDismiss,
         content = {
             Surface {
-                Box(modifier = Modifier.wrapContentHeight()) {
-                    RenderCardEntity(
-                        initialEntity = entity,
-                        onEntitySaveClicked = {
-                            entityToSave = it
-                        },
-                        expanded = true
-                    )
-                }
+                RenderCardEntity(
+                    modifier = Modifier.wrapContentHeight(),
+                    initialEntity = entity,
+                    onEntitySaveClicked = {
+                        entityToSave = it
+                    },
+                    expanded = true
+                )
             }
         })
 

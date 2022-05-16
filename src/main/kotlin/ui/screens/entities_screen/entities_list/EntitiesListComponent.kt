@@ -1,6 +1,9 @@
 package ui.screens.entities_screen.entities_list
 
-import com.akhris.domain.core.application.*
+import com.akhris.domain.core.application.InsertEntity
+import com.akhris.domain.core.application.RemoveEntity
+import com.akhris.domain.core.application.Result
+import com.akhris.domain.core.application.UpdateEntity
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.repository.IRepositoryCallback
 import com.akhris.domain.core.utils.log
@@ -9,19 +12,22 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.lifecycle.subscribe
+import domain.application.GetListItemsUseCase
 import kotlinx.coroutines.*
+import persistence.datasources.EntitiesList
 import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 
 class EntitiesListComponent<T : IEntity<*>>(
     componentContext: ComponentContext,
-    private val fSpec: Specification.Filtered,
-    private val sSpec: Specification.Search,
-    private val getEntities: GetEntities<*, out T>?,
+    private val fSpec: Specification.Filtered? = null,
+    private val sSpec: Specification.Search? = null,
+    private val gSpec: Specification.Grouped? = null,
+    private val getEntities: GetListItemsUseCase<*, out T>?,
     private val updateEntity: UpdateEntity<*, out T>?,
     private val removeEntity: RemoveEntity<*, out T>?,
     private val insertEntity: InsertEntity<*, out T>?,  //used for copying
-    private val onEntitiesLoaded: (List<T>) -> Unit,
+    private val onEntitiesLoaded: (EntitiesList<out T>) -> Unit,
     private val onItemsCountLoaded: (Long) -> Unit
 ) :
     IEntitiesList<T>,
@@ -30,16 +36,10 @@ class EntitiesListComponent<T : IEntity<*>>(
     private val scope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val _state = MutableValue(IEntitiesList.Model<T>(listOf()))
+    private val _state = MutableValue(IEntitiesList.Model<T>())
 
     override val state: Value<IEntitiesList.Model<T>> = _state
 
-//    override fun setEntitiesList(entities: List<T>) {
-//        _state.reduce {
-//            it.copy(entities = entities)
-//        }
-////        onListModelChanged(_state.value)
-//    }
 
     override fun setCurrentPage(currentPage: Long) {
         _state.reduce {
@@ -72,7 +72,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     private suspend fun setupPagination() {
         val repo = (getEntities?.repo as? IPagingRepository) ?: return
 
-        val filterSpec = Specification.Filtered(fSpec.filters)
+        val filterSpec = Specification.Filtered(fSpec?.filters ?: listOf())
 
 
         val totalItems = try {
@@ -114,7 +114,7 @@ class EntitiesListComponent<T : IEntity<*>>(
     private suspend fun invalidateEntities() {
         val pagingParams = _state.value.pagingParameters
 
-        val filterSpec = Specification.Filtered(fSpec.filters)
+        val filterSpec = Specification.Filtered(fSpec?.filters ?: listOf())
         val pagingSpec = pagingParams?.let {
             Specification.Paginated(
                 pageNumber = it.currentPage,
@@ -122,9 +122,12 @@ class EntitiesListComponent<T : IEntity<*>>(
             )
         }
 
-        val specification = Specification.CombinedSpecification(listOfNotNull(filterSpec, pagingSpec, sSpec))
+        val specification = Specification.CombinedSpecification(listOfNotNull(filterSpec, pagingSpec, sSpec, gSpec))
 
-        val entitiesResult = getEntities?.invoke(GetEntities.GetBySpecification(specification))
+        val entitiesResult = getEntities?.invoke(GetListItemsUseCase.Params.GetWithSpecification(specification))
+
+
+
 
         log("invalidating entities for spec: $specification, entitiesResult: $entitiesResult")
         when (entitiesResult) {

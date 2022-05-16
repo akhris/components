@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -31,6 +32,7 @@ import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
+import persistence.datasources.EntitiesList
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.entity_select_dialog.EntityPickerMultiDialog
 import ui.screens.entity_select_dialog.EntityPickerSingleDialog
@@ -38,44 +40,117 @@ import ui.theme.ContentSettings
 import ui.theme.DialogSettings
 import kotlin.reflect.KClass
 
+
 /**
  * Entity screen content - renders list of Entities in a way that depends on [itemRepresentationType] parameter.
  */
 @Composable
 fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
-    entities: List<T>,
+    items: EntitiesList<out T>,
     bottomPadding: Dp = 0.dp,
     listState: LazyListState = rememberLazyListState(),
     onEntityRemoved: ((T) -> Unit)? = null,
     onEntityUpdated: ((T) -> Unit)? = null,
     onEntityCopied: ((T) -> Unit)? = null
 ) {
-    val di = localDI()
-    val factory: FieldsMapperFactory by di.instance()
 
-    val mapper = remember(entities, factory) { entities.firstOrNull()?.let { factory.getFieldsMapper(it::class) } }
-
+    var isExpandedIDs = remember { mutableStateListOf<Any?>() }
     //content depending on representation type:
     when (itemRepresentationType) {
-        //cards
+        //render cards
         ItemRepresentationType.Card -> {
-            LazyColumn(state = listState) {
-                items(items = entities, key = { entity -> entity.id ?: "no_id" }, itemContent = { entity ->
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        RenderCardEntity(
-                            entity,
-                            onEntitySaveClicked = {
-                                log("entity changed: $it")
-                                onEntityUpdated?.invoke(it)
-                            },
-                            onEntityRemoved = onEntityRemoved,
-                            onEntityCopyClicked = onEntityCopied
-                        )
-                    }
-                })
 
-                if (entities.isNotEmpty() && bottomPadding != 0.dp) {
+
+            LazyColumn(state = listState) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                when (items) {
+                    is EntitiesList.Grouped -> {
+                        //render grouped:
+                        this.items(
+                            items = items.items,
+                            key = {
+                                it.groupID
+                            },
+                            itemContent = { listItem ->
+                                val onClick: () -> Unit = {
+                                    if (isExpandedIDs.contains(listItem.groupID)) {
+                                        isExpandedIDs.remove(listItem.groupID)
+                                    } else {
+                                        isExpandedIDs.add(listItem.groupID)
+                                    }
+                                }
+
+                                Column {
+                                    //render header
+                                    Row(modifier = Modifier.clickable {
+                                        onClick()
+                                    }) {
+                                        Text(
+                                            modifier = Modifier.padding(8.dp).weight(1f),
+                                            text = "${listItem.groupID.categoryName}: ${listItem.groupID.keyName ?: listItem.groupID.key} (${listItem.items.size})",
+                                            style = MaterialTheme.typography.subtitle1
+                                        )
+                                        IconButton(
+                                            onClick = onClick,
+                                            content = {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.KeyboardArrowUp,
+                                                    contentDescription = if (isExpandedIDs.contains(listItem.groupID.key)) "collapse group" else "expand group",
+                                                    modifier = Modifier.rotate(
+                                                        if (isExpandedIDs.contains(listItem.groupID.key))
+                                                            0f else 180f
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                    if (isExpandedIDs.contains(listItem.groupID))
+                                        listItem.items.forEach {
+                                            RenderCardEntity(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                it,
+                                                onEntitySaveClicked = {
+                                                    log("entity changed: $it")
+                                                    onEntityUpdated?.invoke(it)
+                                                },
+                                                onEntityRemoved = onEntityRemoved,
+                                                onEntityCopyClicked = onEntityCopied
+                                            )
+                                        }
+                                }
+                            }
+                        )
+
+                    }
+                    is EntitiesList.NotGrouped -> {
+                        //render not grouped:
+
+                        this.items(
+                            items = items.items,
+                            key = {
+                                it.id ?: "no_id"
+                            },
+                            itemContent = { listItem ->
+                                RenderCardEntity(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    listItem,
+                                    onEntitySaveClicked = {
+                                        log("entity changed: $it")
+                                        onEntityUpdated?.invoke(it)
+                                    },
+                                    onEntityRemoved = onEntityRemoved,
+                                    onEntityCopyClicked = onEntityCopied
+                                )
+                            })
+
+
+                    }
+                }
+
+                if (items.isNotEmpty() && bottomPadding != 0.dp) {
                     item {
                         Spacer(modifier = Modifier.height(bottomPadding))
                     }
@@ -83,8 +158,19 @@ fun <T : IEntity<*>> EntityScreenContent(
             }
         }
 
-        //table
+        //render table
         ItemRepresentationType.Table -> {
+            val entities = when (items) {
+                is EntitiesList.Grouped -> listOf()     //todo grouped table is not yet supported
+                is EntitiesList.NotGrouped -> items.items
+            }
+
+            val di = localDI()
+            val factory: FieldsMapperFactory by di.instance()
+            val mapper = remember(items, factory) {
+                entities.firstOrNull()?.let { entity -> factory.getFieldsMapper(entity::class) }
+            }
+
             mapper?.let {
                 EntityTableContent(entities = entities, fieldsMapper = it)
             }
@@ -94,6 +180,61 @@ fun <T : IEntity<*>> EntityScreenContent(
 
 }
 
+///**
+// * Entity screen content - renders list of Entities in a way that depends on [itemRepresentationType] parameter.
+// */
+//@Composable
+//fun <T : IEntity<*>> NotGroupedEntityScreenContent(
+//    itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
+//    entities: List<ListItem.NotGroupedItem<out T>>,
+//    bottomPadding: Dp = 0.dp,
+//    listState: LazyListState = rememberLazyListState(),
+//    onEntityRemoved: ((T) -> Unit)? = null,
+//    onEntityUpdated: ((T) -> Unit)? = null,
+//    onEntityCopied: ((T) -> Unit)? = null
+//) {
+//    val di = localDI()
+//    val factory: FieldsMapperFactory by di.instance()
+//    val mapper = remember(entities, factory) { entities.firstOrNull()?.let { factory.getFieldsMapper(it.item::class) } }
+//
+//    //content depending on representation type:
+//    when (itemRepresentationType) {
+//        //cards
+//        ItemRepresentationType.Card -> {
+//            LazyColumn(state = listState) {
+//                items(items = entities, key = { entity -> entity.item.id ?: "no_id" }, itemContent = { entity ->
+//                    Box(modifier = Modifier.fillMaxWidth()) {
+//                        RenderCardEntity(
+//                            entity.item,
+//                            onEntitySaveClicked = {
+//                                log("entity changed: $it")
+//                                onEntityUpdated?.invoke(it)
+//                            },
+//                            onEntityRemoved = onEntityRemoved,
+//                            onEntityCopyClicked = onEntityCopied
+//                        )
+//                    }
+//                })
+//
+//                if (entities.isNotEmpty() && bottomPadding != 0.dp) {
+//                    item {
+//                        Spacer(modifier = Modifier.height(bottomPadding))
+//                    }
+//                }
+//            }
+//        }
+//
+//        //table
+//        ItemRepresentationType.Table -> {
+//            mapper?.let {
+//                EntityTableContent(entities = entities.map { e -> e.item }, fieldsMapper = it)
+//            }
+//        }
+//    }
+//
+//
+//}
+
 /**
  * Renders entity in a card way - all it's fields in a column one by one.
  * At the bottom of the card there are three buttons: delete entity, save changes and discard changes.
@@ -101,7 +242,8 @@ fun <T : IEntity<*>> EntityScreenContent(
  */
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun <T : IEntity<*>> BoxScope.RenderCardEntity(
+fun <T : IEntity<*>> RenderCardEntity(
+    modifier: Modifier = Modifier,
     initialEntity: T,
     onEntitySaveClicked: (T) -> Unit,
     onEntityCopyClicked: ((T) -> Unit)? = null,
@@ -122,9 +264,7 @@ fun <T : IEntity<*>> BoxScope.RenderCardEntity(
         }
 
     Card(
-        modifier = Modifier
-            .wrapContentHeight()
-            .align(Alignment.Center)
+        modifier = modifier
             .widthIn(min = ContentSettings.contentCardMinWidth, max = ContentSettings.contentCardMaxWidth)
             .padding(8.dp),
         elevation = 0.dp,
