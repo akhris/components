@@ -10,9 +10,14 @@ import settings.AppFoldersManager
 import kotlin.io.path.pathString
 
 object ExposedDbSettings {
+
+
     val db by lazy {
 
-        val db = Database.connect("jdbc:sqlite:${AppFoldersManager.getAppPath().pathString}/data.db?foreign_keys=on", "org.sqlite.JDBC")
+        val db = Database.connect(
+            "jdbc:sqlite:${AppFoldersManager.getAppPath().pathString}/data.db?foreign_keys=on",
+            "org.sqlite.JDBC"
+        )
 //        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")
 //        TransactionManager.manager.defaultIsolationLevel =
 //            TRANSACTION_READ_UNCOMMITTED
@@ -39,6 +44,36 @@ object ExposedDbSettings {
             )
         }
         db
+    }
+
+    fun connectToDB(path: String): Database {
+        val db = Database.connect("jdbc:sqlite:${path}?foreign_keys=on", "org.sqlite.JDBC")
+//        Database.connect("jdbc:sqlite:file:test?mode=memory&cache=shared", "org.sqlite.JDBC")
+//        TransactionManager.manager.defaultIsolationLevel =
+//            TRANSACTION_READ_UNCOMMITTED
+        transaction {
+            addLogger(StdOutSqlLogger)
+
+            SchemaUtils.createMissingTablesAndColumns(
+                Tables.Items,
+                Tables.Containers,
+                Tables.Suppliers,
+                Tables.Units,
+                Tables.ItemIncomes,
+                Tables.ItemOutcomes,
+                Tables.ObjectTypes,
+//                Tables.Values,
+                Tables.Parameters,
+//                Tables.ContainerToContainers,
+//                Tables.ValuesToItem,
+                Tables.ItemValues,
+                Tables.ParametersToObjectType,
+                Tables.Projects,
+                Tables.ProjectItems,
+                Tables.Invoices
+            )
+        }
+        return db
     }
 }
 

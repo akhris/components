@@ -19,8 +19,11 @@ import persistence.repository.FilterSpec
 import persistence.repository.Specification
 import java.util.*
 
+/**
+ * abstract DAO class for operating with Entities objects in Exposed.
+ */
 abstract class BaseExposedDao<
-        ENTITY : IEntity<*>,
+        ENTITY : IEntity<String>,
         EXPOSED_ID : Comparable<EXPOSED_ID>,
         EXPOSED_ENTITY : Entity<EXPOSED_ID>,
         EXPOSED_TABLE : IdTable<EXPOSED_ID>
@@ -33,8 +36,6 @@ abstract class BaseExposedDao<
 
 
     abstract fun mapToEntity(exposedEntity: EXPOSED_ENTITY): ENTITY
-
-//    abstract fun Transaction.mapIntoExposed(exposed: EXPOSED_ENTITY, entity: ENTITY)
 
     protected abstract fun mapToID(id: Any): EXPOSED_ID
 
@@ -375,7 +376,7 @@ abstract class BaseExposedDao<
 }
 
 
-abstract class BaseUUIDDao<ENTITY : IEntity<*>,
+abstract class BaseUUIDDao<ENTITY : IEntity<String>,
         EXPOSED_ENTITY : Entity<UUID>,
         EXPOSED_TABLE : IdTable<UUID>>(
     table: EXPOSED_TABLE,

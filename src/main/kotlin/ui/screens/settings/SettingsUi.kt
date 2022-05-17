@@ -10,9 +10,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
 import settings.AppSetting
+import settings.AppSettingsRepository
 import strings.LocalizedStrings
 import strings.StringsIDs
 import strings.defaultLocalizedStrings
@@ -62,6 +64,7 @@ fun SettingsUi(settingsComponent: ISettings, localizedStrings: LocalizedStrings 
                             PathPreference(
                                 s.value ?: "",
                                 description = it.name,
+                                isRestartNeeded = it.setting.key == AppSettingsRepository.key_db_location,
                                 onPathChanged = { newPath -> settingsComponent.onSettingChanged(s.copy(value = newPath)) })
                         }
                         is AppSetting.ListSetting -> {
@@ -108,27 +111,45 @@ private fun LightDarkThemeSelector(isLight: Boolean, onThemeChanged: (Boolean) -
 
 
 @Composable
-private fun PathPreference(path: String, description: String? = null, onPathChanged: (String) -> Unit) {
+private fun PathPreference(
+    path: String,
+    description: String? = null,
+    isRestartNeeded: Boolean = false,
+    onPathChanged: (String) -> Unit
+) {
 
     var showFileDialog by remember { mutableStateOf(false) }
+    val initialPath by remember { mutableStateOf(path) }
 
     Card(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-        TextField(
-            label = description?.let {
-                {
-                    Text(text = it)
-                }
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    showFileDialog = true
-                }, content = {
-                    Icon(painterResource("vector/folder_black_24dp.svg"), contentDescription = "open path picker")
-                })
-            },
-            value = path,
-            onValueChange = onPathChanged
-        )
+        Column {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                label = description?.let {
+                    {
+                        Text(text = it)
+                    }
+                },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        showFileDialog = true
+                    }, content = {
+                        Icon(painterResource("vector/folder_black_24dp.svg"), contentDescription = "open path picker")
+                    })
+                },
+                value = path,
+                onValueChange = onPathChanged
+            )
+            if (isRestartNeeded && initialPath != path) {
+                //show restart needed warning
+                Text(
+                    modifier = Modifier.align(Alignment.End).padding(4.dp),
+                    text = "restart app to take effect",
+                    style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Bold)
+                )
+
+            }
+        }
     }
 
     if (showFileDialog) {

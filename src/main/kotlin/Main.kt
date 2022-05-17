@@ -35,9 +35,18 @@ import ui.theme.AppTheme
 
 fun main() {
     LogUtils.isLogEnabled = true
-    ExposedDbSettings.db   //connect to database
+
 
     val appSettingsRepository by di.instance<AppSettingsRepository>()
+    val dbLocation = getDBLocation(appSettingsRepository)
+    log("got dbLocation: $dbLocation")
+
+    dbLocation?.let {
+        ExposedDbSettings.connectToDB(it)   //connect to database
+    } ?: run {
+        log("Cannot connect to database. Please check settings.")
+    }
+
     val lifecycle = LifecycleRegistry()
     val updateUseCaseFactory by di.instance<IUpdateUseCaseFactory>()
     val listUseCaseFactory by di.instance<IGetListUseCaseFactory>()
@@ -46,6 +55,7 @@ fun main() {
     val getUseCaseFactory: IGetUseCaseFactory by di.instance()
     val removeUseCaseFactory: IRemoveUseCaseFactory by di.instance()
     val insertUseCaseFactory: IInsertUseCaseFactory by di.instance()
+
 
     val rootComponent = NavHostComponent(
         componentContext = DefaultComponentContext(lifecycle),
@@ -59,11 +69,18 @@ fun main() {
         removeUseCaseFactory = removeUseCaseFactory
     )
 
+    val windowTitle = StringBuilder(AppSettings.appTitle)
+    dbLocation?.let {
+        windowTitle.append(" · ")
+        windowTitle.append(it)
+    }
+
     application {
+
 
         Window(
             onCloseRequest = ::exitApplication,
-            title = AppSettings.appTitle,
+            title = windowTitle.toString(),
             icon = painterResource("vector/grid_view_black_24dp.svg"),
             content = {
                 mainWindow(rootComponent)
@@ -71,6 +88,12 @@ fun main() {
         )
     }
 
+}
+
+private fun getDBLocation(appSettingsRepository: AppSettingsRepository): String? {
+    val file = appSettingsRepository.readAppSettingsFromFile() ?: settings.AppSettings.default
+    val dbSetting = file.settings.find { it.key == AppSettingsRepository.key_db_location } as? AppSetting.PathSetting
+    return dbSetting?.value
 }
 
 //fun main() =
@@ -85,7 +108,7 @@ private fun mainWindow(rootComponent: INavHost) = withDI(di) {
     val di = localDI()
     val settingsRepository: AppSettingsRepository by di.instance()
 
-    PrepopulateDatabase()
+//    PrepopulateDatabase()
 
     val isDarkTheme by remember(settingsRepository) {
         settingsRepository
@@ -102,10 +125,6 @@ private fun mainWindow(rootComponent: INavHost) = withDI(di) {
         settingsRepository.getLocalizedStringProvider().distinctUntilChanged()
     }.collectAsState(null)
 
-
-    remember(stringProvider) {
-        log("got new string provider from settingsRepository: $stringProvider")
-    }
     Root(rootComponent, isDarkTheme ?: false, stringProvider ?: StringProvider())
 
 

@@ -24,7 +24,6 @@ class WarehouseItemRepository(
         throw UnsupportedOperationException(errorText)
     }
 
-
     override suspend fun query(specification: ISpecification): List<WarehouseItem> {
         return emptyList()
     }
@@ -45,7 +44,9 @@ class WarehouseItemRepository(
         return getMergedLists(specification)
     }
 
-
+    /**
+     * Fetch incomes from [incomeRepository], outcomes from [outcomeRepository] and merge it into [EntitiesList] of [WarehouseItem]
+     */
     private suspend fun getMergedLists(specification: ISpecification): EntitiesList<WarehouseItem> {
         //get all incomes by specification
 
@@ -114,6 +115,9 @@ private fun WarehouseItemID.toWarehouseItem(count: Long): WarehouseItem {
     )
 }
 
+/**
+ * helper function to combine two lists of [ItemIncome] and [ItemOutcome] into single list of [WarehouseItem]
+ */
 private fun makeWarehouseList(incomes: List<ItemIncome>, outcomes: List<ItemOutcome>): List<WarehouseItem> {
     return (incomes.asSequence() + outcomes.asSequence()).groupBy(
         keySelector = {

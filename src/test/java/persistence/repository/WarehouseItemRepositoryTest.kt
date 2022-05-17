@@ -30,32 +30,11 @@ internal class WarehouseItemRepositoryTest {
     @Test
     fun test_query_all() {
         val incomes = runBlocking {
-            incomesRepo.query(Specification.QueryAll)
+            incomesRepo.gQuery(Specification.QueryAll)
         }
 
         val outcomes = runBlocking {
-            outcomesRepo.query(Specification.QueryAll)
-        }
-        println()
-        println("incomes:")
-        incomes.forEach {
-            println(it)
-        }
-
-        println()
-        println("outcomes:")
-        outcomes.forEach {
-            println(it)
-        }
-
-        val a = runBlocking {
-            warehouseRepo.query(Specification.QueryAll)
-        }
-
-        println()
-        println("All items:")
-        a.forEach {
-            println(it)
+            outcomesRepo.gQuery(Specification.QueryAll)
         }
     }
 }

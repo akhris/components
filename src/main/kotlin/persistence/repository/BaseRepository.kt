@@ -3,7 +3,6 @@ package persistence.repository
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.exceptions.NotFoundInRepositoryException
 import com.akhris.domain.core.repository.*
-import com.akhris.domain.core.utils.log
 import kotlinx.coroutines.flow.SharedFlow
 import persistence.datasources.EntitiesList
 import persistence.datasources.IBaseDao
@@ -63,8 +62,7 @@ class BaseRepository<ENTITY : IEntity<String>>(
     }
 
     override suspend fun query(specification: ISpecification): List<ENTITY> {
-        log("!!! USING DEPRECATED QUERY METHOD !!! with spec: $specification")
-        return listOf()
+        throw UnsupportedOperationException("$this using deprecated query method with spec: $specification. Use gQuery instead")
     }
 
     override suspend fun getItemsCount(specification: ISpecification): Long {
@@ -92,12 +90,6 @@ class BaseRepository<ENTITY : IEntity<String>>(
             is Specification.Grouped -> baseDao.getItemsCount(groupingSpec = specification)
         }
     }
-
-//    private fun requirePagingDao(): BasePagingDao<ENTITY> {
-//        return basePagingDao
-//            ?: throw IllegalArgumentException("to use paging functions please provide instance of BasePagingDao")
-//    }
-
 
     override suspend fun remove(t: ENTITY) {
         baseDao.removeById(t.id)

@@ -23,8 +23,6 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
 
     private val appSettingsFileName = "app_settings.json"
     private val appSettingsFile = AppFoldersManager.getAppPath().resolve(appSettingsFileName)
-//        Path(currentUserPath, componentsSupPath, appSettingsFileName)
-//    private val defaultDBLocation = Path(currentUserPath, componentsSupPath, defaultComponentsDatabaseFilename)
 
 
     fun setAppSetting(appSetting: AppSetting) {
@@ -39,6 +37,7 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
                 it.settings.find { s -> s.key == key }
             }
     }
+
 
     fun getLocalizedStringProvider(): Flow<StringProvider> {
         return _settingsValue
@@ -79,14 +78,21 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
         invalidateSettings()
     }
 
+
+    fun readAppSettingsFromFile(): AppSettings? {
+        if (appSettingsFile.notExists()) {
+            return null
+        }
+        return appSettingsFile.readText().toAppSettings()
+    }
+
     private suspend fun invalidateSettings() {
         log("invalidate settings")
         if (appSettingsFile.exists()) {
             log("File $appSettingsFile exists")
-            val settingsText = withContext(Dispatchers.IO) {
-                appSettingsFile.readText()
+            val settingsFromFile = withContext(Dispatchers.IO) {
+                readAppSettingsFromFile()
             }
-            val settingsFromFile = settingsText.toAppSettings()
             settingsFromFile?.let {
                 //change _settingsValue settings to settings loaded from file by key:
                 _settingsValue.value = _settingsValue.value.copy(
