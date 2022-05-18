@@ -24,9 +24,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.log
-import domain.entities.EntityValuable
-import domain.entities.Item
-import domain.entities.ObjectType
 import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.EntityFieldID
 import domain.entities.fieldsmappers.FieldsMapperFactory
@@ -281,19 +278,22 @@ fun <T : IEntity<*>> RenderCardEntity(
                         it,
                         onFieldChange = { changedField ->
                             log("onFieldChange: $changedField")
-                            if (initialEntity::class == Item::class) {
-                                val entityField = changedField as? EntityField.EntityLink
-                                val objectType = entityField?.entity as? ObjectType
-                                if (objectType != null) {
-                                    //check if this is object type and item, and add new parameters if necessary
-                                    objectTypeField = entityField
-                                } else {
-                                    //
-                                    entity = mapper.mapIntoEntity(entity, changedField)
-                                }
-                            } else {
-                                entity = mapper.mapIntoEntity(entity, changedField)
-                            }
+                            entity = mapper.mapIntoEntity(entity, changedField)
+//                            if (initialEntity::class == Item::class) {
+//                                val entityField = changedField as? EntityField.EntityLink
+//                                val objectType = entityField?.entity as? ObjectType
+//                                entity = mapper.mapIntoEntity(entity, entityField)
+//                                if (objectType != null) {
+//                                    //check if this is object type and item, and add new parameters if necessary
+////                                    objectTypeField = entityField
+//                                    entity = mapper.mapIntoEntity(entity, entityField)
+//                                } else {
+//                                    //
+//                                    entity = mapper.mapIntoEntity(entity, changedField)
+//                                }
+//                            } else {
+//                                entity = mapper.mapIntoEntity(entity, changedField)
+//                            }
                         })
 
                 }
@@ -363,20 +363,22 @@ fun <T : IEntity<*>> RenderCardEntity(
     }
 
 
+//  Check after object's type change:
 
-    objectTypeField?.let { objectField ->
-        val item = entity as? Item
-        val objectType = objectField.entity as? ObjectType
-        if (item != null && objectType != null)
-            CheckItemObjectType(item, objectType, onItemChanged = {
-                entity = mapper.mapIntoEntity(it as T, objectField)
 
-            }, onDismiss = {
-                objectTypeField = null
-            })
-
-//        entity = mapper.mapIntoEntity(entity, fieldToCheck)
-    }
+//    objectTypeField?.let { objectField ->
+//        val item = entity as? Item
+//        val objectType = objectField.entity as? ObjectType
+//        if (item != null && objectType != null)
+//            CheckItemObjectType(item, objectType, onItemChanged = {
+//                entity = mapper.mapIntoEntity(it as T, objectField)
+//
+//            }, onDismiss = {
+//                objectTypeField = null
+//            })
+//
+////        entity = mapper.mapIntoEntity(entity, fieldToCheck)
+//    }
 
     showDeletePrompt?.let { e ->
         AlertDialog(onDismissRequest = { showDeletePrompt = null }, buttons = {
@@ -407,6 +409,7 @@ fun <T : IEntity<*>> RenderCardEntity(
     }
 }
 
+/*
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun CheckItemObjectType(
@@ -444,6 +447,8 @@ private fun CheckItemObjectType(
             })
     }
 }
+
+ */
 
 /**
  * Renders [EntityField] depending on it's type. And depending on [onFieldChange] callback.

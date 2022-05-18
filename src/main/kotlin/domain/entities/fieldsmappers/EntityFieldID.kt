@@ -4,7 +4,7 @@ import com.akhris.domain.core.entities.IEntity
 import kotlin.reflect.KClass
 
 /**
- * FieldID - identification of the entity's field.
+ * FieldID - descriptive identification of the entity's field without actual data value.
  */
 sealed class EntityFieldID {
 

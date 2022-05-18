@@ -41,7 +41,6 @@ data class Parameter(
 /**
  * e.g. m, cm, km
  */
-//@FieldsEntity
 data class Unit(
     override val id: String = IDUtils.newID(),
     val unit: String = "",

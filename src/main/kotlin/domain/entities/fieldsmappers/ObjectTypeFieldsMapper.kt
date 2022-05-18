@@ -9,7 +9,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.EntitiesListID(
-                tag = Companion.tag_parameters,
+                tag = tag_parameters,
                 name = "parameters",
                 entityClass = Parameter::class
             ),
@@ -29,7 +29,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
                     )
                 }
                 else -> {
-                    val index = tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: -1
+                    val index = tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
                     val parameter = entity.parameters.getOrNull(index)
                     DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
                 }
@@ -68,7 +68,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
         val fieldID = field.fieldID
         val tag = fieldID.tag?:return null
         val paramIndex =
-            tag.substring(startIndex = Companion.tag_parameters.length).toIntOrNull() ?: return null
+            tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: return null
         if (objectType.parameters.getOrNull(paramIndex) == null) {
             return null
         }

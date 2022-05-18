@@ -1,9 +1,7 @@
 package persistence.dto.exposed
 
-import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
@@ -116,7 +114,3 @@ object Tables {
 
 }
 
-abstract class ParentChildTable<ID : Comparable<ID>>(name: String = "") : Table(name = name) {
-    abstract val parent: Column<EntityID<ID>>
-    abstract val child: Column<EntityID<ID>>
-}

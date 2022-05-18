@@ -21,10 +21,19 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
     override fun getFieldParamsByFieldID(entity: Item, fieldID: EntityFieldID): DescriptiveFieldValue {
         return when (fieldID) {
             is EntityFieldID.EntityID -> when (val tag = fieldID.tag) {
-                tag_type -> DescriptiveFieldValue.CommonField(entity = entity.type, description = "type of the object")
+                tag_type -> {
+                    val a = EntityField.EntityLink.EntityLinkSimple(
+                        fieldID = fieldID,
+                        description = "type of the object",
+                        entity = entity.type
+                    )
+                    DescriptiveFieldValue.CommonField(entity = entity.type, description = "type of the object")
+                }
                 null -> throw IllegalArgumentException("tag cannot be null for fieldID: $fieldID")
                 else -> {
+                    //fixme need to get value parameter not by index
                     val valueParameterIndex = tag.substring(startIndex = tag_values.length).toIntOrNull() ?: -1
+
                     val item = entity.values.getOrNull(valueParameterIndex)
 
                     DescriptiveFieldValue.ValuableField(
@@ -41,10 +50,34 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
 
                 }
             }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
-                entity = entity.values,
-                description = "values"
-            )
+            is EntityFieldID.EntitiesListID -> {
+                val a = EntityField.EntityLinksList(
+                    fieldID = fieldID,
+                    entities = entity.getAllValues().map {ev->
+                        val entityID = EntityFieldID.EntityID(
+                            tag = "${fieldID.tag}$index",
+                            name = "${fieldID.name} #${index + 1}",
+                            entityClass = fieldID.entityClass
+                        )
+                        EntityField.EntityLink.EntityLinkValuable(
+                            fieldID = entityID,
+                            description = "values",
+                            entity = ev.entity,
+                            value = ev.value,
+                            factor = ev.factor,
+                            unit = ev.entity.unit?.unit
+                        )
+                    },
+                    description = "values",
+                    entityClass = fieldID.entityClass
+                )
+
+                DescriptiveFieldValue.CommonField(
+                    entity = entity.getAllValues(),
+                    //                entity = entity.values,
+                    description = "values"
+                )
+            }
             is EntityFieldID.StringID -> {
                 DescriptiveFieldValue.CommonField(
                     entity = entity.name.ifEmpty {
@@ -76,6 +109,22 @@ class ItemFieldsMapper : BaseFieldsMapper<Item>() {
         }
     }
 
+    private fun Item.getAllValues(): List<EntityValuable<Parameter>> {
+        val allParameters = type?.getParameters() ?: listOf()
+        val allValues =
+            allParameters
+                .map { p ->
+                    val paramInValues = values.find { it.entity.id == p.id }
+                    paramInValues ?: EntityValuable(p)
+                }.plus(values.filterNot { v -> allParameters.find { it.id == v.entity.id } != null })
+        return allValues
+    }
+
+    private fun ObjectType.getParameters(): List<Parameter> {
+        val thisParams = this.parameters
+        val parentParams = parentEntity?.parameters ?: listOf()
+        return thisParams + parentParams
+    }
 
     override fun mapIntoEntity(entity: Item, field: EntityField): Item {
         return when (val fieldID = field.fieldID) {

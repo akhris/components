@@ -3,13 +3,28 @@ package domain.entities.fieldsmappers
 import com.akhris.domain.core.entities.IEntity
 import java.time.LocalDateTime
 
+/**
+ * Base implementation of [IFieldsMapper] interface
+ *
+ * The way [IEntity] is mapped:
+ * 1. Entity Renderer calls [IFieldsMapper.getEntityIDs] to get List of [EntityFieldID] for [IEntity] to render.
+ * 2. For each [EntityFieldID] Renderer calls [IFieldsMapper.getFieldByID] to get [EntityField]
+ * 3. Renderer renders [EntityField]
+ *
+ */
 abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 
+    /**
+     *
+     */
     abstract fun getFieldParamsByFieldID(entity: T, fieldID: EntityFieldID): DescriptiveFieldValue
 
+    /**
+     * Read actual field value of [entity] for given [fieldID] or null
+     */
     override fun getFieldByID(entity: T, fieldID: EntityFieldID): EntityField? {
         val fieldParams = getFieldParamsByFieldID(entity, fieldID)
-
+// TODO: 5/18/22 why using DescriptiveFieldValue and not EntityField directly?
         return when (fieldID) {
             is EntityFieldID.FloatID -> {
                 EntityField.FloatField(
@@ -72,21 +87,6 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
         fieldParams: DescriptiveFieldValue
     ): EntityField.EntityLink {
 
-
-//        when (val e = fieldParams.value) {
-//            is IEntity<*> -> {
-//                entity = e as T
-//                count = null
-//            }
-//            is EntityCountable<*> -> {
-//                entity = e.entity as T
-//                count = e.count
-//            }
-//            else -> {
-//                entity = null
-//                count = null
-//            }
-//        }
 
         return when (fieldParams) {
             is DescriptiveFieldValue.CommonField -> EntityField.EntityLink.EntityLinkSimple(
