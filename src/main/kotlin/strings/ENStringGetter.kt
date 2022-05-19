@@ -37,7 +37,7 @@ class ENStringGetter : LocalStringGetter(
             StringsIDs.itemOutcome_description ->  "when items came out and from what container"
             StringsIDs.warehouseItem_title -> "Warehouse items"
             StringsIDs.warehouseItem_description -> "current state of warehouse"
-            StringsIDs.invoice_title -> "Invoices"
+            StringsIDs.invoice_title -> "invoices"
             StringsIDs.invoice_description -> "ordering information"
         }
     }

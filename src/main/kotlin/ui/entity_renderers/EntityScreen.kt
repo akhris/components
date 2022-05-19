@@ -251,7 +251,6 @@ fun <T : IEntity<*>> RenderCardEntity(
     val factory: FieldsMapperFactory by di.instance()
     val mapper = remember(factory) { factory.getFieldsMapper(initialEntity::class) }
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
-    var objectTypeField by remember { mutableStateOf<EntityField.EntityLink?>(null) }
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
     var isExpanded by remember(expanded) { mutableStateOf(expanded) }
 
@@ -279,6 +278,8 @@ fun <T : IEntity<*>> RenderCardEntity(
                         onFieldChange = { changedField ->
                             log("onFieldChange: $changedField")
                             entity = mapper.mapIntoEntity(entity, changedField)
+                            log("currentEntity: $entity")
+                            log("initialEntity: $initialEntity")
 //                            if (initialEntity::class == Item::class) {
 //                                val entityField = changedField as? EntityField.EntityLink
 //                                val objectType = entityField?.entity as? ObjectType

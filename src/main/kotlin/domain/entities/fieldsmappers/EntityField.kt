@@ -73,17 +73,6 @@ sealed class EntityField {
     /**
      * Represents EntityLink value of entity field
      */
-//    data class EntityLink constructor(
-//        override val fieldID: EntityFieldID,
-//        override val description: String = "",
-//        val entity: IEntity<*>?,
-//        val entityClass: KClass<out IEntity<*>>,
-//        val count: Long? = null,        //if it's countable
-//        val value: String? = null,      //if it's valuable
-//        val factor: Float? = null       //if it's valuable
-//    ) : EntityField() {
-//        override fun toString(): String = entity?.toString() ?: description
-//    }
 
     sealed class EntityLink : EntityField() {
         abstract val entity: IEntity<*>?
