@@ -2,8 +2,7 @@ package domain.entities.fieldsmappers
 
 import domain.entities.Unit
 
-class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
-
+class UnitFieldsMapper : IFieldsMapper<Unit> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
@@ -12,15 +11,22 @@ class UnitFieldsMapper : BaseFieldsMapper<Unit>() {
         )
     }
 
-
-    override fun getFieldParamsByFieldID(entity: Unit, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: Unit, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
-            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(entity = entity.unit, description = "unit")
-            is EntityFieldID.BooleanID -> DescriptiveFieldValue.CommonField(
-                entity = entity.isMultipliable,
-                description = "can be prefixed with k-, m-, u-, ..."
-            )
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            is EntityFieldID.StringID -> EntityField.StringField(
+                    fieldID = fieldID,
+                    value = entity.unit,
+                    description = "unit",
+                    isPlaceholder = entity.unit.isEmpty()
+                )
+            is EntityFieldID.BooleanID -> EntityField.BooleanField(
+                    fieldID = fieldID,
+                    value = entity.isMultipliable,
+                    description = "can be prefixed with k-, m-, u-, ..."
+                )
+            else -> {
+                throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            }
         }
     }
 

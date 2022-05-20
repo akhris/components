@@ -114,7 +114,7 @@ abstract class BaseFieldsMapper<T : IEntity<*>> : IFieldsMapper<T> {
 
 }
 
-
+@Deprecated("Use direct mapping to EntityField")
 sealed class DescriptiveFieldValue {
     abstract val entity: Any?
     abstract val description: String

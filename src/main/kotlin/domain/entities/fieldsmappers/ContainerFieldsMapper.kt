@@ -2,31 +2,38 @@ package domain.entities.fieldsmappers
 
 import domain.entities.Container
 
-class ContainerFieldsMapper : BaseFieldsMapper<Container>() {
+class ContainerFieldsMapper : IFieldsMapper<Container> {
 
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
             EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
             EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),
-            EntityFieldID.EntityID(name = "parent container", tag = EntityFieldID.tag_entity_id, entityClass = Container::class)
+            EntityFieldID.EntityID(
+                name = "parent container",
+                tag = EntityFieldID.tag_entity_id,
+                entityClass = Container::class
+            )
         )
     }
 
-    override fun getFieldParamsByFieldID(entity: Container, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: Container, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> DescriptiveFieldValue.CommonField(
+            is EntityFieldID.EntityID -> EntityField.EntityLink.EntityLinkSimple(
+                fieldID = fieldID,
                 entity = entity.parentContainer,
                 description = "parent container"
             )
             is EntityFieldID.StringID -> when (fieldID.tag) {
-                EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
-                    entity = entity.name,
-                    description = "item's name"
+                EntityFieldID.tag_name -> EntityField.StringField(
+                    fieldID = fieldID,
+                    description = "item's name",
+                    value = entity.name
                 )
-                EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
-                    entity = entity.description,
-                    description = "item's description"
+                EntityFieldID.tag_description -> EntityField.StringField(
+                    fieldID = fieldID,
+                    description = "item's description",
+                    value = entity.description
                 )
                 else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
             }

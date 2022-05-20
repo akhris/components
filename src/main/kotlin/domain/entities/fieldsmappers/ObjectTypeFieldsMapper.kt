@@ -3,7 +3,7 @@ package domain.entities.fieldsmappers
 import domain.entities.ObjectType
 import domain.entities.Parameter
 
-class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
+class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
@@ -17,34 +17,52 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
         )
     }
 
-
-    override fun getFieldParamsByFieldID(entity: ObjectType, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: ObjectType, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
             is EntityFieldID.EntityID -> when (val tag =
-                fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
-                "parent_object_type" -> {
-                    DescriptiveFieldValue.CommonField(
+                    fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
+                    "parent_object_type" -> EntityField.EntityLink.EntityLinkSimple(
+                        fieldID = fieldID,
                         entity = entity.parentEntity,
                         description = "parent type"
                     )
+                    else -> {
+                        //tag == parameter id
+                        val parameter = entity.parameters.find { it.id == tag }
+                        EntityField.EntityLink.EntityLinkSimple(
+                            fieldID = fieldID,
+                            entity = parameter,
+                            description = parameter?.name ?: ""
+                        )
+                    }
                 }
-                else -> {
-                    val index = tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
-                    val parameter = entity.parameters.getOrNull(index)
-                    DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
-                }
-            }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
-                entity = entity.parameters,
-                description = "parameters"
-            )
-            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(
-                entity = entity.name,
-                description = "type's name"
-            )
+            is EntityFieldID.EntitiesListID -> EntityField.EntityLinksList(
+                    fieldID = fieldID,
+                    description = "parameters",
+                    entities = entity
+                        .parameters
+                        .map { param ->
+                            EntityField.EntityLink.EntityLinkSimple(
+                                fieldID = EntityFieldID.EntityID(
+                                    tag = param.id,
+                                    name = param.name,
+                                    entityClass = Parameter::class
+                                ),
+                                description = param.description,
+                                entity = param
+                            )
+                        },
+                    entityClass = Parameter::class
+                )
+            is EntityFieldID.StringID -> EntityField.StringField(
+                    fieldID = fieldID,
+                    value = entity.name,
+                    description = "type's name"
+                )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
+
 
     override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
         return when (val fieldID = field.fieldID) {
@@ -66,7 +84,7 @@ class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
 
     private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType? {
         val fieldID = field.fieldID
-        val tag = fieldID.tag?:return null
+        val tag = fieldID.tag ?: return null
         val paramIndex =
             tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: return null
         if (objectType.parameters.getOrNull(paramIndex) == null) {

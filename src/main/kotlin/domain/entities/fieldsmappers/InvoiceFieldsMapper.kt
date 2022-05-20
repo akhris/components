@@ -3,7 +3,8 @@ package domain.entities.fieldsmappers
 import domain.entities.Invoice
 import domain.entities.Supplier
 
-class InvoiceFieldsMapper : BaseFieldsMapper<Invoice>() {
+class InvoiceFieldsMapper : IFieldsMapper<Invoice> {
+
     override fun getEntityIDs(): List<EntityFieldID> = listOf(
         EntityFieldID.StringID(tag = tag_order_id, name = "order id"),
         EntityFieldID.EntityID(name = "supplier", entityClass = Supplier::class),
@@ -13,17 +14,41 @@ class InvoiceFieldsMapper : BaseFieldsMapper<Invoice>() {
         EntityFieldID.StringID(tag = tag_currency, name = "currency")
     )
 
-    override fun getFieldParamsByFieldID(entity: Invoice, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: Invoice, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
             is EntityFieldID.StringID -> when (val tag = fieldID.tag) {
-                tag_order_id -> DescriptiveFieldValue.CommonField(entity = entity.orderID)
-                tag_receiver -> DescriptiveFieldValue.CommonField(entity = entity.receiver)
-                tag_currency -> DescriptiveFieldValue.CommonField(entity = entity.currency)
-                else -> throw IllegalArgumentException("fieldID $fieldID must have a tag")
-            }
-            is EntityFieldID.EntityID -> DescriptiveFieldValue.CommonField(entity = entity.supplier)
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(entity = entity.dateTime, description = "invoice date")
-            is EntityFieldID.FloatID -> DescriptiveFieldValue.CommonField(entity = entity.totalPrice)
+                    tag_order_id -> {
+                        EntityField.StringField(
+                            fieldID = fieldID,
+                            value = entity.orderID,
+                            description = "order id"
+                        )
+                    }
+                    tag_receiver -> {
+                        EntityField.StringField(
+                            fieldID = fieldID,
+                            value = entity.receiver,
+                            description = "receiver of the items"
+                        )
+                    }
+                    tag_currency -> {
+                        EntityField.StringField(
+                            fieldID = fieldID,
+                            value = entity.currency,
+                            description = "order currency"
+                        )
+                    }
+                    else -> {
+                        throw IllegalArgumentException("fieldID $fieldID must have a tag")
+                    }
+                }
+            is EntityFieldID.EntityID -> EntityField.EntityLink.EntityLinkSimple(
+                    fieldID = fieldID,
+                    entity = entity.supplier,
+                    description = "supplier"
+                )
+            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(fieldID = fieldID, value = entity.dateTime, description = "invoice date")
+            is EntityFieldID.FloatID -> EntityField.FloatField(fieldID = fieldID, value = entity.totalPrice, description = "total price")
             else -> throw IllegalArgumentException("fieldID $fieldID is not found in $this")
         }
     }
