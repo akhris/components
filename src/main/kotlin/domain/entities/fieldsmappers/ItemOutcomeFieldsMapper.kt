@@ -5,7 +5,7 @@ import domain.entities.EntityCountable
 import domain.entities.Item
 import domain.entities.ItemOutcome
 
-class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
+class ItemOutcomeFieldsMapper : IFieldsMapper<ItemOutcome> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
@@ -16,24 +16,29 @@ class ItemOutcomeFieldsMapper : BaseFieldsMapper<ItemOutcome>() {
         )
     }
 
-    override fun getFieldParamsByFieldID(entity: ItemOutcome, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: ItemOutcome, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    Companion.tag_item -> DescriptiveFieldValue.CountableField(
-                        entity.item?.entity,
-                        description = "item that came",
-                        count = entity.item?.count
+                    tag_item -> EntityField.EntityLink.EntityLinkCountable(
+                        fieldID = fieldID,
+                        entity = entity.item?.entity,
+                        count = entity.item?.count,
+                        description = "item that came"
                     )
-                    Companion.tag_container -> DescriptiveFieldValue.CommonField(
-                        entity.container,
+                    tag_container -> EntityField.EntityLink.EntityLinkSimple(
+                        fieldID = fieldID,
+                        entity = entity.container,
                         description = "container where item was put"
                     )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-//            is EntityFieldID.LongID -> DescriptiveFieldValue(entity.quantity, description = "quantity of items")
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(entity.dateTime, description = "when items came")
+            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
+                fieldID = fieldID,
+                value = entity.dateTime,
+                description = "when items came"
+            )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

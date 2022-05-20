@@ -5,7 +5,7 @@ import domain.entities.EntityCountable
 import domain.entities.Item
 import domain.entities.Project
 
-class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
+class ProjectFieldsMapper : IFieldsMapper<Project> {
 
     private val tag_items = "tag_items"
 
@@ -24,7 +24,67 @@ class ProjectFieldsMapper : BaseFieldsMapper<Project>() {
     }
 
 
-    override fun getFieldParamsByFieldID(entity: Project, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: Project, fieldID: EntityFieldID): EntityField? {
+        return when (fieldID) {
+            is EntityFieldID.EntityID -> {
+                // tag = item.id
+                val item = entity.items.find { it.entity.id == fieldID.tag }
+                EntityField.EntityLink.EntityLinkCountable(
+                    fieldID = fieldID,
+                    entity = item?.entity,
+                    count = item?.count,
+                    description = item?.entity?.name ?: ""
+                )
+            }
+            is EntityFieldID.EntitiesListID -> EntityField.EntityLinksList(
+                fieldID = fieldID,
+                description = "items",
+                entities = entity.items.map { i ->
+                    val entityID = EntityFieldID.EntityID(
+                        tag = i.entity.id,
+                        name = i.entity.name,
+                        entityClass = Item::class
+                    )
+
+                    EntityField.EntityLink.EntityLinkCountable(
+                        fieldID = entityID,
+                        description = i.entity.name,        //?
+                        entity = i.entity,
+                        count = i.count
+                    )
+                },
+                entityClass = Item::class
+            )
+            is EntityFieldID.StringID ->
+                // make EntityField.File
+                when (fieldID.tag) {
+                    EntityFieldID.tag_name -> EntityField.StringField(
+                        fieldID = fieldID,
+                        description = "project's name",
+                        value = entity.name
+                    )
+                    EntityFieldID.tag_description -> EntityField.StringField(
+                        fieldID = fieldID,
+                        description = "project's description",
+                        value = entity.description
+                    )
+                    extFile -> EntityField.StringField(
+                        fieldID = fieldID,
+                        description = "external file attached",
+                        value = entity.extFile ?: ""
+                    )
+                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+                }
+            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
+                fieldID = fieldID,
+                description = "project's created date",
+                value = entity.dateTime
+            )
+            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+        }
+    }
+
+    private fun getFieldParamsByFieldID(entity: Project, fieldID: EntityFieldID): DescriptiveFieldValue {
         log("get field params for id: $fieldID")
         return when (fieldID) {
             is EntityFieldID.EntityID -> {

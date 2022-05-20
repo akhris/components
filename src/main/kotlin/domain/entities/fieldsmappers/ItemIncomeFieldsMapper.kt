@@ -2,7 +2,7 @@ package domain.entities.fieldsmappers
 
 import domain.entities.*
 
-class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
+class ItemIncomeFieldsMapper : IFieldsMapper<ItemIncome> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
@@ -14,33 +14,39 @@ class ItemIncomeFieldsMapper : BaseFieldsMapper<ItemIncome>() {
         )
     }
 
-    override fun getFieldParamsByFieldID(entity: ItemIncome, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: ItemIncome, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
-                    tag_container -> DescriptiveFieldValue.CommonField(
-                        entity.container,
-                        description = "container where item was put"
-                    )
-                    tag_supplier -> DescriptiveFieldValue.CommonField(
-                        entity.supplier,
-                        description = "where items came from"
-                    )
-                    tag_item -> DescriptiveFieldValue.CountableField(
-                        entity.item?.entity,
-                        description = "item that came",
-                        count = entity.item?.count
-                    )
-                    tag_invoice -> DescriptiveFieldValue.CommonField(
-                        entity.invoice
-                    )
+                    tag_container -> EntityField.EntityLink.EntityLinkSimple(
+                            fieldID = fieldID,
+                            description = "container where item was put",
+                            entity = entity.container
+                        )
+                    tag_supplier -> EntityField.EntityLink.EntityLinkSimple(
+                            fieldID = fieldID,
+                            description = "where items came from",
+                            entity = entity.supplier
+                        )
+                    tag_item -> EntityField.EntityLink.EntityLinkCountable(
+                            fieldID = fieldID,
+                            entity = entity.item?.entity,
+                            count = entity.item?.count,
+                            description = "item that came"
+                        )
+                    tag_invoice -> EntityField.EntityLink.EntityLinkSimple(
+                            fieldID = fieldID,
+                            description = "invoice",
+                            entity = entity.invoice
+                        )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(
-                entity.dateTime,
-                description = "when items came"
-            )
+            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
+                    fieldID = fieldID,
+                    value = entity.dateTime,
+                    description = "when items came"
+                )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
