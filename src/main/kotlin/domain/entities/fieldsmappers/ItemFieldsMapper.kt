@@ -8,11 +8,10 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
 
     override fun getEntityIDs(): List<EntityFieldID> = listOf(
         EntityFieldID.StringID(tag = "tag_name", name = "name"),
-        EntityFieldID.EntityID(tag = tag_type, name = "object type", entityClass = ObjectType::class),
+        EntityFieldID.EntityID(tag = tag_type, name = "object type"),
         EntityFieldID.EntitiesListID(
             tag = tag_values,
-            name = "values",
-            entityClass = Parameter::class
+            name = "values"
         )
     )
 
@@ -23,7 +22,8 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                     EntityField.EntityLink.EntityLinkSimple(
                         fieldID = fieldID,
                         description = "type of the object",
-                        entity = entity.type
+                        entity = entity.type,
+                        entityClass = ObjectType::class
                     )
                 }
                 null -> throw IllegalArgumentException("tag cannot be null for fieldID: $fieldID")
@@ -34,6 +34,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                         fieldID = fieldID,
                         description = value?.entity?.description ?: "",
                         entity = value?.entity,
+                        entityClass = Parameter::class,
                         value = value?.value,
                         factor = value?.factor,
                         unit = value?.entity?.unit?.unit
@@ -46,8 +47,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                     entities = entity.getAllValues().map { (ev, ot) ->
                         val entityID = EntityFieldID.EntityID(
                             tag = ev.entity.id,
-                            name = ev.entity.name,
-                            entityClass = Parameter::class
+                            name = ev.entity.name
                         )
 
                         val description = StringBuilder()
@@ -55,7 +55,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                         description.append(ev.entity.description)
 
                         if (ot != null) {
-                            if(ev.entity.description.isNotEmpty()){
+                            if (ev.entity.description.isNotEmpty()) {
                                 description.appendLine()
                             }
                             description.append("parameter of ${ot.name}")
@@ -65,6 +65,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                             fieldID = entityID,
                             description = description.toString(),
                             entity = ev.entity,
+                            entityClass = Parameter::class,
                             value = ev.value,
                             factor = ev.factor,
                             unit = ev.entity.unit?.unit
@@ -129,61 +130,51 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
             params.addAll(ot.parameters.map { it to ot })
         }
         return params
-//        val thisParams = this.parameters
-//        val parentParams = parentEntity?.let {
-//            if (ids.contains(parentEntity.id)) {
-//                // if so - it will lead to infinite recursion, there is loop in ObjectType's inheritance
-//                log("check object types inheritance: $parentEntity is a parent more than once.")
-//
-//                listOf()
-//            } else {
-//                parentEntity.getParameters(ids.plus(id))
-//            }
-//        } ?: listOf()
-//        return thisParams + parentParams
     }
 
-    // FIXME: 5/19/22 structure when by field instead of fieldID?
+
     override fun mapIntoEntity(entity: Item, field: EntityField): Item {
-        return when (val fieldID = field.fieldID) {
-            is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
-            is EntityFieldID.EntityID -> {
-                when (fieldID.tag) {
-                    "tag_type" -> {
-                        entity.copy(type = ((field as EntityField.EntityLink).entity as? ObjectType))
-                    }
-                    else -> setItemValue(entity, field)
-                        ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
-                }
+        return when (field) {
+            is EntityField.StringField -> {
+                entity.copy(name = field.value)
             }
-            is EntityFieldID.EntitiesListID -> entity.copy(values = (field as EntityField.EntityLinksList).entities.mapNotNull {
-                (it.entity as? Parameter)?.let { p ->
-                    EntityValuable(
-                        entity = p,
-                        value = (it as? EntityField.EntityLink.EntityLinkValuable)?.value,
-                        factor = (it as? EntityField.EntityLink.EntityLinkValuable)?.factor
-                    )
-                }
-            })
-            else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
+            is EntityField.EntityLinksList -> {
+                entity.copy(values = field
+                    .entities
+                    .mapNotNull { link ->
+                        (link.entity as? Parameter)?.let { p ->
+                            EntityValuable(
+                                p,
+                                value = (link as? EntityField.EntityLink.EntityLinkValuable)?.value,
+                                factor = (link as? EntityField.EntityLink.EntityLinkValuable)?.factor
+                            )
+                        }
+                    })
+            }
+            is EntityField.EntityLink.EntityLinkSimple -> {
+                entity.copy(type = field.entity as? ObjectType)
+            }
+            is EntityField.EntityLink.EntityLinkValuable -> {
+                setItemValue(entity, field)
+                    ?: throw IllegalArgumentException("unknown fieldID: ${field.fieldID} for entity: $entity")
+            }
+            else -> throw IllegalArgumentException("field with fieldID: ${field.fieldID} was not found in entity: $entity")
         }
     }
 
 
-    private fun setItemValue(item: Item, field: EntityField): Item? {
+    private fun setItemValue(item: Item, field: EntityField.EntityLink.EntityLinkValuable): Item? {
         val fieldID = field.fieldID
         val parameterID = fieldID.tag ?: return null
 
-        val newValue =
-            (field as? EntityField.EntityLink.EntityLinkValuable)?.let { link ->
-                (link.entity as? Parameter)?.let {
-                    EntityValuable(
-                        entity = it,
-                        value = link.value,
-                        factor = link.factor
-                    )
-                }
-            } ?: return null
+        val newValue = (field.entity as? Parameter)?.let {
+            EntityValuable(
+                entity = it,
+                value = field.value,
+                factor = field.factor
+            )
+        }
+            ?: return null
 
         return item.copy(
             values = item.values.replaceOrAdd(

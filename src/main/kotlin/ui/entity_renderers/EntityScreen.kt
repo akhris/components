@@ -484,9 +484,9 @@ private fun RenderField(
                 field = field,
                 onEntityLinkSelect = {
                     //on entity select clicked
-                    println("going to select entity of type:")
-                    println(field.fieldID.entityClass)
-                    showSelectEntityDialog = field.fieldID.entityClass
+//                    showSelectEntityDialog = field.entity?.let { it::class }
+
+                    showSelectEntityDialog = field.entityClass
                 }, onEntityLinkChanged = onFieldChange,
                 onEntityLinkClear = {
                     onFieldChange(
@@ -560,8 +560,7 @@ private fun RenderField(
                         .mapIndexed { index, iEntity ->
                             val entityFieldID = EntityFieldID.EntityID(
                                 tag = "${ell.fieldID.tag}$index",
-                                name = "${iEntity::class.simpleName} ${index + 1}",
-                                entityClass = entityClass
+                                name = "${iEntity::class.simpleName} ${index + 1}"
                             )
                             val fromOldList = ell.entities.find { it.entity?.id == iEntity.id }
                             fromOldList?.let {
@@ -572,8 +571,8 @@ private fun RenderField(
                                 }
                             } ?: EntityField.EntityLink.EntityLinkSimple(
                                 fieldID = entityFieldID,
-                                entity = iEntity
-//                                entityClass = entityClass
+                                entity = iEntity,
+                                entityClass = entityClass
                             )
                         }
 

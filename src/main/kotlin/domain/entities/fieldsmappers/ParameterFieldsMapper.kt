@@ -3,7 +3,7 @@ package domain.entities.fieldsmappers
 import domain.entities.Parameter
 import domain.entities.Unit
 
-class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
+class ParameterFieldsMapper : IFieldsMapper<Parameter> {
 
     private val tag_unit = "tag_unit"
 
@@ -11,26 +11,33 @@ class ParameterFieldsMapper : BaseFieldsMapper<Parameter>() {
         return listOf(
             EntityFieldID.StringID(tag = EntityFieldID.tag_name, name = "name"),
             EntityFieldID.StringID(tag = EntityFieldID.tag_description, name = "description"),
-            EntityFieldID.EntityID(tag = tag_unit, name = "unit", entityClass = Unit::class)
+            EntityFieldID.EntityID(tag = tag_unit, name = "unit")
         )
     }
 
 
-    override fun getFieldParamsByFieldID(entity: Parameter, fieldID: EntityFieldID): DescriptiveFieldValue {
+    override fun getFieldByID(entity: Parameter, fieldID: EntityFieldID): EntityField? {
         return when (fieldID) {
-            is EntityFieldID.EntityID -> DescriptiveFieldValue.CommonField(entity.unit, description = "parameter's unit")
-            is EntityFieldID.StringID -> {
-                when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
-                        entity = entity.name,
-                        description = "parameter's name"
-                    )
-                    EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
-                        entity = entity.description,
+            is EntityFieldID.EntityID -> EntityField.EntityLink.EntityLinkSimple(
+                fieldID = fieldID,
+                description = "parameter's unit",
+                entity = entity.unit,
+                entityClass = Unit::class
+            )
+            is EntityFieldID.StringID -> when (fieldID.tag) {
+                EntityFieldID.tag_name -> EntityField.StringField(
+                    fieldID = fieldID,
+                    value = entity.name,
+                    description = "parameter's name"
+                )
+                EntityFieldID.tag_description ->
+                    EntityField.StringField(
+                        fieldID = fieldID,
+                        value = entity.description,
                         description = "parameter's description"
                     )
-                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
-                }
+
+                else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
             }
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }

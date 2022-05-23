@@ -10,9 +10,8 @@ class ContainerFieldsMapper : IFieldsMapper<Container> {
             EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
             EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),
             EntityFieldID.EntityID(
-                name = "parent container",
                 tag = EntityFieldID.tag_entity_id,
-                entityClass = Container::class
+                name = "parent container"
             )
         )
     }
@@ -22,6 +21,7 @@ class ContainerFieldsMapper : IFieldsMapper<Container> {
             is EntityFieldID.EntityID -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
                 entity = entity.parentContainer,
+                entityClass = Container::class,
                 description = "parent container"
             )
             is EntityFieldID.StringID -> when (fieldID.tag) {

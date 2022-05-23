@@ -6,11 +6,11 @@ class ItemIncomeFieldsMapper : IFieldsMapper<ItemIncome> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = tag_item, name = "item", entityClass = Item::class),
-            EntityFieldID.EntityID(tag = tag_container, name = "container", entityClass = Container::class),
+            EntityFieldID.EntityID(tag = tag_item, name = "item"),
+            EntityFieldID.EntityID(tag = tag_container, name = "container"),
             EntityFieldID.DateTimeID(name = "date"),
-            EntityFieldID.EntityID(tag = tag_supplier, name = "supplier", entityClass = Supplier::class),
-            EntityFieldID.EntityID(tag = tag_invoice, name = "invoice", entityClass = Invoice::class)
+            EntityFieldID.EntityID(tag = tag_supplier, name = "supplier"),
+            EntityFieldID.EntityID(tag = tag_invoice, name = "invoice")
         )
     }
 
@@ -19,34 +19,38 @@ class ItemIncomeFieldsMapper : IFieldsMapper<ItemIncome> {
             is EntityFieldID.EntityID -> {
                 when (fieldID.tag) {
                     tag_container -> EntityField.EntityLink.EntityLinkSimple(
-                            fieldID = fieldID,
-                            description = "container where item was put",
-                            entity = entity.container
-                        )
+                        fieldID = fieldID,
+                        description = "container where item was put",
+                        entity = entity.container,
+                        entityClass = Container::class
+                    )
                     tag_supplier -> EntityField.EntityLink.EntityLinkSimple(
-                            fieldID = fieldID,
-                            description = "where items came from",
-                            entity = entity.supplier
-                        )
+                        fieldID = fieldID,
+                        description = "where items came from",
+                        entity = entity.supplier,
+                        entityClass = Supplier::class
+                    )
                     tag_item -> EntityField.EntityLink.EntityLinkCountable(
-                            fieldID = fieldID,
-                            entity = entity.item?.entity,
-                            count = entity.item?.count,
-                            description = "item that came"
-                        )
+                        fieldID = fieldID,
+                        entity = entity.item?.entity,
+                        count = entity.item?.count,
+                        description = "item that came",
+                        entityClass = Item::class
+                    )
                     tag_invoice -> EntityField.EntityLink.EntityLinkSimple(
-                            fieldID = fieldID,
-                            description = "invoice",
-                            entity = entity.invoice
-                        )
+                        fieldID = fieldID,
+                        description = "invoice",
+                        entity = entity.invoice,
+                        entityClass = Invoice::class
+                    )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
                 }
             }
             is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
-                    fieldID = fieldID,
-                    value = entity.dateTime,
-                    description = "when items came"
-                )
+                fieldID = fieldID,
+                value = entity.dateTime,
+                description = "when items came"
+            )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }

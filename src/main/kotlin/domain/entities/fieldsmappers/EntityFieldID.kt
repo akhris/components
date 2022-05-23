@@ -1,8 +1,5 @@
 package domain.entities.fieldsmappers
 
-import com.akhris.domain.core.entities.IEntity
-import kotlin.reflect.KClass
-
 /**
  * FieldID - descriptive identification of the entity's field without actual data value.
  */
@@ -15,22 +12,20 @@ sealed class EntityFieldID {
     /**
      * Field represents another Entity of class [entityClass]
      */
-    data class EntityID constructor(
+    data class EntityID(
         override val tag: String? = null,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        val entityClass: KClass<out IEntity<*>>
+        override val isReadOnly: Boolean = false
     ) :
         EntityFieldID()
 
     /**
-     * Field represents list of Entities of class [entityClass]
+     * Field represents list of Entities
      */
     data class EntitiesListID constructor(
         override val tag: String? = null,
         override val name: String,
-        override val isReadOnly: Boolean = false,
-        val entityClass: KClass<out IEntity<*>>
+        override val isReadOnly: Boolean = false
     ) : EntityFieldID()
 
 

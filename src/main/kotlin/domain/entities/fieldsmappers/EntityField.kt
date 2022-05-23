@@ -16,7 +16,7 @@ sealed class EntityField {
      * Represents String value of entity field
      */
     data class StringField(
-        override val fieldID: EntityFieldID,
+        override val fieldID: EntityFieldID.StringID,
         override val description: String,
         val value: String,
         val isPlaceholder: Boolean = false
@@ -29,7 +29,7 @@ sealed class EntityField {
      * Represents Float value of entity field
      */
     data class FloatField(
-        override val fieldID: EntityFieldID,
+        override val fieldID: EntityFieldID.FloatID,
         override val description: String,
         val value: Float
     ) :
@@ -41,7 +41,7 @@ sealed class EntityField {
      * Represents Boolean value of entity field
      */
     data class BooleanField(
-        override val fieldID: EntityFieldID,
+        override val fieldID: EntityFieldID.BooleanID,
         override val description: String,
         val value: Boolean
     ) : EntityField() {
@@ -77,11 +77,13 @@ sealed class EntityField {
     sealed class EntityLink : EntityField() {
         abstract val entity: IEntity<*>?
         abstract override val fieldID: EntityFieldID.EntityID
+        abstract val entityClass: KClass<out IEntity<*>>    //is needed to decide what entity to add when null
 
         data class EntityLinkSimple(
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
-            override val entity: IEntity<*>?
+            override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>
         ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
@@ -90,6 +92,7 @@ sealed class EntityField {
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
             val count: Long? = null
         ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
@@ -99,6 +102,7 @@ sealed class EntityField {
             override val fieldID: EntityFieldID.EntityID,
             override val description: String = "",
             override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null

@@ -9,8 +9,8 @@ class ItemOutcomeFieldsMapper : IFieldsMapper<ItemOutcome> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.EntityID(tag = Companion.tag_item, name = "item", entityClass = Item::class),
-            EntityFieldID.EntityID(tag = Companion.tag_container, name = "container", entityClass = Container::class),
+            EntityFieldID.EntityID(tag = Companion.tag_item, name = "item"),
+            EntityFieldID.EntityID(tag = Companion.tag_container, name = "container"),
 //            EntityFieldID.LongID(tag = tag_quantity, name = "quantity"),
             EntityFieldID.DateTimeID(tag = Companion.tag_date_time, name = "date")
         )
@@ -23,12 +23,14 @@ class ItemOutcomeFieldsMapper : IFieldsMapper<ItemOutcome> {
                     tag_item -> EntityField.EntityLink.EntityLinkCountable(
                         fieldID = fieldID,
                         entity = entity.item?.entity,
+                        entityClass = Item::class,
                         count = entity.item?.count,
                         description = "item that came"
                     )
                     tag_container -> EntityField.EntityLink.EntityLinkSimple(
                         fieldID = fieldID,
                         entity = entity.container,
+                        entityClass = Container::class,
                         description = "container where item was put"
                     )
                     else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")

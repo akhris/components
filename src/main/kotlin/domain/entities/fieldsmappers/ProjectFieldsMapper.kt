@@ -1,13 +1,11 @@
 package domain.entities.fieldsmappers
 
-import com.akhris.domain.core.utils.log
 import domain.entities.EntityCountable
 import domain.entities.Item
 import domain.entities.Project
+import utils.replace
 
 class ProjectFieldsMapper : IFieldsMapper<Project> {
-
-    private val tag_items = "tag_items"
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
@@ -17,14 +15,13 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
             EntityFieldID.StringID(extFile, name = "file"),
             EntityFieldID.EntitiesListID(
                 tag = tag_items,
-                name = "items",
-                entityClass = Item::class
+                name = "items"
             )
         )
     }
 
 
-    override fun getFieldByID(entity: Project, fieldID: EntityFieldID): EntityField? {
+    override fun getFieldByID(entity: Project, fieldID: EntityFieldID): EntityField {
         return when (fieldID) {
             is EntityFieldID.EntityID -> {
                 // tag = item.id
@@ -32,6 +29,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                 EntityField.EntityLink.EntityLinkCountable(
                     fieldID = fieldID,
                     entity = item?.entity,
+                    entityClass = Item::class,
                     count = item?.count,
                     description = item?.entity?.name ?: ""
                 )
@@ -42,14 +40,14 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                 entities = entity.items.map { i ->
                     val entityID = EntityFieldID.EntityID(
                         tag = i.entity.id,
-                        name = i.entity.name,
-                        entityClass = Item::class
+                        name = i.entity.name
                     )
 
                     EntityField.EntityLink.EntityLinkCountable(
                         fieldID = entityID,
                         description = i.entity.name,        //?
                         entity = i.entity,
+                        entityClass = Item::class,
                         count = i.count
                     )
                 },
@@ -84,48 +82,6 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
         }
     }
 
-    private fun getFieldParamsByFieldID(entity: Project, fieldID: EntityFieldID): DescriptiveFieldValue {
-        log("get field params for id: $fieldID")
-        return when (fieldID) {
-            is EntityFieldID.EntityID -> {
-                val tag = fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")
-                val index = tag.substring(startIndex = tag_items.length).toIntOrNull() ?: -1
-                val item = entity.items.getOrNull(index)
-                log("item: $item")
-                DescriptiveFieldValue.CountableField(
-                    entity = item?.entity,
-                    description = item?.entity?.name ?: "",
-                    count = item?.count
-                )
-            }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
-                entity = entity.items,
-                description = "items"
-            )
-            is EntityFieldID.StringID ->
-                when (fieldID.tag) {
-                    EntityFieldID.tag_name -> DescriptiveFieldValue.CommonField(
-                        entity = entity.name,
-                        description = "project's name"
-                    )
-                    EntityFieldID.tag_description -> DescriptiveFieldValue.CommonField(
-                        entity = entity.description,
-                        description = "project's description"
-                    )
-                    extFile -> DescriptiveFieldValue.CommonField(
-                        entity = entity.extFile,
-                        description = "external file attached"
-                    )
-                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
-                }
-            is EntityFieldID.DateTimeID -> DescriptiveFieldValue.CommonField(
-                entity = entity.dateTime,
-                description = "project's created date"
-            )
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
-        }
-    }
-
     override fun mapIntoEntity(entity: Project, field: EntityField): Project {
         return when (val fieldID = field.fieldID) {
             is EntityFieldID.StringID ->
@@ -151,24 +107,33 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
 
     private fun setItem(project: Project, field: EntityField): Project? {
         val fieldID = field.fieldID
-        val itemIndex = fieldID.tag?.substring(startIndex = tag_items.length)?.toIntOrNull() ?: return null
-        if (project.items.getOrNull(itemIndex) == null) {
-            return null
+        val itemID = fieldID.tag ?: return null
+        val newEntity = (field as? EntityField.EntityLink.EntityLinkCountable)?.let {
+            EntityCountable(it.entity as Item, it.count ?: 0L)
+        } ?: return null
+        val newItems = project.items.replace(
+            newEntity
+        ) {
+            it.entity.id == itemID
         }
-        return project.copy(
-            items = project.items.mapIndexedNotNull { index, itemCountable ->
-                if (index == itemIndex) {
-                    val countableField = field as? EntityField.EntityLink.EntityLinkCountable
-                    countableField?.let {
-                        EntityCountable(it.entity as Item, it.count ?: 0L)
-                    }
-                } else itemCountable
-            }
-        )
+
+        return project.copy(items = newItems)
+
+//        return project.copy(
+//            items = project.items.mapIndexedNotNull { index, itemCountable ->
+//                if (index == itemIndex) {
+//                    val countableField = field as? EntityField.EntityLink.EntityLinkCountable
+//                    countableField?.let {
+//                        EntityCountable(it.entity as Item, it.count ?: 0L)
+//                    }
+//                } else itemCountable
+//            }
+//        )
     }
 
     companion object {
         const val extFile = "external_file"
+        private const val tag_items = "tag_items"
     }
 
 }
