@@ -11,7 +11,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
         return listOf(
             EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
             EntityFieldID.StringID(EntityFieldID.tag_description, "description"),
-            EntityFieldID.DateTimeID(name = "date"),
+            EntityFieldID.DateTimeID(tag = EntityFieldID.tag_date_time, name = "date"),
             EntityFieldID.StringID(extFile, name = "file"),
             EntityFieldID.EntitiesListID(
                 tag = tag_items,
@@ -22,19 +22,9 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
 
 
     override fun getFieldByID(entity: Project, fieldID: EntityFieldID): EntityField {
-        return when (fieldID) {
-            is EntityFieldID.EntityID -> {
-                // tag = item.id
-                val item = entity.items.find { it.entity.id == fieldID.tag }
-                EntityField.EntityLink.EntityLinkCountable(
-                    fieldID = fieldID,
-                    entity = item?.entity,
-                    entityClass = Item::class,
-                    count = item?.count,
-                    description = item?.entity?.name ?: ""
-                )
-            }
-            is EntityFieldID.EntitiesListID -> EntityField.EntityLinksList(
+        return when (fieldID.tag) {
+
+            tag_items -> EntityField.EntityLinksList(
                 fieldID = fieldID,
                 description = "items",
                 entities = entity.items.map { i ->
@@ -53,32 +43,42 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                 },
                 entityClass = Item::class
             )
-            is EntityFieldID.StringID ->
-                // make EntityField.File
-                when (fieldID.tag) {
-                    EntityFieldID.tag_name -> EntityField.StringField(
-                        fieldID = fieldID,
-                        description = "project's name",
-                        value = entity.name
-                    )
-                    EntityFieldID.tag_description -> EntityField.StringField(
-                        fieldID = fieldID,
-                        description = "project's description",
-                        value = entity.description
-                    )
-                    extFile -> EntityField.StringField(
-                        fieldID = fieldID,
-                        description = "external file attached",
-                        value = entity.extFile ?: ""
-                    )
-                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
-                }
-            is EntityFieldID.DateTimeID -> EntityField.DateTimeField(
+
+            EntityFieldID.tag_name -> EntityField.StringField(
+                fieldID = fieldID,
+                description = "project's name",
+                value = entity.name
+            )
+            EntityFieldID.tag_description -> EntityField.StringField(
+                fieldID = fieldID,
+                description = "project's description",
+                value = entity.description
+            )
+            extFile -> EntityField.StringField(
+                fieldID = fieldID,
+                description = "external file attached",
+                value = entity.extFile ?: ""
+            )
+//                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+
+            EntityFieldID.tag_date_time -> EntityField.DateTimeField(
                 fieldID = fieldID,
                 description = "project's created date",
                 value = entity.dateTime
             )
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            else -> {
+                // tag = item.id
+                val item = entity.items.find { it.entity.id == fieldID.tag }
+                    ?: throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+                EntityField.EntityLink.EntityLinkCountable(
+                    fieldID = fieldID,
+                    entity = item.entity,
+                    entityClass = Item::class,
+                    count = item.count,
+                    description = item.entity.name ?: ""
+                )
+            }
+//            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }
     }
 
