@@ -52,7 +52,7 @@ sealed class EntityField {
      * Represents Long value of entity field
      */
     data class LongField(
-        override val fieldID: EntityFieldID.LongID,
+        override val fieldID: EntityFieldID,
         override val description: String,
         val value: Long
     ) : EntityField() {
@@ -63,7 +63,7 @@ sealed class EntityField {
      * Represents Date&Time value of entity field
      */
     data class DateTimeField(
-        override val fieldID: EntityFieldID.DateTimeID,
+        override val fieldID: EntityFieldID,
         override val description: String,
         val value: LocalDateTime?
     ) : EntityField() {
@@ -73,43 +73,36 @@ sealed class EntityField {
     /**
      * Represents EntityLink value of entity field
      */
-//    data class EntityLink constructor(
-//        override val fieldID: EntityFieldID,
-//        override val description: String = "",
-//        val entity: IEntity<*>?,
-//        val entityClass: KClass<out IEntity<*>>,
-//        val count: Long? = null,        //if it's countable
-//        val value: String? = null,      //if it's valuable
-//        val factor: Float? = null       //if it's valuable
-//    ) : EntityField() {
-//        override fun toString(): String = entity?.toString() ?: description
-//    }
 
     sealed class EntityLink : EntityField() {
         abstract val entity: IEntity<*>?
-        abstract override val fieldID: EntityFieldID.EntityID
+        abstract override val fieldID: EntityFieldID
+        abstract val entityClass: KClass<out IEntity<*>>    //is needed to decide what entity to add when null
 
         data class EntityLinkSimple(
-            override val fieldID: EntityFieldID.EntityID,
+            override val fieldID: EntityFieldID,
             override val description: String = "",
-            override val entity: IEntity<*>?
+            override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>
         ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
 
         data class EntityLinkCountable(
-            override val fieldID: EntityFieldID.EntityID,
+            override val fieldID: EntityFieldID,
             override val description: String = "",
             override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
             val count: Long? = null
         ) : EntityLink() {
             override fun toString(): String = entity?.toString() ?: description
         }
 
         data class EntityLinkValuable constructor(
-            override val fieldID: EntityFieldID.EntityID,
+            override val fieldID: EntityFieldID,
             override val description: String = "",
             override val entity: IEntity<*>?,
+            override val entityClass: KClass<out IEntity<*>>,
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null

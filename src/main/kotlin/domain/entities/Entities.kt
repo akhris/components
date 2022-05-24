@@ -2,6 +2,7 @@ package domain.entities
 
 import com.akhris.domain.core.entities.IEntity
 import com.akhris.domain.core.utils.IDUtils
+import com.akhris.domain.core.utils.log
 import java.time.LocalDateTime
 
 data class Item(
@@ -22,7 +23,7 @@ data class ObjectType constructor(
     val name: String = "",
     val parameters: List<Parameter> = listOf(),
     override val parentEntity: ObjectType? = null
-) : IEntity<String>, IParentableEntity<ObjectType> {
+) : IParentableEntity<String, ObjectType> {
     override fun toString(): String = name
 }
 
@@ -130,6 +131,24 @@ data class EntityValuable<T : IEntity<*>> constructor(
 )
 
 
-interface IParentableEntity<T> {
+interface IParentableEntity<ID, T : IParentableEntity<ID, T>> : IEntity<ID> {
     val parentEntity: T?
+}
+
+fun <ID, T : IParentableEntity<ID, T>> T.iterate(
+    ids: List<ID> = listOf(),
+    doOnIteration: (T) -> kotlin.Unit
+) {
+    //1. do on this:
+    log("doOnIteration for $this. id: ${this.id} parent: $parentEntity")
+    doOnIteration(this)
+
+    //2. do for parent
+    parentEntity?.let { pe ->
+        if (!ids.contains(pe.id)) {
+            pe.iterate(ids.plus(this.id), doOnIteration)
+        } else {
+            log("Warning: inheritance loop! Check $pe")
+        }
+    }
 }

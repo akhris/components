@@ -251,7 +251,6 @@ fun <T : IEntity<*>> RenderCardEntity(
     val factory: FieldsMapperFactory by di.instance()
     val mapper = remember(factory) { factory.getFieldsMapper(initialEntity::class) }
     var showDeletePrompt by remember { mutableStateOf<T?>(null) }
-    var objectTypeField by remember { mutableStateOf<EntityField.EntityLink?>(null) }
     var entity by remember(initialEntity) { mutableStateOf(initialEntity) }
     var isExpanded by remember(expanded) { mutableStateOf(expanded) }
 
@@ -279,6 +278,8 @@ fun <T : IEntity<*>> RenderCardEntity(
                         onFieldChange = { changedField ->
                             log("onFieldChange: $changedField")
                             entity = mapper.mapIntoEntity(entity, changedField)
+                            log("currentEntity: $entity")
+                            log("initialEntity: $initialEntity")
 //                            if (initialEntity::class == Item::class) {
 //                                val entityField = changedField as? EntityField.EntityLink
 //                                val objectType = entityField?.entity as? ObjectType
@@ -483,9 +484,9 @@ private fun RenderField(
                 field = field,
                 onEntityLinkSelect = {
                     //on entity select clicked
-                    println("going to select entity of type:")
-                    println(field.fieldID.entityClass)
-                    showSelectEntityDialog = field.fieldID.entityClass
+//                    showSelectEntityDialog = field.entity?.let { it::class }
+
+                    showSelectEntityDialog = field.entityClass
                 }, onEntityLinkChanged = onFieldChange,
                 onEntityLinkClear = {
                     onFieldChange(
@@ -557,10 +558,9 @@ private fun RenderField(
                 fieldToChange?.let { ell ->
                     val newEntitiesList = changedEntitiesList
                         .mapIndexed { index, iEntity ->
-                            val entityFieldID = EntityFieldID.EntityID(
+                            val entityFieldID = EntityFieldID(
                                 tag = "${ell.fieldID.tag}$index",
-                                name = "${iEntity::class.simpleName} ${index + 1}",
-                                entityClass = entityClass
+                                name = "${iEntity::class.simpleName} ${index + 1}"
                             )
                             val fromOldList = ell.entities.find { it.entity?.id == iEntity.id }
                             fromOldList?.let {
@@ -571,8 +571,8 @@ private fun RenderField(
                                 }
                             } ?: EntityField.EntityLink.EntityLinkSimple(
                                 fieldID = entityFieldID,
-                                entity = iEntity
-//                                entityClass = entityClass
+                                entity = iEntity,
+                                entityClass = entityClass
                             )
                         }
 

@@ -8,16 +8,13 @@ import persistence.dto.exposed.Tables
 
 class ContainersExposedColumnMapper : IDBColumnMapper<Container> {
     override fun getColumn(fieldID: EntityFieldID): IDBColumnMapper.Result? {
-        val column = when (fieldID) {
-            is EntityFieldID.EntityID -> Tables.Containers.parent
-            is EntityFieldID.StringID -> when (fieldID.tag) {
-                EntityFieldID.tag_name -> Tables.Containers.name
-                EntityFieldID.tag_description -> Tables.Containers.description
-                else -> null
-            }
+        val column = when (fieldID.tag) {
+            EntityFieldID.tag_entity_id -> Tables.Containers.parent
+            EntityFieldID.tag_name -> Tables.Containers.name
+            EntityFieldID.tag_description -> Tables.Containers.description
             else -> null
         } as? Column<Any?>
-        return column?.let{
+        return column?.let {
             IDBColumnMapper.Result(column = it)
         }
     }

@@ -74,10 +74,10 @@ class NavHostComponent constructor(
                     Screen.Income.route -> listOf(ItemIncome::class)
                     Screen.Outcome.route -> listOf(ItemOutcome::class)
                     Screen.Types.route -> listOf(
-                        ObjectType::class,
-                        Parameter::class,
-                        domain.entities.Unit::class,
                         Item::class,
+                        ObjectType::class,
+                        domain.entities.Unit::class,
+                        Parameter::class,
                         Container::class,
                         Supplier::class,
                         Invoice::class,

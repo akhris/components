@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package ui.entity_renderers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -244,26 +247,35 @@ private fun RenderValuableEntityLink(
         modifier = Modifier.fillMaxWidth().wrapContentHeight().clickable { onEntityLinkSelect() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextField(
+        TooltipArea(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp),
-            value = value ?: "",
-            onValueChange = { value = it },
-            label = {
-                val labelBuilder = StringBuilder(field.getName())
-                field.unit?.let {
-                    labelBuilder.append(", $it")
-                }
-                Text(labelBuilder.toString())
+            tooltip = {
+            Surface(shape = MaterialTheme.shapes.medium) {
+                Text(modifier = Modifier.padding(4.dp),text = field.description)
             }
-        )
+        }, content = {
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = value ?: "",
+                onValueChange = { value = it },
+                label = {
+                    val labelBuilder = StringBuilder(field.getName())
+                    field.unit?.let {
+                        labelBuilder.append(", $it")
+                    }
+                    Text(labelBuilder.toString())
+                }
+            )
+        })
         if (field.factor != null) {
             FactorsDropDown(modifier = Modifier.width(56.dp).height(40.dp), onFactorSelected = { f ->
                 log("onFactorSelected: $f")
                 onFieldChanged?.invoke(field.copy(factor = f.factor))
             }, factor = Factor.parse(field.factor))
         }
+
     }
 
 

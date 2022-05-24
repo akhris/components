@@ -56,12 +56,12 @@ fun EntitySupplier.toSupplier(): Supplier {
     )
 }
 
-fun EntityObjectType.toObjectType(level: Int = 1): ObjectType {
+fun EntityObjectType.toObjectType(maxLevel: Int = 10): ObjectType {
     return ObjectType(
         id = id.value.toString(),
         name = name,
         parameters = parameters.map { it.toParameter() },
-        parentEntity = if (level <= 0) null else parent?.toObjectType(level - 1)
+        parentEntity = if (maxLevel <= 0) null else parent?.toObjectType(maxLevel - 1)
     )
 }
 

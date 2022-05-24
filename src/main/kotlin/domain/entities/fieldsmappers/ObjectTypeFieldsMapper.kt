@@ -2,127 +2,96 @@ package domain.entities.fieldsmappers
 
 import domain.entities.ObjectType
 import domain.entities.Parameter
+import utils.replace
 
-class ObjectTypeFieldsMapper : BaseFieldsMapper<ObjectType>() {
+class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
-            EntityFieldID.EntitiesListID(
-                tag = tag_parameters,
-                name = "parameters",
-                entityClass = Parameter::class
-            ),
-            EntityFieldID.EntityID(tag = "parent_object_type", name = "parent type", entityClass = ObjectType::class)
+            EntityFieldID(tag = EntityFieldID.tag_name, name = "name"),
+            EntityFieldID(tag = tag_parameters, name = "parameters"),
+            EntityFieldID(tag = tag_parent_type, name = "parent type")
         )
     }
 
-
-    override fun getFieldParamsByFieldID(entity: ObjectType, fieldID: EntityFieldID): DescriptiveFieldValue {
-        return when (fieldID) {
-            is EntityFieldID.EntityID -> when (val tag =
-                fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
-                "parent_object_type" -> {
-                    DescriptiveFieldValue.CommonField(
-                        entity = entity.parentEntity,
-                        description = "parent type"
-                    )
-                }
-                else -> {
-                    val index = tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: -1
-                    val parameter = entity.parameters.getOrNull(index)
-                    DescriptiveFieldValue.CommonField(parameter, description = parameter?.name ?: "")
-                }
-            }
-            is EntityFieldID.EntitiesListID -> DescriptiveFieldValue.CommonField(
-                entity = entity.parameters,
-                description = "parameters"
+    override fun getFieldByID(entity: ObjectType, fieldID: EntityFieldID): EntityField {
+        return when (val tag = fieldID.tag) {
+            tag_parent_type -> EntityField.EntityLink.EntityLinkSimple(
+                fieldID = fieldID,
+                entity = entity.parentEntity,
+                entityClass = ObjectType::class,
+                description = "parent type"
             )
-            is EntityFieldID.StringID -> DescriptiveFieldValue.CommonField(
-                entity = entity.name,
+            tag_parameters -> EntityField.EntityLinksList(
+                fieldID = fieldID,
+                description = "parameters",
+                entities = entity
+                    .parameters
+                    .map { param ->
+                        EntityField.EntityLink.EntityLinkSimple(
+                            fieldID = EntityFieldID(
+                                tag = param.id,
+                                name = param.name
+                            ),
+                            description = param.description,
+                            entity = param,
+                            entityClass = Parameter::class
+                        )
+                    },
+                entityClass = Parameter::class
+            )
+            EntityFieldID.tag_name -> EntityField.StringField(
+                fieldID = fieldID,
+                value = entity.name,
                 description = "type's name"
             )
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            else -> {
+                //tag == parameter id
+                val parameter = entity.parameters.find { it.id == tag }
+                EntityField.EntityLink.EntityLinkSimple(
+                    fieldID = fieldID,
+                    entity = parameter,
+                    entityClass = Parameter::class,
+                    description = parameter?.name ?: ""
+                )
+            }
         }
     }
+
 
     override fun mapIntoEntity(entity: ObjectType, field: EntityField): ObjectType {
-        return when (val fieldID = field.fieldID) {
-            is EntityFieldID.StringID -> entity.copy(name = (field as EntityField.StringField).value)
-            is EntityFieldID.EntityID -> when (fieldID.tag) {
-                "parent_object_type" -> {
-                    entity.copy(parentEntity = (field as EntityField.EntityLink).entity as? ObjectType)
-                }
-                else -> {
-                    setParameter(entity, field)
-                        ?: throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+        return when (field) {
+            is EntityField.StringField -> {
+                entity.copy(name = field.value)
+            }
+            is EntityField.EntityLink.EntityLinkSimple -> {
+                when (field.fieldID.tag) {
+                    tag_parent_type -> entity.copy(parentEntity = field.entity as? ObjectType)
+                    else -> setParameter(entity, field)
+                        ?: throw IllegalArgumentException("unknown tag ${field.fieldID.tag} for entity: $entity")
                 }
             }
-
-            is EntityFieldID.EntitiesListID -> entity.copy(parameters = (field as EntityField.EntityLinksList).entities.mapNotNull { it.entity as? Parameter })
-            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
+            is EntityField.EntityLinksList -> entity.copy(parameters = field.entities.map { it.entity }
+                .filterIsInstance(Parameter::class.java))
+            else -> throw IllegalArgumentException("field with id: ${field.fieldID} was not found in entity: $entity")
         }
     }
 
-    private fun setParameter(objectType: ObjectType, field: EntityField): ObjectType? {
+    private fun setParameter(objectType: ObjectType, field: EntityField.EntityLink): ObjectType? {
         val fieldID = field.fieldID
-        val tag = fieldID.tag?:return null
-        val paramIndex =
-            tag.substring(startIndex = tag_parameters.length).toIntOrNull() ?: return null
-        if (objectType.parameters.getOrNull(paramIndex) == null) {
-            return null
+        val paramID = fieldID.tag ?: return null
+        val newParameter = (field.entity as? Parameter) ?: return null
+        val newParameters = objectType.parameters.replace(newValue = newParameter) {
+            it.id == paramID
         }
         return objectType.copy(
-            parameters = objectType.parameters.mapIndexed { index, param ->
-                if (index == paramIndex) {
-                    (field as EntityField.EntityLink).entity as Parameter
-                } else param
-            }
+            parameters = newParameters
         )
     }
 
     companion object {
         const val tag_parameters = "tag_parameters"
+        const val tag_parent_type = "parent_object_type"
     }
 
 }
-//    override fun mapFields(entity: Any): List<EntityField> {
-//        return when (entity) {
-//            is ObjectType -> mapObjectTypeFields(entity)
-//            else -> throw IllegalArgumentException("$this cannot map $entity fields, use another mapper")
-//        }
-//    }
-
-//    private fun mapObjectTypeFields(type: ObjectType): List<EntityField> {
-//        return listOf(
-//            EntityField.StringField(
-//                tag = "objecttype_field_name",
-//                name = "name",
-//                description = "type name",
-//                value = type.name
-//            ),
-//            EntityField.EntityLinksList(
-//                tag = "objecttype_field_parameters",
-//                name = "type parameters",
-//                description = "default parameters set that is mandatory for this type",
-//                entities = type.parameters.mapIndexed { i, p ->
-//                    EntityField.EntityLink(
-//                        tag = "objecttype_field_parameter_link$i",
-//                        name = p.name,
-//                        description = p.description,
-//                        entity = p
-//                    )
-//                }
-//
-//
-//            ),
-//            EntityField.CaptionField(
-//                tag = "objecttype_field_id",
-//                name = "UUID",
-//                description = "unique id of the object type",
-//                caption = type.id
-//            )
-//        )
-//    }
-//
-
