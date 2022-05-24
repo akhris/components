@@ -9,16 +9,11 @@ import persistence.dto.exposed.Tables
 
 class SupplierExposedColumnMapper : IDBColumnMapper<Supplier> {
     override fun getColumn(fieldID: EntityFieldID): IDBColumnMapper.Result? {
-        val column = when (fieldID) {
-            is EntityFieldID.StringID -> {
-                when (fieldID.tag) {
-                    EntityFieldID.tag_name -> Tables.Suppliers.name
-                    EntityFieldID.tag_description -> Tables.Suppliers.description
-                    SupplierFieldsMapper.tag_url -> Tables.Suppliers.url
-                    else -> null
-                }
-            }
-            is EntityFieldID.BooleanID -> Tables.Suppliers.isFavorite
+        val column = when (fieldID.tag) {
+            EntityFieldID.tag_name -> Tables.Suppliers.name
+            EntityFieldID.tag_description -> Tables.Suppliers.description
+            SupplierFieldsMapper.tag_url -> Tables.Suppliers.url
+            SupplierFieldsMapper.tag_favorite -> Tables.Suppliers.isFavorite
             else -> null
         } as? Column<Any?>
 

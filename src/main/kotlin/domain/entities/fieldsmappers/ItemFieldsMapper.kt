@@ -7,45 +7,27 @@ import utils.replaceOrAdd
 class ItemFieldsMapper : IFieldsMapper<Item> {
 
     override fun getEntityIDs(): List<EntityFieldID> = listOf(
-        EntityFieldID.StringID(tag = "tag_name", name = "name"),
-        EntityFieldID.EntityID(tag = tag_type, name = "object type"),
-        EntityFieldID.EntitiesListID(
-            tag = tag_values,
-            name = "values"
-        )
+        EntityFieldID(tag = EntityFieldID.tag_name, name = "name"),
+        EntityFieldID(tag = tag_type, name = "object type"),
+        EntityFieldID(tag = tag_values, name = "values")
     )
 
     override fun getFieldByID(entity: Item, fieldID: EntityFieldID): EntityField {
-        return when (fieldID) {
-            is EntityFieldID.EntityID -> when (val tag = fieldID.tag) {
-                tag_type -> {
-                    EntityField.EntityLink.EntityLinkSimple(
-                        fieldID = fieldID,
-                        description = "type of the object",
-                        entity = entity.type,
-                        entityClass = ObjectType::class
-                    )
-                }
-                null -> throw IllegalArgumentException("tag cannot be null for fieldID: $fieldID")
-                else -> {
-                    //tag == parameter id
-                    val value = entity.getAllValues().find { it.first.entity.id == tag }?.first
-                    EntityField.EntityLink.EntityLinkValuable(
-                        fieldID = fieldID,
-                        description = value?.entity?.description ?: "",
-                        entity = value?.entity,
-                        entityClass = Parameter::class,
-                        value = value?.value,
-                        factor = value?.factor,
-                        unit = value?.entity?.unit?.unit
-                    )
-                }
+        return when (fieldID.tag) {
+            tag_type -> {
+                EntityField.EntityLink.EntityLinkSimple(
+                    fieldID = fieldID,
+                    description = "type of the object",
+                    entity = entity.type,
+                    entityClass = ObjectType::class
+                )
             }
-            is EntityFieldID.EntitiesListID -> {
+
+            tag_values -> {
                 EntityField.EntityLinksList(
                     fieldID = fieldID,
                     entities = entity.getAllValues().map { (ev, ot) ->
-                        val entityID = EntityFieldID.EntityID(
+                        val entityID = EntityFieldID(
                             tag = ev.entity.id,
                             name = ev.entity.name
                         )
@@ -75,7 +57,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                     entityClass = Parameter::class
                 )
             }
-            is EntityFieldID.StringID -> {
+            EntityFieldID.tag_name -> {
                 val name = entity.name.ifEmpty {
                     val builder = StringBuilder()
                     entity.type?.let {
@@ -105,7 +87,20 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                     isPlaceholder = entity.name.isEmpty()
                 )
             }
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            else -> {
+                //tag == parameter id
+                val value = entity.getAllValues().find { it.first.entity.id == fieldID.tag }?.first
+                EntityField.EntityLink.EntityLinkValuable(
+                    fieldID = fieldID,
+                    description = value?.entity?.description ?: "",
+                    entity = value?.entity,
+                    entityClass = Parameter::class,
+                    value = value?.value,
+                    factor = value?.factor,
+                    unit = value?.entity?.unit?.unit
+                )
+            }
+
         }
     }
 
@@ -188,7 +183,6 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
     companion object {
         const val tag_values = "tag_values"
         const val tag_type = "tag_type"
-
     }
 
 

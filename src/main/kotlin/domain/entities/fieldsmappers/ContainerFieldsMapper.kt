@@ -6,12 +6,9 @@ class ContainerFieldsMapper : IFieldsMapper<Container> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(name = "name", tag = EntityFieldID.tag_name),
-            EntityFieldID.StringID(name = "description", tag = EntityFieldID.tag_description),
-            EntityFieldID.EntityID(
-                tag = EntityFieldID.tag_entity_id,
-                name = "parent container"
-            )
+            EntityFieldID(tag = EntityFieldID.tag_name, name = "name"),
+            EntityFieldID(tag = EntityFieldID.tag_description, name = "description"),
+            EntityFieldID(tag = EntityFieldID.tag_entity_id, name = "parent container")
         )
     }
 
@@ -39,17 +36,17 @@ class ContainerFieldsMapper : IFieldsMapper<Container> {
 
 
     override fun mapIntoEntity(entity: Container, field: EntityField): Container {
-        return when (val fieldID = field.fieldID) {
-            is EntityFieldID.StringID -> {
-                when (fieldID.tag) {
-                    "tag_name" -> entity.copy(name = (field as EntityField.StringField).value)
-                    "tag_description" -> entity.copy(description = (field as EntityField.StringField).value)
-                    else -> throw IllegalArgumentException("unknown tag ${fieldID.tag} for entity: $entity")
+        return when (field) {
+            is EntityField.StringField -> {
+                when (field.fieldID.tag) {
+                    "tag_name" -> entity.copy(name = field.value)
+                    "tag_description" -> entity.copy(description = field.value)
+                    else -> throw IllegalArgumentException("unknown tag ${field.fieldID.tag} for entity: $entity")
                 }
 
             }
-            is EntityFieldID.EntityID -> entity.copy(parentContainer = (field as EntityField.EntityLink).entity as? Container)
-            else -> throw IllegalArgumentException("field with column: $fieldID was not found in entity: $entity")
+            is EntityField.EntityLink-> entity.copy(parentContainer = field.entity as? Container)
+            else -> throw IllegalArgumentException("field with column: ${field.fieldID} was not found in entity: $entity")
         }
     }
 

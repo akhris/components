@@ -8,44 +8,28 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
-            EntityFieldID.EntitiesListID(
-                tag = tag_parameters,
-                name = "parameters"
-            ),
-            EntityFieldID.EntityID(tag = tag_parent_type, name = "parent type")
+            EntityFieldID(tag = EntityFieldID.tag_name, name = "name"),
+            EntityFieldID(tag = tag_parameters, name = "parameters"),
+            EntityFieldID(tag = tag_parent_type, name = "parent type")
         )
     }
 
     override fun getFieldByID(entity: ObjectType, fieldID: EntityFieldID): EntityField {
-        return when (fieldID) {
-            is EntityFieldID.EntityID -> when (val tag =
-                fieldID.tag ?: throw IllegalArgumentException("tag must be set for $fieldID")) {
-                tag_parent_type -> EntityField.EntityLink.EntityLinkSimple(
-                    fieldID = fieldID,
-                    entity = entity.parentEntity,
-                    entityClass = ObjectType::class,
-                    description = "parent type"
-                )
-                else -> {
-                    //tag == parameter id
-                    val parameter = entity.parameters.find { it.id == tag }
-                    EntityField.EntityLink.EntityLinkSimple(
-                        fieldID = fieldID,
-                        entity = parameter,
-                        entityClass = Parameter::class,
-                        description = parameter?.name ?: ""
-                    )
-                }
-            }
-            is EntityFieldID.EntitiesListID -> EntityField.EntityLinksList(
+        return when (val tag = fieldID.tag) {
+            tag_parent_type -> EntityField.EntityLink.EntityLinkSimple(
+                fieldID = fieldID,
+                entity = entity.parentEntity,
+                entityClass = ObjectType::class,
+                description = "parent type"
+            )
+            tag_parameters -> EntityField.EntityLinksList(
                 fieldID = fieldID,
                 description = "parameters",
                 entities = entity
                     .parameters
                     .map { param ->
                         EntityField.EntityLink.EntityLinkSimple(
-                            fieldID = EntityFieldID.EntityID(
+                            fieldID = EntityFieldID(
                                 tag = param.id,
                                 name = param.name
                             ),
@@ -56,12 +40,21 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
                     },
                 entityClass = Parameter::class
             )
-            is EntityFieldID.StringID -> EntityField.StringField(
+            EntityFieldID.tag_name -> EntityField.StringField(
                 fieldID = fieldID,
                 value = entity.name,
                 description = "type's name"
             )
-            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
+            else -> {
+                //tag == parameter id
+                val parameter = entity.parameters.find { it.id == tag }
+                EntityField.EntityLink.EntityLinkSimple(
+                    fieldID = fieldID,
+                    entity = parameter,
+                    entityClass = Parameter::class,
+                    description = parameter?.name ?: ""
+                )
+            }
         }
     }
 
@@ -102,43 +95,3 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
     }
 
 }
-//    override fun mapFields(entity: Any): List<EntityField> {
-//        return when (entity) {
-//            is ObjectType -> mapObjectTypeFields(entity)
-//            else -> throw IllegalArgumentException("$this cannot map $entity fields, use another mapper")
-//        }
-//    }
-
-//    private fun mapObjectTypeFields(type: ObjectType): List<EntityField> {
-//        return listOf(
-//            EntityField.StringField(
-//                tag = "objecttype_field_name",
-//                name = "name",
-//                description = "type name",
-//                value = type.name
-//            ),
-//            EntityField.EntityLinksList(
-//                tag = "objecttype_field_parameters",
-//                name = "type parameters",
-//                description = "default parameters set that is mandatory for this type",
-//                entities = type.parameters.mapIndexed { i, p ->
-//                    EntityField.EntityLink(
-//                        tag = "objecttype_field_parameter_link$i",
-//                        name = p.name,
-//                        description = p.description,
-//                        entity = p
-//                    )
-//                }
-//
-//
-//            ),
-//            EntityField.CaptionField(
-//                tag = "objecttype_field_id",
-//                name = "UUID",
-//                description = "unique id of the object type",
-//                caption = type.id
-//            )
-//        )
-//    }
-//
-

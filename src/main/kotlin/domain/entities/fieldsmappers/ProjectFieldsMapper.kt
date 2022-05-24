@@ -9,26 +9,22 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
 
     override fun getEntityIDs(): List<EntityFieldID> {
         return listOf(
-            EntityFieldID.StringID(EntityFieldID.tag_name, "name"),
-            EntityFieldID.StringID(EntityFieldID.tag_description, "description"),
-            EntityFieldID.DateTimeID(tag = EntityFieldID.tag_date_time, name = "date"),
-            EntityFieldID.StringID(extFile, name = "file"),
-            EntityFieldID.EntitiesListID(
-                tag = tag_items,
-                name = "items"
-            )
+            EntityFieldID(tag = EntityFieldID.tag_name, name = "name"),
+            EntityFieldID(tag = EntityFieldID.tag_description, name = "description"),
+            EntityFieldID(tag = EntityFieldID.tag_date_time, name = "date"),
+            EntityFieldID(tag = tag_ext_file, name = "file"),
+            EntityFieldID(tag = tag_items, name = "items")
         )
     }
 
 
     override fun getFieldByID(entity: Project, fieldID: EntityFieldID): EntityField {
         return when (fieldID.tag) {
-
             tag_items -> EntityField.EntityLinksList(
                 fieldID = fieldID,
                 description = "items",
                 entities = entity.items.map { i ->
-                    val entityID = EntityFieldID.EntityID(
+                    val entityID = EntityFieldID(
                         tag = i.entity.id,
                         name = i.entity.name
                     )
@@ -54,7 +50,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                 description = "project's description",
                 value = entity.description
             )
-            extFile -> EntityField.StringField(
+            tag_ext_file -> EntityField.StringField(
                 fieldID = fieldID,
                 description = "external file attached",
                 value = entity.extFile ?: ""
@@ -75,7 +71,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                     entity = item.entity,
                     entityClass = Item::class,
                     count = item.count,
-                    description = item.entity.name ?: ""
+                    description = item.entity.name
                 )
             }
 //            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
@@ -83,29 +79,27 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
     }
 
     override fun mapIntoEntity(entity: Project, field: EntityField): Project {
-        return when (val fieldID = field.fieldID) {
-            is EntityFieldID.StringID ->
-                when (fieldID.tag) {
-                    EntityFieldID.tag_name -> entity.copy(name = (field as? EntityField.StringField)?.value ?: "")
-                    EntityFieldID.tag_description -> entity.copy(
-                        description = (field as? EntityField.StringField)?.value ?: ""
-                    )
-                    extFile -> entity.copy(extFile = (field as? EntityField.StringField)?.value)
-                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
+        return when (field) {
+            is EntityField.StringField ->
+                when (field.fieldID.tag) {
+                    EntityFieldID.tag_name -> entity.copy(name = field.value)
+                    EntityFieldID.tag_description -> entity.copy(description = field.value)
+                    tag_ext_file -> entity.copy(extFile = field.value)
+                    else -> throw IllegalArgumentException("field with tag: ${field.fieldID.tag} was not found in entity: $entity")
                 }
-            is EntityFieldID.EntityID -> setItem(entity, field)
-                ?: throw IllegalArgumentException("unknown fieldID: $fieldID for entity: $entity")
-            is EntityFieldID.EntitiesListID -> entity.copy(items = (field as EntityField.EntityLinksList).entities.mapNotNull { link ->
+            is EntityField.EntityLink -> setItem(entity, field)
+                ?: throw IllegalArgumentException("unknown fieldID: ${field.fieldID} for entity: $entity")
+            is EntityField.EntityLinksList -> entity.copy(items = field.entities.mapNotNull { link ->
                 (link.entity as? Item)?.let { i ->
                     EntityCountable(i, count = (link as? EntityField.EntityLink.EntityLinkCountable)?.count ?: 1L)
                 }
             })
-            is EntityFieldID.DateTimeID -> entity.copy(dateTime = (field as? EntityField.DateTimeField)?.value)
-            else -> throw IllegalArgumentException("field with fieldID: $fieldID was not found in entity: $entity")
+            is EntityField.DateTimeField -> entity.copy(dateTime = field.value)
+            else -> throw IllegalArgumentException("field with fieldID: ${field.fieldID} was not found in entity: $entity")
         }
     }
 
-    private fun setItem(project: Project, field: EntityField): Project? {
+    private fun setItem(project: Project, field: EntityField.EntityLink): Project? {
         val fieldID = field.fieldID
         val itemID = fieldID.tag ?: return null
         val newEntity = (field as? EntityField.EntityLink.EntityLinkCountable)?.let {
@@ -118,62 +112,12 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
         }
 
         return project.copy(items = newItems)
-
-//        return project.copy(
-//            items = project.items.mapIndexedNotNull { index, itemCountable ->
-//                if (index == itemIndex) {
-//                    val countableField = field as? EntityField.EntityLink.EntityLinkCountable
-//                    countableField?.let {
-//                        EntityCountable(it.entity as Item, it.count ?: 0L)
-//                    }
-//                } else itemCountable
-//            }
-//        )
     }
 
     companion object {
-        const val extFile = "external_file"
-        private const val tag_items = "tag_items"
+        const val tag_ext_file = "external_file"
+        const val tag_items = "tag_items"
     }
 
 }
-//    override fun mapFields(entity: Any): List<EntityField> {
-//        return when (entity) {
-//            is ObjectType -> mapObjectTypeFields(entity)
-//            else -> throw IllegalArgumentException("$this cannot map $entity fields, use another mapper")
-//        }
-//    }
-
-//    private fun mapObjectTypeFields(type: ObjectType): List<EntityField> {
-//        return listOf(
-//            EntityField.StringField(
-//                tag = "objecttype_field_name",
-//                name = "name",
-//                description = "type name",
-//                value = type.name
-//            ),
-//            EntityField.EntityLinksList(
-//                tag = "objecttype_field_parameters",
-//                name = "type parameters",
-//                description = "default parameters set that is mandatory for this type",
-//                entities = type.parameters.mapIndexed { i, p ->
-//                    EntityField.EntityLink(
-//                        tag = "objecttype_field_parameter_link$i",
-//                        name = p.name,
-//                        description = p.description,
-//                        entity = p
-//                    )
-//                }
-//
-//
-//            ),
-//            EntityField.CaptionField(
-//                tag = "objecttype_field_id",
-//                name = "UUID",
-//                description = "unique id of the object type",
-//                caption = type.id
-//            )
-//        )
-//    }
-//
 

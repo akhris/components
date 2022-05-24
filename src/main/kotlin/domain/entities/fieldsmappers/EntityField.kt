@@ -29,7 +29,7 @@ sealed class EntityField {
      * Represents Float value of entity field
      */
     data class FloatField(
-        override val fieldID: EntityFieldID.FloatID,
+        override val fieldID: EntityFieldID,
         override val description: String,
         val value: Float
     ) :
@@ -41,7 +41,7 @@ sealed class EntityField {
      * Represents Boolean value of entity field
      */
     data class BooleanField(
-        override val fieldID: EntityFieldID.BooleanID,
+        override val fieldID: EntityFieldID,
         override val description: String,
         val value: Boolean
     ) : EntityField() {
@@ -52,7 +52,7 @@ sealed class EntityField {
      * Represents Long value of entity field
      */
     data class LongField(
-        override val fieldID: EntityFieldID.LongID,
+        override val fieldID: EntityFieldID,
         override val description: String,
         val value: Long
     ) : EntityField() {

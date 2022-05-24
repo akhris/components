@@ -558,7 +558,7 @@ private fun RenderField(
                 fieldToChange?.let { ell ->
                     val newEntitiesList = changedEntitiesList
                         .mapIndexed { index, iEntity ->
-                            val entityFieldID = EntityFieldID.EntityID(
+                            val entityFieldID = EntityFieldID(
                                 tag = "${ell.fieldID.tag}$index",
                                 name = "${iEntity::class.simpleName} ${index + 1}"
                             )
