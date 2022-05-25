@@ -18,13 +18,13 @@ class ItemIncomeFieldsMapper : IFieldsMapper<ItemIncome> {
         return when (fieldID.tag) {
             tag_container -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
-                description = "container where item was put",
+                descriptionID = "container where item was put",
                 entity = entity.container,
                 entityClass = Container::class
             )
             tag_supplier -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
-                description = "where items came from",
+                descriptionID = "where items came from",
                 entity = entity.supplier,
                 entityClass = Supplier::class
             )
@@ -32,19 +32,19 @@ class ItemIncomeFieldsMapper : IFieldsMapper<ItemIncome> {
                 fieldID = fieldID,
                 entity = entity.item?.entity,
                 count = entity.item?.count,
-                description = "item that came",
+                descriptionID = "item that came",
                 entityClass = Item::class
             )
             tag_invoice -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
-                description = "invoice",
+                descriptionID = "invoice",
                 entity = entity.invoice,
                 entityClass = Invoice::class
             )
             EntityFieldID.tag_date_time -> EntityField.DateTimeField(
                 fieldID = fieldID,
                 value = entity.dateTime,
-                description = "when items came"
+                descriptionID = "when items came"
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }

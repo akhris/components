@@ -24,7 +24,6 @@ import persistence.repository.IPagingRepository
 import persistence.repository.Specification
 import settings.AppSetting
 import settings.AppSettingsRepository
-import strings.LocalizedStrings
 import strings.StringProvider
 import test.*
 import ui.screens.nav_host.INavHost
@@ -133,11 +132,11 @@ private fun mainWindow(rootComponent: INavHost) = withDI(di) {
 @Composable
 private fun Root(component: INavHost, isDarkTheme: Boolean, stringProvider: StringProvider) {
 
-    val localizedStrings =
-        remember<LocalizedStrings>(stringProvider) { { stringID -> stringProvider.getLocalizedString(stringID.name) } }
+//    val localizedStrings =
+//        remember<LocalizedStrings>(stringProvider) { { stringID -> stringProvider.getLocalizedString(stringID.name) } }
 
     AppTheme(darkTheme = isDarkTheme) {
-        RootUi(component = component, localizedStrings = localizedStrings)
+        RootUi(component = component, stringProvider = stringProvider)
     }
 }
 

@@ -15,12 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import strings.LocalizedStrings
-import strings.defaultLocalizedStrings
+import strings.StringProvider
 import ui.theme.NavigationPanelSettings
 
 @Composable
-fun NavigationRailUi(component: INavigationRail, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
+fun NavigationRailUi(component: INavigationRail, stringProvider: StringProvider) {
     val navModel by component.state.subscribeAsState()
 
     val isExpandable by remember { mutableStateOf(false) }
@@ -85,7 +84,7 @@ fun NavigationRailUi(component: INavigationRail, localizedStrings: LocalizedStri
                         )
                     },
                     label = {
-                        Text(localizedStrings(item.title))
+                        Text(stringProvider.getLocalizedString(item.title.name))
                     },
                     onClick = {
                         component.onDestinationSelected(item)

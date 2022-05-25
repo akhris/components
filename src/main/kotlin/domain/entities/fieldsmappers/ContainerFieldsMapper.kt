@@ -1,6 +1,7 @@
 package domain.entities.fieldsmappers
 
 import domain.entities.Container
+import strings.StringsIDs
 
 class ContainerFieldsMapper : IFieldsMapper<Container> {
 
@@ -18,16 +19,16 @@ class ContainerFieldsMapper : IFieldsMapper<Container> {
                 fieldID = fieldID,
                 entity = entity.parentContainer,
                 entityClass = Container::class,
-                description = "parent container"
+                descriptionID = StringsIDs.parent_container.name
             )
             EntityFieldID.tag_name -> EntityField.StringField(
                 fieldID = fieldID,
-                description = "item's name",
+                descriptionID = StringsIDs.item_s_name.name,
                 value = entity.name
             )
             EntityFieldID.tag_description -> EntityField.StringField(
                 fieldID = fieldID,
-                description = "item's description",
+                descriptionID = StringsIDs.items_description.name,
                 value = entity.description
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

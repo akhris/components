@@ -15,9 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.AwtWindow
 import settings.AppSetting
 import settings.AppSettingsRepository
-import strings.LocalizedStrings
+import strings.StringProvider
 import strings.StringsIDs
-import strings.defaultLocalizedStrings
 import ui.composable.ScrollableBox
 import java.awt.FileDialog
 import java.awt.Frame
@@ -26,7 +25,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.extension
 
 @Composable
-fun SettingsUi(settingsComponent: ISettings, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
+fun SettingsUi(settingsComponent: ISettings, stringProvider: StringProvider) {
 
     val settings by settingsComponent.state.collectAsState(null)
 
@@ -37,7 +36,7 @@ fun SettingsUi(settingsComponent: ISettings, localizedStrings: LocalizedStrings 
         Surface(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = localizedStrings(StringsIDs.navitem_settings_title),
+                text = stringProvider.getLocalizedString(StringsIDs.navitem_settings_title.name),
                 style = MaterialTheme.typography.h3
             )
         }

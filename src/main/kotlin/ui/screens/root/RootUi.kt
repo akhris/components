@@ -12,8 +12,7 @@ import com.akhris.domain.core.entities.IEntity
 import domain.entities.*
 import domain.entities.Unit
 import navigation.NavItem
-import strings.LocalizedStrings
-import strings.defaultLocalizedStrings
+import strings.StringProvider
 import ui.dialogs.Type
 import ui.dialogs.TypesPickerDialog
 import ui.entity_renderers.AddEntityDialog
@@ -24,7 +23,7 @@ import ui.screens.navigation_rail.NavigationRailUi
 
 
 @Composable
-fun RootUi(component: INavHost, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
+fun RootUi(component: INavHost, stringProvider: StringProvider) {
     //todo use stringProvider
 
 
@@ -35,29 +34,29 @@ fun RootUi(component: INavHost, localizedStrings: LocalizedStrings = defaultLoca
             component.setDestination(it.route)
         }, onAddButtonClicked = {
             addClickedNavItem = it
-        }), localizedStrings = localizedStrings)
+        }), stringProvider = stringProvider)
 
         Box(modifier = Modifier.fillMaxHeight().weight(1f)) {
-            NavHostUi(component = component, localizedStrings = localizedStrings)
+            NavHostUi(component = component, stringProvider = stringProvider)
         }
     }
 
     addClickedNavItem?.let { navItem ->
-        HandleAddButtonClicks(navItem, onDismiss = { addClickedNavItem = null }, localizedStrings = localizedStrings)
+        HandleAddButtonClicks(navItem, onDismiss = { addClickedNavItem = null }, stringProvider = stringProvider)
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit, localizedStrings: LocalizedStrings) {
+private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit, stringProvider: StringProvider) {
     var addEntity by remember { mutableStateOf<IEntity<*>?>(null) }
     val showPicker = remember(navItem, addEntity) { navItem == NavItem.DataTypes && addEntity == null }
 
 
 
     addEntity?.let {
-        AddEntityDialog(it, onDismiss)
+        AddEntityDialog(it, stringProvider = stringProvider, onDismiss)
     }
 
     if (showPicker) {
@@ -75,7 +74,7 @@ private fun HandleAddButtonClicks(navItem: NavItem, onDismiss: () -> kotlin.Unit
         }, onDismiss = {
             if (addEntity == null)
                 onDismiss()
-        }, localizedStrings = localizedStrings)
+        }, stringProvider = stringProvider)
     }
 
     LaunchedEffect(navItem) {

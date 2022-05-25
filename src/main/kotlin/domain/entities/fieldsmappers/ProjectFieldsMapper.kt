@@ -22,7 +22,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
         return when (fieldID.tag) {
             tag_items -> EntityField.EntityLinksList(
                 fieldID = fieldID,
-                description = "items",
+                descriptionID = "items",
                 entities = entity.items.map { i ->
                     val entityID = EntityFieldID(
                         tag = i.entity.id,
@@ -31,7 +31,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
 
                     EntityField.EntityLink.EntityLinkCountable(
                         fieldID = entityID,
-                        description = i.entity.name,        //?
+                        descriptionID = i.entity.name,        //?
                         entity = i.entity,
                         entityClass = Item::class,
                         count = i.count
@@ -42,24 +42,24 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
 
             EntityFieldID.tag_name -> EntityField.StringField(
                 fieldID = fieldID,
-                description = "project's name",
+                descriptionID = "project's name",
                 value = entity.name
             )
             EntityFieldID.tag_description -> EntityField.StringField(
                 fieldID = fieldID,
-                description = "project's description",
+                descriptionID = "project's description",
                 value = entity.description
             )
             tag_ext_file -> EntityField.StringField(
                 fieldID = fieldID,
-                description = "external file attached",
+                descriptionID = "external file attached",
                 value = entity.extFile ?: ""
             )
 //                    else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
 
             EntityFieldID.tag_date_time -> EntityField.DateTimeField(
                 fieldID = fieldID,
-                description = "project's created date",
+                descriptionID = "project's created date",
                 value = entity.dateTime
             )
             else -> {
@@ -71,7 +71,7 @@ class ProjectFieldsMapper : IFieldsMapper<Project> {
                     entity = item.entity,
                     entityClass = Item::class,
                     count = item.count,
-                    description = item.entity.name
+                    descriptionID = item.entity.name
                 )
             }
 //            else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import strings.ENStringGetter
+import strings.ENStringDataSource
 import strings.StringProvider
 import strings.toLocalStringGetter
 import utils.FileUtils
@@ -52,7 +52,7 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
                 } catch (e: Exception) {
                     log("exception while deserializing: $e")
                     null
-                } ?: ENStringGetter()
+                } ?: ENStringDataSource()
             }.map {
                 StringProvider(it)
             }
@@ -143,7 +143,7 @@ class AppSettingsRepository(private val scope: CoroutineScope) {
             }.toMap()
 
             val defaultTranslation =
-                mapOf("default" to ENStringGetter().language)
+                mapOf("default" to ENStringDataSource().language)
 
             log("translations found: ${translations.size}")
             translations.forEach { (t, u) ->

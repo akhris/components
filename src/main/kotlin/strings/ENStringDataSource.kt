@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-class ENStringGetter : LocalStringGetter(
+class ENStringDataSource : LocalStringDataSource(
     language = "EN (default)",
     translations =
     StringsIDs.values().associate {
@@ -39,6 +39,9 @@ class ENStringGetter : LocalStringGetter(
             StringsIDs.warehouseItem_description -> "current state of warehouse"
             StringsIDs.invoice_title -> "invoices"
             StringsIDs.invoice_description -> "ordering information"
+            StringsIDs.parent_container -> "parent container"
+            StringsIDs.item_s_name -> "item's name"
+            StringsIDs.item_s_description -> "item's description"
         }
     }
 )

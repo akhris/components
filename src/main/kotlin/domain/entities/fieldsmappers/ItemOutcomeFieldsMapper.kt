@@ -22,18 +22,18 @@ class ItemOutcomeFieldsMapper : IFieldsMapper<ItemOutcome> {
                 entity = entity.item?.entity,
                 entityClass = Item::class,
                 count = entity.item?.count,
-                description = "item that came"
+                descriptionID = "item that came"
             )
             tag_container -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
                 entity = entity.container,
                 entityClass = Container::class,
-                description = "container where item was put"
+                descriptionID = "container where item was put"
             )
             EntityFieldID.tag_date_time -> EntityField.DateTimeField(
                 fieldID = fieldID,
                 value = entity.dateTime,
-                description = "when items came"
+                descriptionID = "when items came"
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")
         }

@@ -30,6 +30,7 @@ import domain.entities.fieldsmappers.EntityField
 import domain.entities.fieldsmappers.getName
 import domain.valueobjects.Factor
 import kotlinx.coroutines.delay
+import strings.StringProvider
 import ui.composable.FactorsDropDown
 import ui.dialogs.DatePickerDialog
 import ui.dialogs.TimePickerDialog
@@ -45,7 +46,7 @@ import kotlin.math.sign
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean) -> Unit) {
+fun RenderBooleanField(field: EntityField.BooleanField, stringProvider: StringProvider,onValueChange: (Boolean) -> Unit) {
     ListItem(
         modifier = Modifier.fillMaxWidth(),
         text = {
@@ -53,7 +54,7 @@ fun RenderBooleanField(field: EntityField.BooleanField, onValueChange: (Boolean)
                 text = field.fieldID.name
             )
         }, secondaryText = {
-            Text(text = field.description)
+            Text(text = stringProvider.getLocalizedString(field.descriptionID))
         }, trailing = {
             Checkbox(field.value, onCheckedChange = onValueChange)
         })
@@ -124,6 +125,7 @@ fun RenderTextField(field: EntityField.StringField, onValueChange: (String) -> U
 fun RenderEntityLink(
     modifier: Modifier = Modifier,
     field: EntityField.EntityLink,
+    stringProvider: StringProvider,
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: ((EntityField.EntityLink) -> Unit)? = null,
     onEntityLinkChanged: ((EntityField.EntityLink) -> Unit)? = null
@@ -133,6 +135,7 @@ fun RenderEntityLink(
         when (field) {
             is EntityField.EntityLink.EntityLinkCountable -> RenderCountableEntityLink(
                 field = field,
+                stringProvider = stringProvider,
                 onEntityLinkSelect = onEntityLinkSelect,
                 onEntityLinkClear = { onEntityLinkClear?.invoke(field) },
                 onCountChanged = {
@@ -141,12 +144,13 @@ fun RenderEntityLink(
             )
             is EntityField.EntityLink.EntityLinkSimple -> RenderCommonEntityLink(
                 name = field.getName(),
-                description = field.description,
+                description = stringProvider.getLocalizedString(field.descriptionID),
                 onEntityLinkSelect = onEntityLinkSelect,
                 onEntityLinkClear = { onEntityLinkClear?.invoke(field) }
             )
             is EntityField.EntityLink.EntityLinkValuable -> RenderValuableEntityLink(
                 field = field,
+                stringProvider = stringProvider,
                 onEntityLinkSelect = onEntityLinkSelect,
                 onEntityLinkClear = { onEntityLinkClear?.invoke(field) },
                 onFieldChanged = onEntityLinkChanged
@@ -168,6 +172,7 @@ fun RenderEntityLink(
 @Composable
 private fun RenderCountableEntityLink(
     field: EntityField.EntityLink.EntityLinkCountable,
+    stringProvider: StringProvider,
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: () -> Unit,
     onCountChanged: ((Long) -> Unit)? = null
@@ -231,13 +236,14 @@ private fun RenderCountableEntityLink(
                 count?.let { onCountChanged?.invoke(it) }
             }
         }
-        RenderCommonEntityLink(field.getName(), field.description, onEntityLinkSelect, onEntityLinkClear)
+        RenderCommonEntityLink(field.getName(), stringProvider.getLocalizedString(field.descriptionID), onEntityLinkSelect, onEntityLinkClear)
     }
 }
 
 @Composable
 private fun RenderValuableEntityLink(
     field: EntityField.EntityLink.EntityLinkValuable,
+    stringProvider: StringProvider,
     onEntityLinkSelect: () -> Unit,
     onEntityLinkClear: () -> Unit,
     onFieldChanged: ((EntityField.EntityLink.EntityLinkValuable) -> Unit)? = null
@@ -252,23 +258,23 @@ private fun RenderValuableEntityLink(
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             tooltip = {
-            Surface(shape = MaterialTheme.shapes.medium) {
-                Text(modifier = Modifier.padding(4.dp),text = field.description)
-            }
-        }, content = {
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = value ?: "",
-                onValueChange = { value = it },
-                label = {
-                    val labelBuilder = StringBuilder(field.getName())
-                    field.unit?.let {
-                        labelBuilder.append(", $it")
-                    }
-                    Text(labelBuilder.toString())
+                Surface(shape = MaterialTheme.shapes.medium) {
+                    Text(modifier = Modifier.padding(4.dp), text = stringProvider.getLocalizedString(field.descriptionID))
                 }
-            )
-        })
+            }, content = {
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = value ?: "",
+                    onValueChange = { value = it },
+                    label = {
+                        val labelBuilder = StringBuilder(field.getName())
+                        field.unit?.let {
+                            labelBuilder.append(", $it")
+                        }
+                        Text(labelBuilder.toString())
+                    }
+                )
+            })
         if (field.factor != null) {
             FactorsDropDown(modifier = Modifier.width(56.dp).height(40.dp), onFactorSelected = { f ->
                 log("onFactorSelected: $f")
@@ -306,10 +312,11 @@ private fun RenderCommonEntityLink(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderEntityLinksList(
     field: EntityField.EntityLinksList,
+    stringProvider: StringProvider,
     onEntityLinkAdd: () -> Unit,
     onEntityLinkClear: (EntityField.EntityLink) -> Unit,
     onEntityLinkChanged: (EntityField.EntityLink) -> Unit,
@@ -326,7 +333,12 @@ fun RenderEntityLinksList(
                     style = MaterialTheme.typography.h6
                 )
             },
-            secondaryText = { Text(text = field.description, textAlign = TextAlign.Center) }
+            secondaryText = {
+                Text(
+                    text = stringProvider.getLocalizedString(field.descriptionID),
+                    textAlign = TextAlign.Center
+                )
+            }
         )
 
 
@@ -359,6 +371,7 @@ fun RenderEntityLinksList(
                 RenderEntityLink(
                     modifier = Modifier.weight(1f),
                     field = link,
+                    stringProvider = stringProvider,
                     onEntityLinkChanged = onEntityLinkChanged,
                     onEntityLinkClear = { onEntityLinkClear(link) },
                     onEntityLinkSelect = {})
@@ -387,7 +400,7 @@ fun RenderDateTime(field: EntityField.DateTimeField, onDateChanged: (LocalDateTi
     ListItem(
         modifier = Modifier.clickable { datePickerDialogShow = true },
         text = { field.value?.let { dateTime -> Text(DateTimeConverter.dateTimeToString(dateTime)) } },
-        secondaryText = { Text(text = field.description) }
+        secondaryText = { Text(text = field.descriptionID) }
     )
 
     if (datePickerDialogShow) {

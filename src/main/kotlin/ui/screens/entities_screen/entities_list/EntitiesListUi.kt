@@ -30,12 +30,13 @@ import androidx.compose.ui.unit.dp
 import com.akhris.domain.core.entities.IEntity
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import kotlinx.coroutines.delay
+import strings.StringProvider
 import ui.entity_renderers.EntityScreenContent
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import kotlin.math.sign
 
 @Composable
-fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentationType: ItemRepresentationType) {
+fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentationType: ItemRepresentationType, stringProvider: StringProvider) {
 
     val state by remember(component) { component.state }.subscribeAsState()
 
@@ -52,6 +53,7 @@ fun <T : IEntity<*>> EntitiesListUi(component: IEntitiesList<T>, itemRepresentat
             itemRepresentationType = itemRepresentationType,
             items = state.entities,
             listState = listState,
+            stringProvider = stringProvider,
             bottomPadding = bottomPadding,
             onEntityRemoved = component.onEntityRemovedCallback?.let { rc -> { rc(it) } },
             onEntityUpdated = component::onEntityUpdated,

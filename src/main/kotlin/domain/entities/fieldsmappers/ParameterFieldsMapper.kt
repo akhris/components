@@ -18,20 +18,20 @@ class ParameterFieldsMapper : IFieldsMapper<Parameter> {
         return when (fieldID.tag) {
             tag_unit -> EntityField.EntityLink.EntityLinkSimple(
                 fieldID = fieldID,
-                description = "parameter's unit",
+                descriptionID = "parameter's unit",
                 entity = entity.unit,
                 entityClass = Unit::class
             )
             EntityFieldID.tag_name -> EntityField.StringField(
                 fieldID = fieldID,
                 value = entity.name,
-                description = "parameter's name"
+                descriptionID = "parameter's name"
             )
             EntityFieldID.tag_description ->
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = entity.description,
-                    description = "parameter's description"
+                    descriptionID = "parameter's description"
                 )
             else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
         }

@@ -6,7 +6,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import com.akhris.domain.core.utils.log
-import strings.ENStringGetter
+import strings.ENStringDataSource
 import kotlin.io.path.pathString
 
 @Serializable
@@ -23,7 +23,7 @@ data class AppSettings(val settings: List<AppSetting>) {
                 ),
                 AppSetting.ListSetting(
                     AppSettingsRepository.key_localization_file,
-                    mapOf("default" to ENStringGetter().language),
+                    mapOf("default" to ENStringDataSource().language),
                     selectedKey = "default"
                 )
             )

@@ -16,13 +16,13 @@ class UnitFieldsMapper : IFieldsMapper<Unit> {
             tag_unit -> EntityField.StringField(
                     fieldID = fieldID,
                     value = entity.unit,
-                    description = "unit",
+                    descriptionID = "unit",
                     isPlaceholder = entity.unit.isEmpty()
                 )
             tag_is_multipliable -> EntityField.BooleanField(
                     fieldID = fieldID,
                     value = entity.isMultipliable,
-                    description = "can be prefixed with k-, m-, u-, ..."
+                    descriptionID = "can be prefixed with k-, m-, u-, ..."
                 )
             else -> {
                 throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

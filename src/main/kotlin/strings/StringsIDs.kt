@@ -34,5 +34,11 @@ enum class StringsIDs {
     warehouseItem_title,
     warehouseItem_description,
     invoice_title,
-    invoice_description
+    invoice_description,
+
+
+    // Entities descriptions:
+    parent_container,
+    item_s_name,
+    item_s_description
 }

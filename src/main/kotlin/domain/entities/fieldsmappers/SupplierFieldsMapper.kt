@@ -18,28 +18,28 @@ class SupplierFieldsMapper : IFieldsMapper<Supplier> {
             EntityFieldID.tag_name -> {
                 EntityField.StringField(
                     fieldID = fieldID,
-                    description = "supplier's name",
+                    descriptionID = "supplier's name",
                     value = entity.name
                 )
             }
             EntityFieldID.tag_description -> {
                 EntityField.StringField(
                     fieldID = fieldID,
-                    description = "description",
+                    descriptionID = "description",
                     value = entity.description
                 )
             }
             tag_url -> {
                 EntityField.StringField(
                     fieldID = fieldID,
-                    description = "supplier's url",
+                    descriptionID = "supplier's url",
                     value = entity.url
                 )
             }
 
             tag_favorite -> EntityField.BooleanField(
                 fieldID = fieldID,
-                description = "marked as favorite",
+                descriptionID = "marked as favorite",
                 value = entity.isFavorite
             )
             else -> throw IllegalArgumentException("field with id: $fieldID was not found in entity: $entity")

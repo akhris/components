@@ -21,21 +21,21 @@ class InvoiceFieldsMapper : IFieldsMapper<Invoice> {
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = entity.orderID,
-                    description = "order id"
+                    descriptionID = "order id"
                 )
             }
             tag_receiver -> {
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = entity.receiver,
-                    description = "receiver of the items"
+                    descriptionID = "receiver of the items"
                 )
             }
             tag_currency -> {
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = entity.currency,
-                    description = "order currency"
+                    descriptionID = "order currency"
                 )
             }
 
@@ -43,17 +43,17 @@ class InvoiceFieldsMapper : IFieldsMapper<Invoice> {
                 fieldID = fieldID,
                 entity = entity.supplier,
                 entityClass = Supplier::class,
-                description = "supplier"
+                descriptionID = "supplier"
             )
             tag_date -> EntityField.DateTimeField(
                 fieldID = fieldID,
                 value = entity.dateTime,
-                description = "invoice date"
+                descriptionID = "invoice date"
             )
             tag_total_price -> EntityField.FloatField(
                 fieldID = fieldID,
                 value = entity.totalPrice,
-                description = "total price"
+                descriptionID = "total price"
             )
             else -> throw IllegalArgumentException("fieldID $fieldID is not found in $this")
         }

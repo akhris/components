@@ -8,9 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
-import strings.LocalizedStrings
+import strings.StringProvider
 import strings.StringsIDs
-import strings.defaultLocalizedStrings
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -18,7 +17,7 @@ import strings.defaultLocalizedStrings
 fun TypesPickerDialog(
     onItemPicked: (Type) -> kotlin.Unit,
     onDismiss: () -> kotlin.Unit,
-    localizedStrings: LocalizedStrings = defaultLocalizedStrings
+    stringProvider: StringProvider
 ) {
     val types = Type.getAllTypes()
 
@@ -29,9 +28,9 @@ fun TypesPickerDialog(
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 text = {
-                    Text(text = type.name?.let { localizedStrings(it) } ?: "")
+                    Text(text = type.name?.let { stringProvider.getLocalizedString(it.name) } ?: "")
                 }, secondaryText = {
-                    Text(text = type.description?.let { localizedStrings(it) } ?: "")
+                    Text(text = type.description?.let { stringProvider.getLocalizedString(it.name) } ?: "")
                 }
             )
         },

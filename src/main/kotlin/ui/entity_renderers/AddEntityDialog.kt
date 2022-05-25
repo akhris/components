@@ -13,10 +13,11 @@ import com.akhris.domain.core.entities.IEntity
 import domain.entities.usecase_factories.IInsertUseCaseFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
+import strings.StringProvider
 import ui.theme.DialogSettings
 
 @Composable
-fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
+fun <T : IEntity<*>> AddEntityDialog(entity: T, stringProvider: StringProvider, onDismiss: () -> Unit) {
     val di = localDI()
     val insertFactory by di.instance<IInsertUseCaseFactory>()
     val insertUseCase = remember(entity, insertFactory) { insertFactory.getInsertUseCase(entityClass = entity::class) }
@@ -42,7 +43,8 @@ fun <T : IEntity<*>> AddEntityDialog(entity: T, onDismiss: () -> Unit) {
                     onEntitySaveClicked = {
                         entityToSave = it
                     },
-                    expanded = true
+                    expanded = true,
+                    stringProvider = stringProvider
                 )
             }
         })

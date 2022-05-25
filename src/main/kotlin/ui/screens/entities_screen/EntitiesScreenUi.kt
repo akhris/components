@@ -21,8 +21,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.decompose.router.RouterState
 import com.arkivanov.decompose.value.Value
-import strings.LocalizedStrings
-import strings.defaultLocalizedStrings
+import strings.StringProvider
 import ui.screens.entities_screen.entities_filter.EntitiesFilterUi
 import ui.screens.entities_screen.entities_grouping.EntitiesGroupingUi
 import ui.screens.entities_screen.entities_search.EntitiesSearchUi
@@ -41,8 +40,7 @@ import ui.screens.patterns.ScreenWithFilterSheet
  */
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStrings = defaultLocalizedStrings) {
-
+fun EntitiesScreenUi(component: IEntitiesScreen, stringProvider: StringProvider) {
 
     val state by remember(component) { component.state }.subscribeAsState()
 
@@ -55,12 +53,11 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
     val searchRouterState = remember(component) { component.searchRouterState }
     val groupingRouterState = remember(component) { component.groupingRouterState }
 
-    log("composing EntitiesScreenUi. component: $component localizedStrings: $localizedStrings")
     ScreenWithFilterSheet(
         isOpened = true,
         isModal = true,
         content = {
-            ListPane(listRouterState, itemRepresentationType = itemRepresentationType)
+            ListPane(listRouterState, itemRepresentationType = itemRepresentationType, stringProvider = stringProvider)
         },
         filterSheetTitle = itemsCount?.let {
             {
@@ -70,7 +67,7 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
         filterContent = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(horizontal = 8.dp)) {
                 ViewModeSelector(viewSettingsRouterState)
-                SelectorPanel(selectorRouterState, localizedStrings = localizedStrings)
+                SelectorPanel(selectorRouterState, stringProvider = stringProvider)
                 SearchPanel(searchRouterState)
                 GroupingPanel(groupingRouterState)
                 FilterPanel(filterRouterState)
@@ -78,8 +75,8 @@ fun EntitiesScreenUi(component: IEntitiesScreen, localizedStrings: LocalizedStri
         },
         mainScreenTitle = {
             ListItem(
-                text = { state.screenTitle?.let { Text(localizedStrings(it)) } },
-                secondaryText = { state.screenDescription?.let { Text(localizedStrings(it)) } }
+                text = { state.screenTitle?.let { Text(stringProvider.getLocalizedString(id = it.name)) } },
+                secondaryText = { state.screenDescription?.let { Text(stringProvider.getLocalizedString(it.name)) } }
             )
         }
     )
@@ -100,7 +97,8 @@ fun GroupingPanel(routerState: Value<RouterState<*, IEntitiesScreen.EntitiesGrou
 @Composable
 private fun ListPane(
     routerState: Value<RouterState<*, IEntitiesScreen.ListChild>>,
-    itemRepresentationType: ItemRepresentationType
+    itemRepresentationType: ItemRepresentationType,
+    stringProvider: StringProvider
 ) {
     Children(routerState) {
         when (val child = it.instance) {
@@ -108,7 +106,8 @@ private fun ListPane(
                 log("create list ui for $child")
                 ui.screens.entities_screen.entities_list.EntitiesListUi(
                     component = child.component,
-                    itemRepresentationType = itemRepresentationType
+                    itemRepresentationType = itemRepresentationType,
+                    stringProvider = stringProvider
                 )
             }
         }
@@ -118,12 +117,12 @@ private fun ListPane(
 @Composable
 private fun SelectorPanel(
     routerState: Value<RouterState<*, IEntitiesScreen.EntitiesSelectorChild>>,
-    localizedStrings: LocalizedStrings
+    stringProvider: StringProvider
 ) {
     Children(routerState, animation = childAnimation(fade())) {
         when (val child = it.instance) {
             is IEntitiesScreen.EntitiesSelectorChild.EntitiesSelector -> {
-                EntitiesSelectorUi(component = child.component, localizedStrings = localizedStrings)
+                EntitiesSelectorUi(component = child.component, stringProvider = stringProvider)
             }
         }
     }

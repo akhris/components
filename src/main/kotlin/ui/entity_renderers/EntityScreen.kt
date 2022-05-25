@@ -30,6 +30,7 @@ import domain.entities.fieldsmappers.FieldsMapperFactory
 import org.kodein.di.compose.localDI
 import org.kodein.di.instance
 import persistence.datasources.EntitiesList
+import strings.StringProvider
 import ui.screens.entities_screen.entities_view_settings.ItemRepresentationType
 import ui.screens.entity_select_dialog.EntityPickerMultiDialog
 import ui.screens.entity_select_dialog.EntityPickerSingleDialog
@@ -46,6 +47,7 @@ fun <T : IEntity<*>> EntityScreenContent(
     itemRepresentationType: ItemRepresentationType = ItemRepresentationType.Card,
     items: EntitiesList<out T>,
     bottomPadding: Dp = 0.dp,
+    stringProvider: StringProvider,
     listState: LazyListState = rememberLazyListState(),
     onEntityRemoved: ((T) -> Unit)? = null,
     onEntityUpdated: ((T) -> Unit)? = null,
@@ -114,7 +116,8 @@ fun <T : IEntity<*>> EntityScreenContent(
                                                     onEntityUpdated?.invoke(it)
                                                 },
                                                 onEntityRemoved = onEntityRemoved,
-                                                onEntityCopyClicked = onEntityCopied
+                                                onEntityCopyClicked = onEntityCopied,
+                                                stringProvider = stringProvider
                                             )
                                         }
                                 }
@@ -140,7 +143,7 @@ fun <T : IEntity<*>> EntityScreenContent(
                                     },
                                     onEntityRemoved = onEntityRemoved,
                                     onEntityCopyClicked = onEntityCopied
-                                )
+                                , stringProvider = stringProvider)
                             })
 
 
@@ -242,6 +245,7 @@ fun <T : IEntity<*>> EntityScreenContent(
 fun <T : IEntity<*>> RenderCardEntity(
     modifier: Modifier = Modifier,
     initialEntity: T,
+    stringProvider: StringProvider,
     onEntitySaveClicked: (T) -> Unit,
     onEntityCopyClicked: ((T) -> Unit)? = null,
     onEntityRemoved: ((T) -> Unit)? = null,
@@ -295,7 +299,7 @@ fun <T : IEntity<*>> RenderCardEntity(
 //                            } else {
 //                                entity = mapper.mapIntoEntity(entity, changedField)
 //                            }
-                        })
+                        }, stringProvider = stringProvider)
 
                 }
             //buttons row:
@@ -403,7 +407,7 @@ fun <T : IEntity<*>> RenderCardEntity(
         }, text = {
             Column {
                 fields.forEach {
-                    RenderField(it)
+                    RenderField(it, stringProvider = stringProvider)
                 }
             }
         }, modifier = Modifier.width(DialogSettings.defaultAlertDialogWidth))
@@ -458,6 +462,7 @@ private fun CheckItemObjectType(
 @Composable
 private fun RenderField(
     field: EntityField,
+    stringProvider: StringProvider,
     onFieldChange: ((EntityField) -> Unit)? = null
 ) {
     var showSelectEntityDialog by remember { mutableStateOf<KClass<out IEntity<*>>?>(null) }
@@ -468,9 +473,9 @@ private fun RenderField(
         //render read-only mode
         when (field) {
             is EntityField.BooleanField -> RenderBooleanFieldReadOnly(field)
-            is EntityField.EntityLink -> RenderEntityLinkReadOnly(field)
-            is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field)
-            is EntityField.StringField -> RenderTextFieldReadOnly(field)
+            is EntityField.EntityLink -> RenderEntityLinkReadOnly(field, stringProvider)
+            is EntityField.EntityLinksList -> RenderEntityLinksListReadOnly(field, stringProvider)
+            is EntityField.StringField -> RenderTextFieldReadOnly(field, stringProvider)
             is EntityField.FloatField -> RenderFloatFieldReadOnly(field)
             is EntityField.DateTimeField -> RenderDateTimeReadOnly(field)
             is EntityField.LongField -> {}
@@ -479,8 +484,10 @@ private fun RenderField(
         when (field) {
             is EntityField.BooleanField -> RenderBooleanField(
                 field,
+                stringProvider = stringProvider,
                 onValueChange = { newValue -> onFieldChange(field.copy(value = newValue)) })
             is EntityField.EntityLink -> RenderEntityLink(
+                stringProvider = stringProvider,
                 field = field,
                 onEntityLinkSelect = {
                     //on entity select clicked
@@ -500,6 +507,7 @@ private fun RenderField(
             )
             is EntityField.EntityLinksList -> RenderEntityLinksList(
                 field,
+                stringProvider = stringProvider,
                 onEntityLinkAdd = {
                     //on add entity clicked
                     println("going to add entity of type:")

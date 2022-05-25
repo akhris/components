@@ -10,14 +10,14 @@ import kotlin.reflect.KClass
  */
 sealed class EntityField {
     abstract val fieldID: EntityFieldID
-    abstract val description: String
+    abstract val descriptionID: String
 
     /**
      * Represents String value of entity field
      */
     data class StringField(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val value: String,
         val isPlaceholder: Boolean = false
     ) :
@@ -30,7 +30,7 @@ sealed class EntityField {
      */
     data class FloatField(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val value: Float
     ) :
         EntityField() {
@@ -42,7 +42,7 @@ sealed class EntityField {
      */
     data class BooleanField(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val value: Boolean
     ) : EntityField() {
         override fun toString(): String = value.toString()
@@ -53,7 +53,7 @@ sealed class EntityField {
      */
     data class LongField(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val value: Long
     ) : EntityField() {
         override fun toString(): String = value.toString()
@@ -64,7 +64,7 @@ sealed class EntityField {
      */
     data class DateTimeField(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val value: LocalDateTime?
     ) : EntityField() {
         override fun toString(): String = value?.let { DateTimeConverter.dateTimeToString(it) } ?: "no date/time"
@@ -81,33 +81,33 @@ sealed class EntityField {
 
         data class EntityLinkSimple(
             override val fieldID: EntityFieldID,
-            override val description: String = "",
+            override val descriptionID: String = "",
             override val entity: IEntity<*>?,
             override val entityClass: KClass<out IEntity<*>>
         ) : EntityLink() {
-            override fun toString(): String = entity?.toString() ?: description
+            override fun toString(): String = entity?.toString() ?: descriptionID
         }
 
         data class EntityLinkCountable(
             override val fieldID: EntityFieldID,
-            override val description: String = "",
+            override val descriptionID: String = "",
             override val entity: IEntity<*>?,
             override val entityClass: KClass<out IEntity<*>>,
             val count: Long? = null
         ) : EntityLink() {
-            override fun toString(): String = entity?.toString() ?: description
+            override fun toString(): String = entity?.toString() ?: descriptionID
         }
 
         data class EntityLinkValuable constructor(
             override val fieldID: EntityFieldID,
-            override val description: String = "",
+            override val descriptionID: String = "",
             override val entity: IEntity<*>?,
             override val entityClass: KClass<out IEntity<*>>,
             val value: String? = null,
             val factor: Int? = null,
             val unit: String? = null
         ) : EntityLink() {
-            override fun toString(): String = entity?.toString() ?: description
+            override fun toString(): String = entity?.toString() ?: descriptionID
         }
 
         //used for filtering
@@ -119,11 +119,11 @@ sealed class EntityField {
      */
     data class EntityLinksList constructor(
         override val fieldID: EntityFieldID,
-        override val description: String,
+        override val descriptionID: String,
         val entities: List<EntityLink>,
         val entityClass: KClass<out IEntity<*>>
     ) : EntityField() {
-        override fun toString(): String = description
+        override fun toString(): String = descriptionID
     }
 }
 

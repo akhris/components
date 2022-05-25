@@ -28,14 +28,14 @@ class WarehouseItemFieldsMapper : IFieldsMapper<WarehouseItem> {
                 fieldID = fieldID,
                 entity = entity.container,
                 entityClass = Container::class,
-                description = "container where item was put"
+                descriptionID = "container where item was put"
             )
             tag_item -> EntityField.EntityLink.EntityLinkCountable(
                 fieldID = fieldID,
                 entity = entity.item?.entity,
                 entityClass = Item::class,
                 count = entity.item?.count,
-                description = "item in warehouse"
+                descriptionID = "item in warehouse"
             )
             else -> throw IllegalArgumentException("field with tag: ${fieldID.tag} was not found in entity: $entity")
         }

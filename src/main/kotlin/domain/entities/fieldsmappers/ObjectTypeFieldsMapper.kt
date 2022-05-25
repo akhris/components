@@ -20,11 +20,11 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
                 fieldID = fieldID,
                 entity = entity.parentEntity,
                 entityClass = ObjectType::class,
-                description = "parent type"
+                descriptionID = "parent type"
             )
             tag_parameters -> EntityField.EntityLinksList(
                 fieldID = fieldID,
-                description = "parameters",
+                descriptionID = "parameters",
                 entities = entity
                     .parameters
                     .map { param ->
@@ -33,7 +33,7 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
                                 tag = param.id,
                                 name = param.name
                             ),
-                            description = param.description,
+                            descriptionID = param.description,
                             entity = param,
                             entityClass = Parameter::class
                         )
@@ -43,7 +43,7 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
             EntityFieldID.tag_name -> EntityField.StringField(
                 fieldID = fieldID,
                 value = entity.name,
-                description = "type's name"
+                descriptionID = "type's name"
             )
             else -> {
                 //tag == parameter id
@@ -52,7 +52,7 @@ class ObjectTypeFieldsMapper : IFieldsMapper<ObjectType> {
                     fieldID = fieldID,
                     entity = parameter,
                     entityClass = Parameter::class,
-                    description = parameter?.name ?: ""
+                    descriptionID = parameter?.name ?: ""
                 )
             }
         }

@@ -17,7 +17,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
             tag_type -> {
                 EntityField.EntityLink.EntityLinkSimple(
                     fieldID = fieldID,
-                    description = "type of the object",
+                    descriptionID = "type of the object",
                     entity = entity.type,
                     entityClass = ObjectType::class
                 )
@@ -45,7 +45,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
 
                         EntityField.EntityLink.EntityLinkValuable(
                             fieldID = entityID,
-                            description = description.toString(),
+                            descriptionID = description.toString(),
                             entity = ev.entity,
                             entityClass = Parameter::class,
                             value = ev.value,
@@ -53,7 +53,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                             unit = ev.entity.unit?.unit
                         )
                     },
-                    description = "parameters values",
+                    descriptionID = "parameters values",
                     entityClass = Parameter::class
                 )
             }
@@ -83,7 +83,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                 EntityField.StringField(
                     fieldID = fieldID,
                     value = name,
-                    description = "name",
+                    descriptionID = "name",
                     isPlaceholder = entity.name.isEmpty()
                 )
             }
@@ -92,7 +92,7 @@ class ItemFieldsMapper : IFieldsMapper<Item> {
                 val value = entity.getAllValues().find { it.first.entity.id == fieldID.tag }?.first
                 EntityField.EntityLink.EntityLinkValuable(
                     fieldID = fieldID,
-                    description = value?.entity?.description ?: "",
+                    descriptionID = value?.entity?.description ?: "",
                     entity = value?.entity,
                     entityClass = Parameter::class,
                     value = value?.value,
